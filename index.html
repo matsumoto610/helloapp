@@ -3,9 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello アプリ</title>
+  <title>シンプルシューティング</title>
   <style>
-    /* 画面全体を使って要素を上下左右の中央に配置 */
     body {
       margin: 0;
       height: 100vh;
@@ -13,55 +12,159 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      font-family: sans-serif;
-      background-color: #f4f4f9;
-    }
-
-    /* ボタンのデザイン */
-    button {
-      padding: 15px 30px;
-      font-size: 18px;
-      font-weight: bold;
+      background-color: #111;
       color: white;
-      background-color: #007bff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.2s;
+      font-family: sans-serif;
+      user-select: none; /* 長押しで文字選択されるのを防ぐ */
     }
 
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    /* 「hello」を表示するテキストのデザイン */
-    #message {
-      margin-top: 20px;
-      font-size: 28px;
+    #scoreBoard {
+      font-size: 24px;
+      margin-bottom: 10px;
       font-weight: bold;
-      color: #333;
-      min-height: 40px; /* 文字が出る前も高さを確保してボタンがズレないようにする */
+    }
+
+    /* ゲーム画面の枠 */
+    canvas {
+      background-color: #222;
+      border: 3px solid #00ffcc;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+      max-width: 95vw;
+    }
+
+    p {
+      margin-top: 12px;
+      color: #aaa;
+      font-size: 14px;
     }
   </style>
 </head>
 <body>
 
-  <!-- 画面中央のボタン -->
-  <button id="helloButton">押してください</button>
-
-  <!-- 結果が表示される場所 -->
-  <div id="message"></div>
+  <div id="scoreBoard">スコア: <span id="score">0</span></div>
+  <canvas id="gameCanvas" width="400" height="500"></canvas>
+  <p>【Aキー】または【画面タップ】でビーム発射！</p>
 
   <script>
-    // ボタンと表示エリアの要素を取得
-    const button = document.getElementById('helloButton');
-    const messageArea = document.getElementById('message');
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
 
-    // ボタンがクリックされたときの処理
-    button.addEventListener('click', () => {
-      messageArea.textContent = 'こんにちは';
+    let score = 0;
+
+    // 自機（プレイヤー）の設定（左右に自動で往復します）
+    const player = {
+      x: 180,
+      y: 440,
+      width: 40,
+      height: 20,
+      speed: 3,
+      direction: 1
+    };
+
+    // 弾（ビーム）と敵のリスト
+    let bullets = [];
+    let enemies = [];
+
+    // 弾を発射する関数
+    function shoot() {
+      bullets.push({
+        x: player.x + player.width / 2 - 3,
+        y: player.y,
+        width: 6,
+        height: 15,
+        speed: 7
+      });
+    }
+
+    // キーボードの「A」キーが押されたとき
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'a' || e.key === 'A') {
+        shoot();
+      }
     });
+
+    // 画面がタップ・クリックされたとき（iPad用）
+    canvas.addEventListener('pointerdown', () => {
+      shoot();
+    });
+
+    // 一定時間ごとに敵を出現させる
+    setInterval(() => {
+      enemies.push({
+        x: Math.random() * (canvas.width - 30),
+        y: -30,
+        width: 30,
+        height: 30,
+        speed: 2
+      });
+    }, 1000);
+
+    // ゲームのメインループ（毎フレーム画面を更新）
+    function update() {
+      // 画面をクリア
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 1. 自機を左右に自動で動かす
+      player.x += player.speed * player.direction;
+      if (player.x <= 0 || player.x + player.width >= canvas.width) {
+        player.direction *= -1; // 端に着いたら反転
+      }
+
+      // 自機を描画（水色）
+      ctx.fillStyle = '#00ffcc';
+      ctx.fillRect(player.x, player.y, player.width, player.height);
+
+      // 2. 弾を動かして描画（黄色）
+      ctx.fillStyle = '#ffff00';
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        bullets[i].y -= bullets[i].speed;
+        ctx.fillRect(bullets[i].x, bullets[i].y, bullets[i].width, bullets[i].height);
+
+        // 画面外に出たら消す
+        if (bullets[i].y < 0) {
+          bullets.splice(i, 1);
+        }
+      }
+
+      // 3. 敵を動かして描画（赤色）
+      ctx.fillStyle = '#ff4444';
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        const enemy = enemies[i];
+        enemy.y += enemy.speed;
+        ctx.fillRect(enemy.x, enemy.y, enemy.width, enemy.height);
+
+        // 弾と敵の当たり判定
+        for (let j = bullets.length - 1; j >= 0; j--) {
+          const b = bullets[j];
+          if (
+            b.x < enemy.x + enemy.width &&
+            b.x + b.width > enemy.x &&
+            b.y < enemy.y + enemy.height &&
+            b.y + b.height > enemy.y
+          ) {
+            // 命中したら敵と弾を消してスコア加算
+            enemies.splice(i, 1);
+            bullets.splice(j, 1);
+            score += 10;
+            scoreElement.textContent = score;
+            break;
+          }
+        }
+
+        // 敵が画面下まで行ったら消す
+        if (enemy && enemy.y > canvas.height) {
+          enemies.splice(i, 1);
+        }
+      }
+
+      // 次のフレームを描画
+      requestAnimationFrame(update);
+    }
+
+    // ゲーム開始
+    update();
   </script>
 
 </body>
