@@ -2,9 +2,13 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>長篠の戦い 〜三英傑の陣〜</title>
   <style>
+    * {
+      touch-action: manipulation; /* iPadでの連続タップ拡大を防止 */
+    }
+
     body {
       margin: 0;
       padding: 10px;
@@ -17,6 +21,7 @@
       color: white;
       font-family: sans-serif;
       user-select: none;
+      -webkit-user-select: none;
     }
 
     h1 {
@@ -66,31 +71,28 @@
 
     .unit-btn {
       flex: 1;
-      padding: 10px 5px;
-      border: 2px solid #7f8fa6;
+      padding: 12px 5px;
+      border: 2px solid #ffd32a;
       border-radius: 8px;
-      background-color: #353b48;
+      background-color: #40739e;
       color: white;
       font-weight: bold;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
-      transition: transform 0.1s, background-color 0.2s;
     }
 
     .unit-btn:active:not(:disabled) {
       transform: scale(0.95);
+      background-color: #487eb0;
     }
 
     .unit-btn:disabled {
       opacity: 0.4;
+      border-color: #7f8fa6;
+      background-color: #353b48;
       cursor: not-allowed;
-    }
-
-    .unit-btn.ready {
-      border-color: #ffd32a;
-      background-color: #40739e;
     }
 
     .unit-icon {
@@ -140,19 +142,19 @@
   <canvas id="gameCanvas" width="700" height="300"></canvas>
 
   <div id="controls">
-    <button class="unit-btn" id="btnTokugawa" onclick="spawnPlayer('tokugawa')">
+    <button type="button" class="unit-btn" id="btnTokugawa">
       <span class="unit-icon">🛡️</span>
       <span class="unit-name">徳川軍（馬防柵）</span>
       <span class="unit-role">高耐久・守り</span>
       <span class="unit-cost">15両</span>
     </button>
-    <button class="unit-btn" id="btnToyotomi" onclick="spawnPlayer('toyotomi')">
+    <button type="button" class="unit-btn" id="btnToyotomi">
       <span class="unit-icon">⚔️</span>
       <span class="unit-name">豊臣軍（突撃隊）</span>
       <span class="unit-role">素早い近接攻撃</span>
       <span class="unit-cost">30両</span>
     </button>
-    <button class="unit-btn" id="btnOda" onclick="spawnPlayer('oda')">
+    <button type="button" class="unit-btn" id="btnOda">
       <span class="unit-icon">🔫</span>
       <span class="unit-name">織田軍（鉄砲隊）</span>
       <span class="unit-role">遠距離・高火力</span>
@@ -160,13 +162,12 @@
     </button>
   </div>
 
-  <button id="restartBtn" onclick="resetGame()">もう一度戦う！</button>
+  <button type="button" id="restartBtn">もう一度戦う！</button>
 
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ゲーム状態（初期軍資金500両・上限1000両）
     let money = 500;
     const maxMoney = 1000;
     let playerCastleHp = 1000;
@@ -177,25 +178,21 @@
     let lastEnemyTime = Date.now();
     let enemySpawnCount = 0;
 
-    // ユニットと弾の配列
     let allies = [];
     let enemies = [];
     let bullets = [];
 
-    // 味方ユニット（徳川・豊臣・織田）
     const ALLY_TYPES = {
       tokugawa: { label: '徳川', icon: '🛡️', cost: 15, hp: 320, atk: 12, range: 30, speed: 0.9, atkSpeed: 50 },
       toyotomi: { label: '豊臣', icon: '⚔️', cost: 30, hp: 160, atk: 30, range: 35, speed: 1.8, atkSpeed: 35 },
       oda:      { label: '織田', icon: '🔫', cost: 50, hp: 90,  atk: 65, range: 190, speed: 1.0, atkSpeed: 65 }
     };
 
-    // 敵ユニット（武田軍）
     const ENEMY_TYPES = {
       foot:    { label: '武田兵', icon: '👹', hp: 120, atk: 16, range: 30, speed: 1.2, atkSpeed: 45 },
       cavalry: { label: '赤備え', icon: '🐎', hp: 250, atk: 42, range: 35, speed: 2.5, atkSpeed: 50 }
     };
 
-    // 味方出撃
     function spawnPlayer(typeKey) {
       if (gameOver) return;
       const spec = ALLY_TYPES[typeKey];
@@ -211,7 +208,6 @@
       }
     }
 
-    // 敵出撃
     function spawnEnemy(typeKey) {
       const spec = ENEMY_TYPES[typeKey];
       enemies.push({
@@ -223,7 +219,12 @@
       });
     }
 
-    // ゲームリセット
+    // ボタンのイベント登録（タッチ・クリック両対応）
+    document.getElementById('btnTokugawa').addEventListener('click', () => spawnPlayer('tokugawa'));
+    document.getElementById('btnToyotomi').addEventListener('click', () => spawnPlayer('toyotomi'));
+    document.getElementById('btnOda').addEventListener('click', () => spawnPlayer('oda'));
+    document.getElementById('restartBtn').addEventListener('click', resetGame);
+
     function resetGame() {
       money = 500;
       playerCastleHp = 1000;
@@ -238,14 +239,11 @@
       enemySpawnCount = 0;
       document.getElementById('restartBtn').style.display = 'none';
 
-      // 開始と同時に最初の敵が1体出現
       spawnEnemy('foot');
       loop();
     }
 
-    // 城の描画
     function drawCastles() {
-      // 武田本陣（左）
       ctx.fillStyle = '#c23616';
       ctx.fillRect(20, 130, 60, 120);
       ctx.fillStyle = 'white';
@@ -253,25 +251,21 @@
       ctx.textAlign = 'center';
       ctx.fillText('武田陣', 50, 120);
 
-      // 連合軍本陣（右）
       ctx.fillStyle = '#273c75';
       ctx.fillRect(620, 130, 60, 120);
       ctx.fillStyle = 'white';
       ctx.fillText('連合陣', 650, 120);
     }
 
-    // ユニットの描画（アイコン＋武将名＋HPバー）
     function drawUnit(u, isAlly) {
       ctx.font = '28px sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(u.icon, u.x, u.y);
 
-      // 名前ラベル
       ctx.font = 'bold 11px sans-serif';
       ctx.fillStyle = isAlly ? '#003366' : '#660000';
       ctx.fillText(u.label, u.x, u.y + 15);
 
-      // HPバー
       const barWidth = 34;
       const hpRatio = Math.max(0, u.hp / u.maxHp);
       ctx.fillStyle = '#333';
@@ -280,12 +274,10 @@
       ctx.fillRect(u.x - barWidth / 2, u.y - 32, barWidth * hpRatio, 5);
     }
 
-    // メインループ
     function loop() {
       if (gameOver) return;
       const now = Date.now();
 
-      // 1. 1秒につき3両増える
       if (now - lastMoneyTime >= 1000) {
         if (money < maxMoney) {
           money = Math.min(maxMoney, money + 3);
@@ -293,7 +285,6 @@
         lastMoneyTime += 1000;
       }
 
-      // 2. 敵の定期出現（4秒ごとに確実に敵が出現、3回に1回は強力な赤備え騎馬隊）
       if (now - lastEnemyTime >= 4000) {
         enemySpawnCount++;
         if (enemySpawnCount % 3 === 0) {
@@ -304,29 +295,17 @@
         lastEnemyTime = now;
       }
 
-      // UI更新
       document.getElementById('money').textContent = money;
       document.getElementById('playerHp').textContent = Math.max(0, playerCastleHp);
       document.getElementById('enemyHp').textContent = Math.max(0, enemyCastleHp);
 
-      const btnTokugawa = document.getElementById('btnTokugawa');
-      const btnToyotomi = document.getElementById('btnToyotomi');
-      const btnOda = document.getElementById('btnOda');
+      document.getElementById('btnTokugawa').disabled = money < 15;
+      document.getElementById('btnToyotomi').disabled = money < 30;
+      document.getElementById('btnOda').disabled = money < 50;
 
-      btnTokugawa.disabled = money < 15;
-      btnTokugawa.classList.toggle('ready', money >= 15);
-
-      btnToyotomi.disabled = money < 30;
-      btnToyotomi.classList.toggle('ready', money >= 30);
-
-      btnOda.disabled = money < 50;
-      btnOda.classList.toggle('ready', money >= 50);
-
-      // 3. 画面クリア＆城の描画
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawCastles();
 
-      // 4. 味方ユニット（右から左へ進軍）
       for (let i = allies.length - 1; i >= 0; i--) {
         const a = allies[i];
         if (a.cooldown > 0) a.cooldown--;
@@ -355,7 +334,6 @@
         drawUnit(a, true);
       }
 
-      // 5. 敵ユニット（左から右へ進軍）
       for (let i = enemies.length - 1; i >= 0; i--) {
         const e = enemies[i];
         if (e.cooldown > 0) e.cooldown--;
@@ -380,5 +358,15 @@
         drawUnit(e, false);
       }
 
-      // 6. 織田鉄砲隊の弾丸処理
       ctx.fillStyle = '#ffd32a';
+      for (let i = bullets.length - 1; i >= 0; i--) {
+        const b = bullets[i];
+        b.x -= 10;
+        ctx.beginPath();
+        ctx.arc(b.x, b.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (b.target && b.x <= b.target.x) {
+          b.target.hp -= b.atk;
+          bullets.splice(i, 1);
+        } else if (b.x < 0) {
