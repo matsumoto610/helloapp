@@ -166,6 +166,7 @@
     let gameOver = false;
     let winner = '';
     let frameCount = 0;
+    let lastMoneyTime = Date.now(); // 時間計測用
 
     // ユニットと弾の配列
     let allies = [];
@@ -224,6 +225,7 @@
       gameOver = false;
       winner = '';
       frameCount = 0;
+      lastMoneyTime = Date.now();
       document.getElementById('restartBtn').style.display = 'none';
       loop();
     }
@@ -264,10 +266,15 @@
       if (gameOver) return;
       frameCount++;
 
-      // 1. 軍資金の増加とボタン更新
-      if (frameCount % 3 === 0 && money < maxMoney) {
-        money += 1;
+      // 1. 軍資金の増加（1000ミリ秒＝1秒ごとに3両増える）
+      const now = Date.now();
+      if (now - lastMoneyTime >= 1000) {
+        if (money < maxMoney) {
+          money = Math.min(maxMoney, money + 3);
+        }
+        lastMoneyTime += 1000;
       }
+
       document.getElementById('money').textContent = money;
       document.getElementById('playerHp').textContent = Math.max(0, playerCastleHp);
       document.getElementById('enemyHp').textContent = Math.max(0, enemyCastleHp);
@@ -377,8 +384,3 @@
       enemies = enemies.filter(e => e.hp > 0);
 
       // 8. 勝敗判定
-      if (enemyCastleHp <= 0 || playerCastleHp <= 0) {
-        gameOver = true;
-        winner = enemyCastleHp <= 0 ? '🎉 織田・徳川にゃんこ軍の勝利！' : '💀 武田軍に敗北しました…';
-        
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
