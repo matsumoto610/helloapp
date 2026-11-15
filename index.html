@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hello アプリ</title>
+  <style>
+    /* 画面全体を使って要素を上下左右の中央に配置 */
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-family: sans-serif;
+      background-color: #f4f4f9;
+    }
+
+    /* ボタンのデザイン */
+    button {
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background-color: #007bff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    /* 「hello」を表示するテキストのデザイン */
+    #message {
+      margin-top: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #333;
+      min-height: 40px; /* 文字が出る前も高さを確保してボタンがズレないようにする */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 画面中央のボタン -->
+  <button id="helloButton">押してください</button>
+
+  <!-- 結果が表示される場所 -->
+  <div id="message"></div>
+
+  <script>
+    // ボタンと表示エリアの要素を取得
+    const button = document.getElementById('helloButton');
+    const messageArea = document.getElementById('message');
+
+    // ボタンがクリックされたときの処理
+    button.addEventListener('click', () => {
+      messageArea.textContent = 'hello';
+    });
+  </script>
+
+</body>
+</html>
