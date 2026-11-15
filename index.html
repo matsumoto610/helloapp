@@ -133,7 +133,7 @@
 
   <div id="hud">
     <div>連合軍本陣: <span id="playerHp">1000</span></div>
-    <div id="moneyDisplay">軍資金: <span id="money">0</span> / 500両</div>
+    <div id="moneyDisplay">軍資金: <span id="money">500</span> / 1000両</div>
     <div>武田勝頼陣: <span id="enemyHp">1500</span></div>
   </div>
 
@@ -166,9 +166,9 @@
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ゲーム状態
-    let money = 30;
-    const maxMoney = 500;
+    // ゲーム状態（初期軍資金500両・上限1000両）
+    let money = 500;
+    const maxMoney = 1000;
     let playerCastleHp = 1000;
     let enemyCastleHp = 1500;
     let gameOver = false;
@@ -225,7 +225,7 @@
 
     // ゲームリセット
     function resetGame() {
-      money = 30;
+      money = 500;
       playerCastleHp = 1000;
       enemyCastleHp = 1500;
       allies = [];
