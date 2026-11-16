@@ -1,176 +1,136 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>戦国大戦争 〜三英傑とガチャ〜</title>
-<style>
-  * { touch-action: manipulation; box-sizing: border-box; }
-  body { margin: 0; padding: 10px; background: #1e272e; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; }
-  .box { width: 100%; max-width: 700px; display: none; flex-direction: column; align-items: center; }
-  .show { display: flex; }
-
-  /* ホーム画面 */
-  #home { height: 360px; background: linear-gradient(135deg, #2c3e50, #8e2424); border: 3px solid #ffd32a; border-radius: 12px; position: relative; overflow: hidden; }
-  #winBadge { position: absolute; top: 10px; right: 12px; background: rgba(0,0,0,0.8); border: 2px solid #ffd32a; padding: 6px 14px; border-radius: 20px; font-weight: bold; color: #ffd32a; font-size: 14px; z-index: 3; }
-  #startBtn { position: absolute; top: 28%; left: 16%; padding: 14px 26px; font-size: 20px; font-weight: bold; background: #ffd32a; color: #000; border: 3px solid #fff; border-radius: 10px; cursor: pointer; z-index: 2; }
-  .home-sub-btns { position: absolute; top: 52%; left: 16%; display: flex; gap: 10px; z-index: 2; }
-  .subBtn { padding: 10px 16px; font-size: 14px; font-weight: bold; background: #2980b9; color: #fff; border: 2px solid #fff; border-radius: 8px; cursor: pointer; }
-  .portraits { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 6px; z-index: 1; }
-  .p-card { background: rgba(0,0,0,0.75); border: 1.5px solid #ffd32a; border-radius: 6px; padding: 3px; text-align: center; width: 64px; }
-  .p-card img { width: 100%; height: 70px; object-fit: cover; border-radius: 4px; display: block; }
-  .p-card span { font-size: 10px; font-weight: bold; color: #ffd32a; display: block; margin-top: 2px; }
-
-  /* マップ・ガチャ・編成共通枠 */
-  .panel { min-height: 360px; background: #2f3640; border: 3px solid #ffd32a; border-radius: 12px; padding: 15px; justify-content: space-between; }
-  #map { background: #2d5a27; }
-  .stages { display: flex; justify-content: space-around; align-items: center; width: 100%; height: 190px; }
-  .stBtn { width: 95px; height: 95px; border-radius: 50%; background: #e84118; color: #fff; border: 3px solid #ffd32a; font-weight: bold; font-size: 13px; cursor: pointer; }
-  .backBtn { padding: 8px 20px; border-radius: 6px; border: none; font-weight: bold; background: #7f8fa6; color: #fff; cursor: pointer; }
-
-  /* ガチャ画面 */
-  #gachaBtn { padding: 16px 28px; font-size: 18px; font-weight: bold; background: #e84118; color: #fff; border: 3px solid #ffd32a; border-radius: 12px; cursor: pointer; }
-  #gachaBtn:disabled { opacity: 0.4; border-color: #777; cursor: not-allowed; }
-  #gachaResult { min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-weight: bold; font-size: 16px; color: #ffd32a; }
-
-  /* チーム編成画面 */
-  .team-slots { display: flex; gap: 8px; width: 100%; justify-content: center; margin: 8px 0; }
-  .slot { flex: 1; background: #1e272e; border: 2px solid #ffd32a; border-radius: 8px; padding: 8px; text-align: center; font-size: 12px; }
-  .char-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; width: 100%; max-height: 170px; overflow-y: auto; }
-  .cCard { background: #353b48; border: 2px solid #7f8fa6; border-radius: 6px; padding: 6px; text-align: center; font-size: 11px; color: #fff; cursor: pointer; }
-  .cCard.selected { border-color: #4cd137; background: #218c74; }
-
-  /* バトル画面 */
-  #hud { width: 100%; display: flex; justify-content: space-between; background: #2f3640; padding: 8px; font-size: 13px; font-weight: bold; border-radius: 8px 8px 0 0; }
-  canvas { background: #87CEEB; width: 100%; height: 220px; display: block; }
-  #btns { width: 100%; display: flex; gap: 6px; background: #2f3640; padding: 8px; border-radius: 0 0 8px 8px; }
-  .uBtn { flex: 1; padding: 10px 2px; background: #40739e; color: #fff; border: 2px solid #ffd32a; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
-  .uBtn:disabled { opacity: 0.4; border-color: #777; cursor: not-allowed; }
-  #backMap { display: none; margin-top: 10px; padding: 10px 24px; background: #ffd32a; color: #000; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; }
-</style>
-</head>
-<body>
-
-<!-- 1. ホーム画面 -->
-<div id="home" class="box show">
-  <div id="winBadge">勝利数: <span id="winCount">0</span>勝</div>
-  <h2 style="color:#ffd32a; margin-top:18px; text-shadow: 2px 2px 4px #000;">⚔️ 戦国大戦争 〜三英傑〜</h2>
-  <button id="startBtn" onclick="go('map')">出陣する！</button>
-  <div class="home-sub-btns">
-    <button class="subBtn" onclick="openGacha()">🎰 ガチャ</button>
-    <button class="subBtn" onclick="openTeam()">🛡️ チーム編成</button>
-  </div>
-  <div class="portraits">
-    <div class="p-card"><img src="https://wikimedia.org" alt="織田信長"><span>織田信長</span></div>
-    <div class="p-card"><img src="https://wikimedia.org" alt="豊臣秀吉"><span>豊臣秀吉</span></div>
-    <div class="p-card"><img src="https://wikimedia.org" alt="徳川家康"><span>徳川家康</span></div>
-  </div>
-</div>
-
-<!-- 2. マップ画面 -->
-<div id="map" class="box panel">
-  <h3 style="color:#ffd32a; margin:0;">🗺️ ステージ選択</h3>
-  <div class="stages">
-    <button class="stBtn" onclick="play(0)">第1戦<br>桶狭間</button>
-    <button class="stBtn" onclick="play(1)">第2戦<br>長篠</button>
-    <button class="stBtn" onclick="play(2)">第3戦<br>大坂</button>
-  </div>
-  <button class="backBtn" onclick="go('home')">ホームへ戻る</button>
-</div>
-
-<!-- 3. ガチャ画面 -->
-<div id="gacha" class="box panel">
-  <h3 style="color:#ffd32a; margin:0;">🎰 武将ガチャ</h3>
-  <div style="font-size:14px;">現在の勝利数: <b id="gWins" style="color:#ffd32a;">0</b>勝 ／ 必要勝数: <b id="gCost" style="color:#ff4757;">0</b>勝</div>
-  <div id="gachaResult">初回は0勝（無料）で回せます！</div>
-  <button id="gachaBtn" onclick="rollGacha()">ガチャを回す！</button>
-  <button class="backBtn" onclick="go('home')">ホームへ戻る</button>
-</div>
-
-<!-- 4. チーム編成画面 -->
-<div id="team" class="box panel">
-  <h3 style="color:#ffd32a; margin:0;">🛡️ チーム編成（3体まで選択）</h3>
-  <div class="team-slots" id="teamSlots"></div>
-  <div style="font-size:12px; color:#ccc;">▼ 所持武将をタップして入れ替え ▼</div>
-  <div class="char-list" id="charList"></div>
-  <button class="backBtn" onclick="go('home')">決定して戻る</button>
-</div>
-
-<!-- 5. バトル画面 -->
-<div id="battle" class="box">
-  <div id="hud">
-    <div>味方城:<span id="pHp">1000</span></div>
-    <div id="stName" style="color:#4cd137;">長篠</div>
-    <div style="color:#ffd32a;">資金:<span id="mny">100</span>両</div>
-    <div>敵城:<span id="eHp">1500</span></div>
-  </div>
-  <canvas id="cv" width="700" height="220"></canvas>
-  <div id="btns">
-    <button class="uBtn" id="b0" onclick="unit(0)"></button>
-    <button class="uBtn" id="b1" onclick="unit(1)"></button>
-    <button class="uBtn" id="b2" onclick="unit(2)"></button>
-  </div>
-  <button id="backMap" onclick="go('map')">マップへ戻る</button>
-</div>
-
-<script>
-const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
-
-// 全武将データ（最初3体は初期所持、残り6体はガチャ限定）
-const ALL_CHARS = [
-  { id: 0, n: '徳川', full: '徳川家康(守)', rare: '普通', c: '#2ecc71', cost: 15, hp: 320, atk: 12, r: 35, sp: 0.9, cd: 50, gun: false },
-  { id: 1, n: '豊臣', full: '豊臣秀吉(攻)', rare: '普通', c: '#f1c40f', cost: 30, hp: 160, atk: 30, r: 40, sp: 1.8, cd: 35, gun: false },
-  { id: 2, n: '織田', full: '織田信長(銃)', rare: '普通', c: '#3498db', cost: 50, hp: 90,  atk: 65, r: 190, sp: 1.0, cd: 65, gun: true },
-  { id: 3, n: '徳川壁', full: '大久保・徳川鉄壁', rare: 'レア', c: '#16a085', cost: 25, hp: 650, atk: 20, r: 35, sp: 0.8, cd: 50, gun: false },
-  { id: 4, n: 'サル', full: '木下藤吉郎(超速)', rare: 'レア', c: '#e67e22', cost: 35, hp: 200, atk: 45, r: 45, sp: 3.0, cd: 25, gun: false },
-  { id: 5, n: '三段銃', full: '織田・三段撃ち隊', rare: 'レア', c: '#2980b9', cost: 65, hp: 120, atk: 110, r: 210, sp: 1.0, cd: 50, gun: true },
-  { id: 6, n: '神君', full: '神君・徳川家康', rare: '超激レア', c: '#27ae60', cost: 45, hp: 1200, atk: 55, r: 45, sp: 1.1, cd: 40, gun: false },
-  { id: 7, n: '太閤', full: '天下人・豊臣秀吉', rare: '超激レア', c: '#f39c12', cost: 60, hp: 450, atk: 130, r: 55, sp: 2.5, cd: 25, gun: false },
-  { id: 8, n: '魔王', full: '第六天魔王・信長', rare: '超激レア', c: '#9b59b6', cost: 90, hp: 300, atk: 240, r: 230, sp: 1.2, cd: 45, gun: true }
-];
-
-let wins = 0;          // 現在の勝数
-let gachaCount = 0;    // ガチャを回した回数（0, 1, 2, 3...と必要勝数が増える）
-let ownedIds =; // 最初は普通の織田・豊臣・徳川のみ所持
-let teamIds =;  // 出撃チーム（最大3体）
-
-let mny = 100, pHp = 1000, eHp = 1500, over = true, tM = 0, tE = 0, cnt = 0, st = 0;
-let al = [], en = [], bl = [];
-const STS = [
-  { n: '桶狭間', hp: 1000, ms: 5500, e1: '今川', e2: '義元' },
-  { n: '長篠', hp: 1500, ms: 4500, e1: '武田', e2: '赤備' },
-  { n: '大坂', hp: 2200, ms: 3500, e1: '真田', e2: '幸村' }
-];
-
-function updateWinUI() {
-  document.getElementById('winCount').textContent = wins;
-  document.getElementById('gWins').textContent = wins;
-  document.getElementById('gCost').textContent = gachaCount;
+document.getElementById('gachaResult').innerHTML =
+【${picked.rare}】<span style="font-size:20px; color:#fff;">${picked.full}</span> を獲得！<br> +
+<span style="font-size:12px; color:#4cd137;">${isNew ? '★NEW！チーム編成で使えます' : '（すでに所持しています）'}</span>;
+document.getElementById('gachaBtn').disabled = wins < gachaCount;
 }
-
-function go(id) {
-  over = true;
-  updateWinUI();
-  document.querySelectorAll('.box').forEach(b => b.classList.remove('show'));
-  document.getElementById(id).classList.add('show');
+// チーム編成機能
+function openTeam() {
+go('team');
+renderTeam();
 }
-
-// ガチャ機能
-function openGacha() {
-  go('gacha');
-  document.getElementById('gachaResult').textContent = gachaCount === 0 ? '初回は0勝（無料）で回せます！' : `次は ${gachaCount}勝 で回せます！`;
-  document.getElementById('gachaBtn').disabled = wins < gachaCount;
+function renderTeam() {
+const slotsEl = document.getElementById('teamSlots');
+slotsEl.innerHTML = [0, 1, 2].map(idx => {
+const ch = ALL_CHARS[teamIds[idx]];
+return <div class="slot">${ch ? ${ch.full}
+${ch.cost}両 : '空き枠'}</div>;
+}).join('');
+const listEl = document.getElementById('charList');
+listEl.innerHTML = ownedIds.map(id => {
+const ch = ALL_CHARS[id];
+const sel = teamIds.includes(id);
+return <button class="cCard ${sel ? 'selected' : ''}" onclick="toggleMember(${id})"> <b>[${ch.rare}]</b><br>${ch.full}<br>${ch.cost}両 </button>;
+}).join('');
 }
-
-function rollGacha() {
-  if (wins < gachaCount) return;
-  wins -= gachaCount; // 必要勝数分を消費
-  gachaCount++;       // 次回は +1勝 必要になる（0→1→2→3…）
-
-  // ガチャ対象（ID 3〜8のバリエーション武将）から抽選
-  const pool = ALL_CHARS.filter(c => c.id >= 3);
-  const picked = pool[Math.floor(Math.random() * pool.length)];
-  const isNew = !ownedIds.includes(picked.id);
-  if (isNew) ownedIds.push(picked.id);
-
-  updateWinUI();
+function toggleMember(id) {
+if (teamIds.includes(id)) {
+if (teamIds.length > 1) teamIds = teamIds.filter(x => x !== id);
+} else {
+if (teamIds.length < 3) teamIds.push(id);
+else { teamIds.shift(); teamIds.push(id); }
+}
+renderTeam();
+}
+// バトル機能
+function unit(slotIdx) {
+const ch = ALL_CHARS[teamIds[slotIdx]];
+if (!ch || over || mny < ch.cost) return;
+mny -= ch.cost;
+al.push({ ...ch, mHp: ch.hp, x: 600, y: 145, tm: 0 });
+}
+function addEn(boss) {
+const s = STS[st], m = 1 + st * 0.25;
+en.push({
+n: boss ? s.e2 : s.e1, c: boss ? '#8e44ad' : '#e74c3c',
+hp: Math.round((boss ? 250 : 120) * m), mHp: Math.round((boss ? 250 : 120) * m),
+atk: Math.round((boss ? 40 : 16) * m), r: boss ? 40 : 35, sp: boss ? 2.4 : 1.2, cd: boss ? 50 : 45,
+x: 90, y: 145, tm: 0
+});
+}
+function play(idx) {
+st = idx; go('battle');
+mny = 100; pHp = 1000; eHp = STS[st].hp; over = false;
+al = []; en = []; bl = []; cnt = 0; tM = Date.now(); tE = Date.now();
+document.getElementById('stName').textContent = STS[st].n;
+document.getElementById('backMap').style.display = 'none';
+// 編成中の3体をボタンにセット
+for (let i = 0; i < 3; i++) {
+const btn = document.getElementById('b' + i);
+const ch = ALL_CHARS[teamIds[i]];
+if (ch) {
+btn.style.display = 'block';
+btn.innerHTML = ${ch.n}<br>${ch.cost}両;
+} else {
+btn.style.display = 'none';
+}
+}
+addEn(false);
+requestAnimationFrame(loop);
+}
+function drawU(u, isAl) {
+ctx.fillStyle = u.c; ctx.fillRect(u.x - 18, u.y - 15, 36, 36);
+ctx.strokeStyle = '#fff'; ctx.strokeRect(u.x - 18, u.y - 15, 36, 36);
+ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center';
+ctx.fillText(u.n, u.x, u.y + 7);
+ctx.fillStyle = '#333'; ctx.fillRect(u.x - 16, u.y - 23, 32, 4);
+ctx.fillStyle = isAl ? '#4cd137' : '#ff4757';
+ctx.fillRect(u.x - 16, u.y - 23, 32 * Math.max(0, u.hp / u.mHp), 4);
+}
+function loop() {
+if (over) return;
+const now = Date.now();
+if (now - tM >= 1000) { mny = Math.min(1000, mny + 1); tM += 1000; }
+if (now - tE >= STS[st].ms) { cnt++; addEn(cnt % 3 === 0); tE = now; }
+document.getElementById('mny').textContent = mny;
+document.getElementById('pHp').textContent = Math.max(0, pHp);
+document.getElementById('eHp').textContent = Math.max(0, eHp);
+for (let i = 0; i < 3; i++) {
+const ch = ALL_CHARS[teamIds[i]];
+if (ch) document.getElementById('b' + i).disabled = mny < ch.cost;
+}
+ctx.clearRect(0, 0, 700, 220);
+ctx.fillStyle = '#558b2f'; ctx.fillRect(0, 168, 700, 52);
+ctx.fillStyle = '#c23616'; ctx.fillRect(20, 88, 55, 80);
+ctx.fillStyle = '#273c75'; ctx.fillRect(625, 88, 55, 80);
+al.forEach(a => {
+if (a.tm > 0) a.tm--;
+const t = en.find(e => a.x >= e.x && a.x - e.x <= a.r);
+if (t) {
+if (a.tm === 0) {
+if (a.gun) bl.push({ x: a.x - 15, y: a.y, t, atk: a.atk });
+else t.hp -= a.atk;
+a.tm = a.cd;
+}
+} else if (a.x - 75 <= a.r) { if (a.tm === 0) { eHp -= a.atk; a.tm = a.cd; } }
+else a.x -= a.sp;
+drawU(a, true);
+});
+en.forEach(e => {
+if (e.tm > 0) e.tm--;
+const t = al.find(a => a.x >= e.x && a.x - e.x <= e.r);
+if (t) { if (e.tm === 0) { t.hp -= e.atk; e.tm = e.cd; } }
+else if (625 - e.x <= e.r) { if (e.tm === 0) { pHp -= e.atk; e.tm = e.cd; } }
+else e.x += e.sp;
+drawU(e, false);
+});
+ctx.fillStyle = '#ffd32a';
+for (let i = bl.length - 1; i >= 0; i--) {
+const b = bl[i]; b.x -= 10;
+ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2); ctx.fill();
+if (b.t && b.x <= b.t.x) { b.t.hp -= b.atk; bl.splice(i, 1); }
+else if (b.x < 0) bl.splice(i, 1);
+}
+al = al.filter(a => a.hp > 0);
+en = en.filter(e => e.hp > 0);
+if (eHp <= 0 || pHp <= 0) {
+over = true;
+const isWin = eHp <= 0;
+if (isWin) { wins++; updateWinUI(); }
+ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(0, 0, 700, 220);
+ctx.fillStyle = '#ffd32a'; ctx.font = 'bold 26px sans-serif'; ctx.textAlign = 'center';
+ctx.fillText(isWin ? 'ステージクリア！（+1勝）' : '敗北…', 350, 110);
+document.getElementById('backMap').style.display = 'block';
+return;
+}
+requestAnimationFrame(loop);
+}
