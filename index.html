@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>戦国大戦争</title>
 <style>
-  body { margin: 0; background: #1a1c20; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+  body { margin: 0; background: #1a1c20; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
   #app { width: 720px; max-width: 96vw; height: 430px; background: #282c34; border: 2px solid #4a505c; border-radius: 10px; padding: 16px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; }
   .screen { display: none; width: 100%; height: 100%; flex-direction: column; }
   .active { display: flex; }
@@ -204,7 +204,7 @@ function toggleMember(id) {
 function unit(slotIdx) {
   if (slotIdx >= teamIds.length) return;
   var ch = ALL_CHARS.at(teamIds.at(slotIdx));
-if (!ch || over || mny < ch.cost) return;
+  if (!ch || over || mny < ch.cost) return;
 mny -= ch.cost;
 al.push({ n: ch.n, c: ch.c, hp: ch.hp, mHp: ch.hp, atk: ch.atk, r: ch.r, sp: ch.sp, cd: ch.cd, gun: ch.gun, x: 600, y: 140, tm: 0 });
 }
