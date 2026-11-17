@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>長篠の戦い大戦争</title>
+<title>長篠の戦い</title>
 <style>
   body {
     margin: 0;
@@ -55,8 +55,8 @@
   }
   .unit-btn {
     flex: 1;
-    padding: 12px 8px;
-    font-size: 15px;
+    padding: 14px 8px;
+    font-size: 16px;
     font-weight: bold;
     color: #fff;
     background: #273c75;
@@ -90,37 +90,36 @@
 <body>
 
 <div id="game">
-  <h1>⚔️ 長篠の戦い 〜織田・豊臣・徳川〜 ⚔️</h1>
+  <h1>長篠の戦い</h1>
 
   <div class="status-bar">
-    <span style="color:#ff6b81;">武田城(左): <span id="enemyCastle">1500</span></span>
-    <span style="color:#f1c40f;">軍資金: <span id="money">15</span>両</span>
-    <span style="color:#70a1ff;">連合城(右): <span id="playerCastle">1000</span></span>
+    <span style="color:#ff6b81;">武田城: <span id="enemyCastle">1500</span></span>
+    <span style="color:#f1c40f;">軍資金: <span id="money">100</span>両</span>
+    <span style="color:#70a1ff;">連合城: <span id="playerCastle">1000</span></span>
   </div>
 
   <canvas id="canvas" width="700" height="220"></canvas>
 
   <div class="controls">
-    <button type="button" class="unit-btn" id="btn0" onclick="spawnAlly(0)">徳川（守り）<br>15両</button>
-    <button type="button" class="unit-btn" id="btn1" onclick="spawnAlly(1)">豊臣（突撃）<br>30両</button>
-    <button type="button" class="unit-btn" id="btn2" onclick="spawnAlly(2)">織田（鉄砲）<br>50両</button>
+    <button type="button" class="unit-btn" id="btn0" onclick="spawnAlly(0)">徳川 15両</button>
+    <button type="button" class="unit-btn" id="btn1" onclick="spawnAlly(1)">豊臣 30両</button>
+    <button type="button" class="unit-btn" id="btn2" onclick="spawnAlly(2)">織田 50両</button>
   </div>
 
-  <button type="button" id="restartBtn" onclick="startGame()">もう一度戦う</button>
+  <button type="button" id="restartBtn" onclick="startGame()">再戦</button>
 </div>
 
 <script>
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
 
-  // 味方ユニットデータ
   var UNIT_TYPES = new Array(
     { name: '徳川', cost: 15, hp: 220, atk: 12, range: 30,  speed: 1.0, cd: 45, color: '#27ae60', isGun: false },
     { name: '豊臣', cost: 30, hp: 120, atk: 26, range: 35,  speed: 2.5, cd: 38, color: '#2980b9', isGun: false },
     { name: '織田', cost: 50, hp: 80,  atk: 35, range: 175, speed: 1.1, cd: 60, color: '#8e44ad', isGun: true  }
   );
 
-  var money = 15;
+  var money = 100;
   var playerHp = 1000;
   var enemyHp = 1500;
   var isGameOver = false;
@@ -134,7 +133,7 @@
   var enemyCount = 0;
 
   function startGame() {
-    money = 15;
+    money = 100;
     playerHp = 1000;
     enemyHp = 1500;
     isGameOver = false;
@@ -175,7 +174,7 @@
   function spawnEnemy(isCavalry) {
     enemyCount++;
     enemies.push({
-      name: isCavalry ? '武田騎馬' : '武田足軽',
+      name: isCavalry ? '騎馬' : '足軽',
       hp: isCavalry ? 240 : 110,
       maxHp: isCavalry ? 240 : 110,
       atk: isCavalry ? 38 : 15,
@@ -190,19 +189,16 @@
   }
 
   function drawUnit(u, isAlly) {
-    // キャラクター本体
     ctx.fillStyle = u.color;
     ctx.fillRect(u.x - 18, u.y - 15, 36, 36);
     ctx.strokeStyle = '#fff';
     ctx.strokeRect(u.x - 18, u.y - 15, 36, 36);
 
-    // 名前
     ctx.fillStyle = '#fff';
-    ctx.font = 'bold 11px sans-serif';
+    ctx.font = 'bold 12px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(u.name, u.x, u.y + 7);
 
-    // HPバー
     ctx.fillStyle = '#333';
     ctx.fillRect(u.x - 16, u.y - 23, 32, 4);
     ctx.fillStyle = isAlly ? '#4cd137' : '#ff4757';
@@ -213,18 +209,15 @@
     if (isGameOver) return;
 
     var now = Date.now();
-    // 1秒ごとに2両増加
     if (now - lastMoneyTime >= 1000) {
       money = Math.min(1000, money + 2);
       lastMoneyTime += 1000;
     }
-    // 3.2秒ごとに敵が出現（3体に1体は武田騎馬隊）
     if (now - lastEnemyTime >= 3200) {
       spawnEnemy((enemyCount + 1) % 3 === 0);
       lastEnemyTime = now;
     }
 
-    // UI更新
     document.getElementById('money').textContent = money;
     document.getElementById('playerCastle').textContent = Math.max(0, playerHp);
     document.getElementById('enemyCastle').textContent = Math.max(0, enemyHp);
@@ -233,20 +226,16 @@
       document.getElementById('btn' + i).disabled = money < UNIT_TYPES.at(i).cost;
     }
 
-    // 背景と城の描画
     ctx.clearRect(0, 0, 700, 220);
     ctx.fillStyle = '#558b2f';
     ctx.fillRect(0, 168, 700, 52);
 
-    // 武田城（左・赤）
     ctx.fillStyle = '#c23616';
     ctx.fillRect(20, 88, 55, 80);
 
-    // 連合城（右・青）
     ctx.fillStyle = '#273c75';
     ctx.fillRect(625, 88, 55, 80);
 
-    // 味方の行動
     for (var i = 0; i < allies.length; i++) {
       var a = allies.at(i);
       if (a.timer > 0) a.timer--;
@@ -270,7 +259,6 @@
       drawUnit(a, true);
     }
 
-    // 敵の行動
     for (var j = 0; j < enemies.length; j++) {
       var e = enemies.at(j);
       if (e.timer > 0) e.timer--;
@@ -292,7 +280,6 @@
       drawUnit(e, false);
     }
 
-    // 鉄砲の弾
     ctx.fillStyle = '#ffd32a';
     for (var k = bullets.length - 1; k >= 0; k--) {
       var b = bullets.at(k);
@@ -312,11 +299,9 @@
       }
     }
 
-    // 倒れたユニットを消去
     allies = allies.filter(function(a) { return a.hp > 0; });
     enemies = enemies.filter(function(e) { return e.hp > 0; });
 
-    // 勝敗判定
     if (enemyHp <= 0 || playerHp <= 0) {
       isGameOver = true;
       var isWin = enemyHp <= 0;
@@ -325,7 +310,7 @@
       ctx.fillStyle = '#ffd32a';
       ctx.font = 'bold 28px sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(isWin ? '長篠の戦い 勝利！' : '敗北…', 350, 115);
+      ctx.fillText(isWin ? '勝利！' : '敗北…', 350, 115);
       document.getElementById('restartBtn').style.display = 'block';
       return;
     }
