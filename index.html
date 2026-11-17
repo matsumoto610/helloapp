@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>戦国大戦争</title>
+<title>戦国大戦争 〜織田・豊臣・徳川〜</title>
 <style>
   body { margin: 0; background: #1a1c20; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
   #app { width: 740px; height: 440px; background: #282c34; border: 2px solid #4a505c; border-radius: 10px; padding: 18px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; }
@@ -41,7 +41,7 @@
 <body>
 <div id="app">
   <div id="home" class="screen active">
-    <div class="home-title">戦国大戦争 〜織田・明智・徳川〜</div>
+    <div class="home-title">戦国大戦争 〜織田・豊臣・徳川〜</div>
     <div class="win-badge">勝利数：<span id="winCount">0</span>勝</div>
     <div class="home-controls">
       <button class="btn-main-map" onclick="go('map')">出陣（マップ）</button>
@@ -63,9 +63,9 @@
       <h2>武将ガチャ（全9種）</h2>
       <button onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
     </div>
-    <p style="text-align:center; margin:4px 0;">所持勝利数：<span id="gachaWinCount">0</span>勝（1回 1勝消費）</p>
-    <button id="gachaBtn" onclick="drawGacha()" style="padding:12px; font-size:16px; width:200px; margin:8px auto;">ガチャを引く</button>
-    <div id="gachaResult">勝利数を消費して新たな武将を手に入れよう！</div>
+    <p style="text-align:center; margin:4px 0;">所持勝利数：<span id="gachaWinCount">0</span>勝（次のガチャ必要勝利数：<span id="gachaNeed">0</span>勝）</p>
+    <button id="gachaBtn" onclick="drawGacha()" style="padding:12px; font-size:16px; width:220px; margin:8px auto;">ガチャを引く</button>
+    <div id="gachaResult">勝利数を貯めて新たな武将を手に入れよう！（初回は0勝で回せます）</div>
   </div>
   <div id="team" class="screen">
     <div class="sub-header">
@@ -76,11 +76,11 @@
     <div id="charList"></div>
   </div>
   <div id="battle" class="screen">
-    <div id="stName" class="battle-title">長篠の戦い 〜織田・明智・徳川〜</div>
+    <div id="stName" class="battle-title">長篠の戦い 〜織田・豊臣・徳川〜</div>
     <div class="battle-bar">
-      <span>連合城: <span id="pHp">1000</span></span>
+      <span style="color:#ff7675;">敵城(左): <span id="eHp">1500</span></span>
       <span style="color:#f1c40f;">軍資金: <span id="mny">15</span>両</span>
-      <span>敵城: <span id="eHp">1500</span></span>
+      <span style="color:#74b9ff;">連合城(右): <span id="pHp">1000</span></span>
     </div>
     <canvas id="cv" width="700" height="220"></canvas>
     <div class="unit-bar">
@@ -92,27 +92,30 @@
   </div>
 </div>
 <script>
-const ALL_CHARS = new Array(
-  { rare: 'N',   n: '織田', full: '織田 (鉄砲)',   cost: 50,  hp: 80,  atk: 28,  r: 170, sp: 1.1, cd: 60, c: '#8e44ad', gun: true  },
-  { rare: 'N',   n: '明智', full: '明智 (突撃)',   cost: 30,  hp: 110, atk: 22,  r: 35,  sp: 2.2, cd: 40, c: '#2980b9', gun: false },
-  { rare: 'N',   n: '徳川', full: '徳川 (守り)',   cost: 15,  hp: 180, atk: 12,  r: 30,  sp: 1.2, cd: 45, c: '#27ae60', gun: false },
-  { rare: 'R',   n: '羽柴', full: '羽柴 (足軽)',   cost: 20,  hp: 130, atk: 18,  r: 30,  sp: 1.8, cd: 35, c: '#d35400', gun: false },
-  { rare: 'R',   n: '柴田', full: '柴田 (鬼柴田)', cost: 70,  hp: 280, atk: 45,  r: 40,  sp: 1.5, cd: 45, c: '#c0392b', gun: false },
-  { rare: 'SR',  n: '前田', full: '前田 (槍衾)',   cost: 90,  hp: 340, atk: 55,  r: 55,  sp: 1.6, cd: 42, c: '#f39c12', gun: false },
-  { rare: 'SR',  n: '本多', full: '本多 (無双)',   cost: 130, hp: 500, atk: 85,  r: 45,  sp: 1.7, cd: 38, c: '#16a085', gun: false },
-  { rare: 'SSR', n: '真田', full: '真田 (赤備え)', cost: 160, hp: 450, atk: 110, r: 40,  sp: 2.6, cd: 32, c: '#e74c3c', gun: false },
-  { rare: 'UR',  n: '信長', full: '第六天魔王',    cost: 220, hp: 650, atk: 160, r: 210, sp: 1.2, cd: 65, c: '#9b59b6', gun: true  }
+const ALL_CHARS = Array.of(
+  { rare: 'N',   n: '徳川', full: '徳川 (守り)',   cost: 15,  hp: 200, atk: 10,  r: 30,  sp: 1.0, cd: 45, c: '#27ae60', gun: false },
+  { rare: 'N',   n: '豊臣', full: '豊臣 (突撃)',   cost: 30,  hp: 110, atk: 24,  r: 35,  sp: 2.6, cd: 38, c: '#2980b9', gun: false },
+  { rare: 'N',   n: '織田', full: '織田 (鉄砲)',   cost: 50,  hp: 80,  atk: 30,  r: 175, sp: 1.1, cd: 60, c: '#8e44ad', gun: true  },
+  { rare: 'R',   n: '明智', full: '明智 (智謀)',   cost: 45,  hp: 130, atk: 28,  r: 120, sp: 1.5, cd: 50, c: '#16a085', gun: true  },
+  { rare: 'R',   n: '柴田', full: '柴田 (鬼柴田)', cost: 70,  hp: 300, atk: 45,  r: 40,  sp: 1.5, cd: 45, c: '#c0392b', gun: false },
+  { rare: 'SR',  n: '前田', full: '前田 (槍衾)',   cost: 90,  hp: 360, atk: 55,  r: 55,  sp: 1.6, cd: 42, c: '#f39c12', gun: false },
+  { rare: 'SR',  n: '本多', full: '本多 (無双)',   cost: 130, hp: 520, atk: 85,  r: 45,  sp: 1.7, cd: 38, c: '#2ecc71', gun: false },
+  { rare: 'SSR', n: '真田', full: '真田 (赤備え)', cost: 160, hp: 460, atk: 115, r: 40,  sp: 2.8, cd: 30, c: '#e74c3c', gun: false },
+  { rare: 'UR',  n: '信長', full: '第六天魔王',    cost: 220, hp: 680, atk: 165, r: 210, sp: 1.2, cd: 65, c: '#9b59b6', gun: true  }
 );
-const STS = new Array(
-  { n: '長篠の戦い 〜織田・明智・徳川〜', hp: 1500, ms: 3200, e1: '武田足軽', e2: '武田騎馬' },
+
+const STS = Array.of(
+  { n: '長篠の戦い 〜織田・豊臣・徳川〜', hp: 1500, ms: 3200, e1: '武田足軽', e2: '武田騎馬' },
   { n: '関ヶ原の戦い 〜天下分け目〜',     hp: 2200, ms: 2700, e1: '西軍槍兵', e2: '石田三成' },
   { n: '大坂の陣 〜最終決戦〜',           hp: 3000, ms: 2200, e1: '大坂牢人', e2: '真田幸村' }
 );
-let wins = 0, gachaCount = 1;
-let ownedIds = new Array(0, 1, 2);
-let teamIds = new Array(2, 1, 0);
+
+let wins = 0;
+let gachaCount = 0;
+let ownedIds = Array.of(0, 1, 2);
+let teamIds = Array.of(0, 1, 2);
 let st = 0, mny = 15, pHp = 1000, eHp = 1500, over = false;
-let al = new Array(), en = new Array(), bl = new Array(), cnt = 0, tM = 0, tE = 0;
+let al = Array.of(), en = Array.of(), bl = Array.of(), cnt = 0, tM = 0, tE = 0;
 const ctx = document.getElementById('cv').getContext('2d');
 
 function go(id) {
@@ -120,23 +123,30 @@ function go(id) {
   document.getElementById(id).classList.add('active');
   updateWinUI();
 }
+
 function updateWinUI() {
   document.getElementById('winCount').textContent = wins;
   document.getElementById('gachaWinCount').textContent = wins;
+  document.getElementById('gachaNeed').textContent = gachaCount;
   document.getElementById('gachaBtn').disabled = wins < gachaCount;
 }
+
 function initStages() {
   document.getElementById('stageList').innerHTML = STS.map((s, idx) =>
     `<button class="stage-btn" onclick="play(${idx})">${s.n}（敵城HP: ${s.hp}）</button>`
   ).join('');
 }
+
 function openGacha() {
   go('gacha');
-  document.getElementById('gachaResult').textContent = '勝利数を消費して新たな武将を手に入れよう！';
+  updateWinUI();
+  document.getElementById('gachaResult').textContent = '勝利数を貯めて新たな武将を手に入れよう！';
 }
+
 function drawGacha() {
   if (wins < gachaCount) return;
   wins -= gachaCount;
+  gachaCount++;
   updateWinUI();
   const pickedId = Math.floor(Math.random() * ALL_CHARS.length);
   const picked = ALL_CHARS[pickedId];
@@ -146,14 +156,16 @@ function drawGacha() {
     if (teamIds.length < 3) teamIds.push(pickedId);
   }
   document.getElementById('gachaResult').innerHTML = `【${picked.rare}】<span style="font-size:20px; color:#fff;">${picked.full}</span> を獲得！<br><span style="font-size:12px; color:#4cd137;">${isNew ? '★NEW！編成でチームに入れられます' : '（すでに所持しています）'}</span>`;
-  document.getElementById('gachaBtn').disabled = wins < gachaCount;
+  updateWinUI();
 }
+
 function openTeam() {
   go('team');
   renderTeam();
 }
+
 function renderTeam() {
-  const slots = new Array(0, 1, 2);
+  const slots = Array.of(0, 1, 2);
   document.getElementById('teamSlots').innerHTML = slots.map(idx => {
     const ch = ALL_CHARS[teamIds[idx]];
     return `<div class="slot">${ch ? `${ch.full}<br>${ch.cost}両` : '空き枠'}</div>`;
@@ -164,6 +176,7 @@ function renderTeam() {
     return `<button class="cCard ${sel ? 'selected' : ''}" onclick="toggleMember(${id})"><b>[${ch.rare}]</b> ${ch.full}<br>${ch.cost}両</button>`;
   }).join('');
 }
+
 function toggleMember(id) {
   if (teamIds.includes(id)) {
     if (teamIds.length > 1) teamIds = teamIds.filter(x => x !== id);
@@ -173,25 +186,27 @@ function toggleMember(id) {
   }
   renderTeam();
 }
+
 function unit(slotIdx) {
   const ch = ALL_CHARS[teamIds[slotIdx]];
   if (!ch || over || mny < ch.cost) return;
   mny -= ch.cost;
   al.push({ ...ch, mHp: ch.hp, x: 600, y: 145, tm: 0 });
 }
+
 function addEn(boss) {
   const s = STS[st], m = 1 + st * 0.25;
   en.push({
     n: boss ? s.e2 : s.e1, c: boss ? '#8e44ad' : '#e74c3c',
     hp: Math.round((boss ? 250 : 120) * m), mHp: Math.round((boss ? 250 : 120) * m),
-    atk: Math.round((boss ? 40 : 16) * m), r: boss ? 40 : 35, sp: boss ? 2.4 : 1.2, cd: boss ? 50 : 45,
-    x: 90, y: 145, tm: 0
-  });
+atk: Math.round((boss ? 40 : 16) * m), r: boss ? 40 : 35, sp: boss ? 2.4 : 1.2, cd: boss ? 50 : 45,
+x: 90, y: 145, tm: 0
+});
 }
 function play(idx) {
-  st = idx; go('battle');
+st = idx; go('battle');
 mny = 15; pHp = 1000; eHp = STS[st].hp; over = false;
-al = new Array(); en = new Array(); bl = new Array(); cnt = 0; tM = Date.now(); tE = Date.now();
+al = Array.of(); en = Array.of(); bl = Array.of(); cnt = 0; tM = Date.now(); tE = Date.now();
 document.getElementById('stName').textContent = STS[st].n;
 document.getElementById('backMap').style.display = 'none';
 for (let i = 0; i < 3; i++) {
