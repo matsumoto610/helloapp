@@ -2,28 +2,26 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>戦国大戦争 〜織田・豊臣・徳川〜</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>戦国大戦争</title>
 <style>
   body { margin: 0; background: #1a1c20; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
   #app { width: 740px; height: 440px; background: #282c34; border: 2px solid #4a505c; border-radius: 10px; padding: 18px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; }
   .screen { display: none; width: 100%; height: 100%; flex-direction: column; }
   .active { display: flex; }
   button { cursor: pointer; border: 2px solid #f1c40f; border-radius: 6px; background: #2c3e50; color: #fff; font-weight: bold; }
-  button:hover:not(:disabled) { background: #34495e; }
   button:disabled { border-color: #7f8c8d; background: #3b4048; color: #95a5a6; cursor: not-allowed; }
   #home { position: relative; }
   .home-title { color: #f1c40f; font-size: 22px; font-weight: bold; text-align: center; margin-top: 10px; }
   .win-badge { position: absolute; top: 12px; right: 16px; background: #1a1c20; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1c40f; font-size: 14px; }
   .home-controls { position: absolute; top: 34%; left: 26%; width: 260px; display: flex; flex-direction: column; gap: 12px; }
   .btn-main-map { width: 100%; padding: 16px; font-size: 18px; background: #c0392b; }
-  .btn-main-map:hover { background: #e74c3c; }
   .home-sub-btns { display: flex; gap: 10px; }
   .home-sub-btns button { flex: 1; padding: 12px; font-size: 15px; }
   .sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
   .sub-header h2 { margin: 0; color: #f1c40f; font-size: 20px; }
   .stage-list { display: flex; flex-direction: column; gap: 12px; margin: auto 0; }
   .stage-btn { padding: 16px; font-size: 16px; background: #2980b9; }
-  .stage-btn:hover { background: #3498db; }
   #gachaResult { margin: 15px 0; padding: 18px; background: #1a1c20; border-radius: 8px; text-align: center; min-height: 60px; line-height: 1.6; }
   #teamSlots { display: flex; justify-content: center; gap: 12px; margin-bottom: 10px; }
   .slot { width: 160px; height: 56px; background: #1a1c20; border: 2px dashed #f1c40f; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 13px; }
@@ -42,35 +40,35 @@
 <div id="app">
   <div id="home" class="screen active">
     <div class="home-title">戦国大戦争 〜織田・豊臣・徳川〜</div>
-    <div class="win-badge">勝利数：<span id="winCount">0</span>勝</div>
+    <div class="win-badge">勝利数：<span id="winCount">未起動</span></div>
     <div class="home-controls">
-      <button class="btn-main-map" onclick="go('map')">出陣（マップ）</button>
+      <button type="button" class="btn-main-map" id="btnMap">出陣（マップ）</button>
       <div class="home-sub-btns">
-        <button onclick="openGacha()">ガチャ</button>
-        <button onclick="openTeam()">編成</button>
+        <button type="button" id="btnGacha">ガチャ</button>
+        <button type="button" id="btnTeam">編成</button>
       </div>
     </div>
   </div>
   <div id="map" class="screen">
     <div class="sub-header">
       <h2>合戦場選択</h2>
-      <button onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
+      <button type="button" onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
     </div>
     <div class="stage-list" id="stageList"></div>
   </div>
   <div id="gacha" class="screen">
     <div class="sub-header">
       <h2>武将ガチャ（全9種）</h2>
-      <button onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
+      <button type="button" onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
     </div>
-    <p style="text-align:center; margin:4px 0;">所持勝利数：<span id="gachaWinCount">0</span>勝（次のガチャ必要勝利数：<span id="gachaNeed">0</span>勝）</p>
-    <button id="gachaBtn" onclick="drawGacha()" style="padding:12px; font-size:16px; width:220px; margin:8px auto;">ガチャを引く</button>
+    <p style="text-align:center; margin:4px 0;">所持勝利数：<span id="gachaWinCount">0</span>勝（必要勝利数：<span id="gachaNeed">0</span>勝）</p>
+    <button type="button" id="gachaBtn" style="padding:12px; font-size:16px; width:220px; margin:8px auto;">ガチャを引く</button>
     <div id="gachaResult">勝利数を貯めて新たな武将を手に入れよう！（初回は0勝で回せます）</div>
   </div>
   <div id="team" class="screen">
     <div class="sub-header">
       <h2>チーム編成（3体まで）</h2>
-      <button onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
+      <button type="button" onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
     </div>
     <div id="teamSlots"></div>
     <div id="charList"></div>
@@ -84,15 +82,15 @@
     </div>
     <canvas id="cv" width="700" height="220"></canvas>
     <div class="unit-bar">
-      <button id="b0" class="unit-btn" onclick="unit(0)"></button>
-      <button id="b1" class="unit-btn" onclick="unit(1)"></button>
-      <button id="b2" class="unit-btn" onclick="unit(2)"></button>
+      <button type="button" id="b0" class="unit-btn" onclick="unit(0)"></button>
+      <button type="button" id="b1" class="unit-btn" onclick="unit(1)"></button>
+      <button type="button" id="b2" class="unit-btn" onclick="unit(2)"></button>
     </div>
-    <button id="backMap" onclick="go('map')">マップへ戻る</button>
+    <button type="button" id="backMap" onclick="go('map')">マップへ戻る</button>
   </div>
 </div>
 <script>
-const ALL_CHARS = Array.of(
+const ALL_CHARS = [
   { rare: 'N',   n: '徳川', full: '徳川 (守り)',   cost: 15,  hp: 200, atk: 10,  r: 30,  sp: 1.0, cd: 45, c: '#27ae60', gun: false },
   { rare: 'N',   n: '豊臣', full: '豊臣 (突撃)',   cost: 30,  hp: 110, atk: 24,  r: 35,  sp: 2.6, cd: 38, c: '#2980b9', gun: false },
   { rare: 'N',   n: '織田', full: '織田 (鉄砲)',   cost: 50,  hp: 80,  atk: 30,  r: 175, sp: 1.1, cd: 60, c: '#8e44ad', gun: true  },
@@ -102,20 +100,20 @@ const ALL_CHARS = Array.of(
   { rare: 'SR',  n: '本多', full: '本多 (無双)',   cost: 130, hp: 520, atk: 85,  r: 45,  sp: 1.7, cd: 38, c: '#2ecc71', gun: false },
   { rare: 'SSR', n: '真田', full: '真田 (赤備え)', cost: 160, hp: 460, atk: 115, r: 40,  sp: 2.8, cd: 30, c: '#e74c3c', gun: false },
   { rare: 'UR',  n: '信長', full: '第六天魔王',    cost: 220, hp: 680, atk: 165, r: 210, sp: 1.2, cd: 65, c: '#9b59b6', gun: true  }
-);
+];
 
-const STS = Array.of(
+const STS = [
   { n: '長篠の戦い 〜織田・豊臣・徳川〜', hp: 1500, ms: 3200, e1: '武田足軽', e2: '武田騎馬' },
   { n: '関ヶ原の戦い 〜天下分け目〜',     hp: 2200, ms: 2700, e1: '西軍槍兵', e2: '石田三成' },
   { n: '大坂の陣 〜最終決戦〜',           hp: 3000, ms: 2200, e1: '大坂牢人', e2: '真田幸村' }
-);
+];
 
 let wins = 0;
 let gachaCount = 0;
-let ownedIds = Array.of(0, 1, 2);
-let teamIds = Array.of(0, 1, 2);
+let ownedIds =;
+let teamIds =;
 let st = 0, mny = 15, pHp = 1000, eHp = 1500, over = false;
-let al = Array.of(), en = Array.of(), bl = Array.of(), cnt = 0, tM = 0, tE = 0;
+let al = [], en = [], bl = [], cnt = 0, tM = 0, tE = 0;
 const ctx = document.getElementById('cv').getContext('2d');
 
 function go(id) {
@@ -125,7 +123,7 @@ function go(id) {
 }
 
 function updateWinUI() {
-  document.getElementById('winCount').textContent = wins;
+  document.getElementById('winCount').textContent = wins + '勝';
   document.getElementById('gachaWinCount').textContent = wins;
   document.getElementById('gachaNeed').textContent = gachaCount;
   document.getElementById('gachaBtn').disabled = wins < gachaCount;
@@ -133,13 +131,12 @@ function updateWinUI() {
 
 function initStages() {
   document.getElementById('stageList').innerHTML = STS.map((s, idx) =>
-    `<button class="stage-btn" onclick="play(${idx})">${s.n}（敵城HP: ${s.hp}）</button>`
+    `<button type="button" class="stage-btn" onclick="play(${idx})">${s.n}（敵城HP: ${s.hp}）</button>`
   ).join('');
 }
 
 function openGacha() {
   go('gacha');
-  updateWinUI();
   document.getElementById('gachaResult').textContent = '勝利数を貯めて新たな武将を手に入れよう！';
 }
 
@@ -147,7 +144,6 @@ function drawGacha() {
   if (wins < gachaCount) return;
   wins -= gachaCount;
   gachaCount++;
-  updateWinUI();
   const pickedId = Math.floor(Math.random() * ALL_CHARS.length);
   const picked = ALL_CHARS[pickedId];
   const isNew = !ownedIds.includes(pickedId);
@@ -165,15 +161,14 @@ function openTeam() {
 }
 
 function renderTeam() {
-  const slots = Array.of(0, 1, 2);
-  document.getElementById('teamSlots').innerHTML = slots.map(idx => {
+  document.getElementById('teamSlots').innerHTML = [0, 1, 2].map(idx => {
     const ch = ALL_CHARS[teamIds[idx]];
     return `<div class="slot">${ch ? `${ch.full}<br>${ch.cost}両` : '空き枠'}</div>`;
   }).join('');
   document.getElementById('charList').innerHTML = ownedIds.map(id => {
     const ch = ALL_CHARS[id];
     const sel = teamIds.includes(id);
-    return `<button class="cCard ${sel ? 'selected' : ''}" onclick="toggleMember(${id})"><b>[${ch.rare}]</b> ${ch.full}<br>${ch.cost}両</button>`;
+    return `<button type="button" class="cCard ${sel ? 'selected' : ''}" onclick="toggleMember(${id})"><b>[${ch.rare}]</b> ${ch.full}<br>${ch.cost}両</button>`;
   }).join('');
 }
 
@@ -199,14 +194,14 @@ function addEn(boss) {
   en.push({
     n: boss ? s.e2 : s.e1, c: boss ? '#8e44ad' : '#e74c3c',
     hp: Math.round((boss ? 250 : 120) * m), mHp: Math.round((boss ? 250 : 120) * m),
-atk: Math.round((boss ? 40 : 16) * m), r: boss ? 40 : 35, sp: boss ? 2.4 : 1.2, cd: boss ? 50 : 45,
+    atk: Math.round((boss ? 40 : 16) * m), r: boss ? 40 : 35, sp: boss ? 2.4 : 1.2, cd: boss ? 50 : 45,
 x: 90, y: 145, tm: 0
 });
 }
 function play(idx) {
 st = idx; go('battle');
 mny = 15; pHp = 1000; eHp = STS[st].hp; over = false;
-al = Array.of(); en = Array.of(); bl = Array.of(); cnt = 0; tM = Date.now(); tE = Date.now();
+al = []; en = []; bl = []; cnt = 0; tM = Date.now(); tE = Date.now();
 document.getElementById('stName').textContent = STS[st].n;
 document.getElementById('backMap').style.display = 'none';
 for (let i = 0; i < 3; i++) {
@@ -291,5 +286,9 @@ return;
 }
 requestAnimationFrame(loop);
 }
+document.getElementById('btnMap').addEventListener('click', () => go('map'));
+document.getElementById('btnGacha').addEventListener('click', openGacha);
+document.getElementById('btnTeam').addEventListener('click', openTeam);
+document.getElementById('gachaBtn').addEventListener('click', drawGacha);
 initStages();
 updateWinUI();
