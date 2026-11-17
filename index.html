@@ -5,38 +5,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>戦国大戦争</title>
 <style>
-  body { margin: 0; background: #1a1c20; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-  #app { width: 740px; height: 440px; background: #282c34; border: 2px solid #4a505c; border-radius: 10px; padding: 18px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; }
+  body { margin: 0; background: #1a1c20; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+  #debug { background: #c0392b; color: #fff; padding: 6px 12px; margin-bottom: 8px; border-radius: 4px; font-size: 13px; }
+  #app { width: 720px; max-width: 96vw; height: 430px; background: #282c34; border: 2px solid #4a505c; border-radius: 10px; padding: 16px; box-sizing: border-box; position: relative; display: flex; flex-direction: column; }
   .screen { display: none; width: 100%; height: 100%; flex-direction: column; }
   .active { display: flex; }
   button { cursor: pointer; border: 2px solid #f1c40f; border-radius: 6px; background: #2c3e50; color: #fff; font-weight: bold; }
-  button:disabled { border-color: #7f8c8d; background: #3b4048; color: #95a5a6; cursor: not-allowed; }
-  #home { position: relative; }
-  .home-title { color: #f1c40f; font-size: 22px; font-weight: bold; text-align: center; margin-top: 10px; }
-  .win-badge { position: absolute; top: 12px; right: 16px; background: #1a1c20; padding: 6px 12px; border-radius: 6px; border: 1px solid #f1c40f; font-size: 14px; }
-  .home-controls { position: absolute; top: 34%; left: 26%; width: 260px; display: flex; flex-direction: column; gap: 12px; }
-  .btn-main-map { width: 100%; padding: 16px; font-size: 18px; background: #c0392b; }
+  button:disabled { border-color: #7f8c8d; background: #3b4048; color: #95a5a6; }
+  .home-title { color: #f1c40f; font-size: 20px; font-weight: bold; text-align: center; margin-top: 8px; }
+  .win-badge { position: absolute; top: 12px; right: 16px; background: #1a1c20; padding: 5px 10px; border-radius: 6px; border: 1px solid #f1c40f; font-size: 14px; }
+  .home-controls { position: absolute; top: 34%; left: 24%; width: 250px; display: flex; flex-direction: column; gap: 12px; }
+  .btn-main-map { width: 100%; padding: 15px; font-size: 18px; background: #c0392b; }
   .home-sub-btns { display: flex; gap: 10px; }
   .home-sub-btns button { flex: 1; padding: 12px; font-size: 15px; }
-  .sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-  .sub-header h2 { margin: 0; color: #f1c40f; font-size: 20px; }
-  .stage-list { display: flex; flex-direction: column; gap: 12px; margin: auto 0; }
-  .stage-btn { padding: 16px; font-size: 16px; background: #2980b9; }
-  #gachaResult { margin: 15px 0; padding: 18px; background: #1a1c20; border-radius: 8px; text-align: center; min-height: 60px; line-height: 1.6; }
-  #teamSlots { display: flex; justify-content: center; gap: 12px; margin-bottom: 10px; }
-  .slot { width: 160px; height: 56px; background: #1a1c20; border: 2px dashed #f1c40f; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 13px; }
-  #charList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; flex: 1; padding: 4px; }
+  .sub-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .sub-header h2 { margin: 0; color: #f1c40f; font-size: 18px; }
+  .stage-list { display: flex; flex-direction: column; gap: 10px; margin: auto 0; }
+  .stage-btn { padding: 15px; font-size: 16px; background: #2980b9; }
+  #gachaResult { margin: 12px 0; padding: 16px; background: #1a1c20; border-radius: 8px; text-align: center; min-height: 55px; line-height: 1.6; }
+  #teamSlots { display: flex; justify-content: center; gap: 10px; margin-bottom: 10px; }
+  .slot { width: 150px; height: 52px; background: #1a1c20; border: 2px dashed #f1c40f; border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 12px; }
+  #charList { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; overflow-y: auto; flex: 1; }
   .cCard { padding: 8px; font-size: 12px; border-color: #7f8c8d; }
   .cCard.selected { border-color: #2ecc71; background: #1e5631; }
-  .battle-title { text-align: center; color: #f1c40f; font-size: 17px; font-weight: bold; margin-bottom: 6px; }
-  .battle-bar { display: flex; justify-content: space-between; background: #353b48; padding: 6px 14px; font-size: 14px; font-weight: bold; border-radius: 4px 4px 0 0; }
-  canvas { background: #87ceeb; display: block; width: 700px; height: 220px; margin: 0 auto; }
-  .unit-bar { display: flex; gap: 10px; margin-top: 10px; flex: 1; }
-  .unit-btn { flex: 1; font-size: 14px; line-height: 1.4; }
+  .battle-title { text-align: center; color: #f1c40f; font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+  .battle-bar { display: flex; justify-content: space-between; background: #353b48; padding: 6px 12px; font-size: 14px; font-weight: bold; }
+  canvas { background: #87ceeb; display: block; width: 100%; height: 210px; }
+  .unit-bar { display: flex; gap: 8px; margin-top: 8px; flex: 1; }
+  .unit-btn { flex: 1; font-size: 13px; }
   #backMap { position: absolute; top: 52%; left: 50%; transform: translate(-50%, -50%); padding: 12px 24px; font-size: 16px; background: #e74c3c; display: none; }
 </style>
 </head>
 <body>
+
+<div id="debug">JavaScript待機中...（ここが緑色にならなければJSがブロックされています）</div>
+
 <div id="app">
   <div id="home" class="screen active">
     <div class="home-title">戦国大戦争 〜織田・豊臣・徳川〜</div>
@@ -49,30 +52,34 @@
       </div>
     </div>
   </div>
+
   <div id="map" class="screen">
     <div class="sub-header">
       <h2>合戦場選択</h2>
-      <button type="button" onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
+      <button type="button" onclick="go('home')" style="padding:6px 12px;">ホームへ戻る</button>
     </div>
     <div class="stage-list" id="stageList"></div>
   </div>
+
   <div id="gacha" class="screen">
     <div class="sub-header">
       <h2>武将ガチャ（全9種）</h2>
-      <button type="button" onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
+      <button type="button" onclick="go('home')" style="padding:6px 12px;">ホームへ戻る</button>
     </div>
     <p style="text-align:center; margin:4px 0;">所持勝利数：<span id="gachaWinCount">0</span>勝（必要勝利数：<span id="gachaNeed">0</span>勝）</p>
-    <button type="button" id="gachaBtn" onclick="drawGacha()" style="padding:12px; font-size:16px; width:220px; margin:8px auto;">ガチャを引く</button>
-    <div id="gachaResult">勝利数を貯めて新たな武将を手に入れよう！（初回は0勝で回せます）</div>
+    <button type="button" id="gachaBtn" onclick="drawGacha()" style="padding:12px; font-size:16px; width:200px; margin:8px auto;">ガチャを引く</button>
+    <div id="gachaResult">初回は0勝で回せます！</div>
   </div>
+
   <div id="team" class="screen">
     <div class="sub-header">
       <h2>チーム編成（3体まで）</h2>
-      <button type="button" onclick="go('home')" style="padding:6px 14px;">ホームへ戻る</button>
+      <button type="button" onclick="go('home')" style="padding:6px 12px;">ホームへ戻る</button>
     </div>
     <div id="teamSlots"></div>
     <div id="charList"></div>
   </div>
+
   <div id="battle" class="screen">
     <div id="stName" class="battle-title">長篠の戦い 〜織田・豊臣・徳川〜</div>
     <div class="battle-bar">
@@ -80,7 +87,7 @@
       <span style="color:#f1c40f;">軍資金: <span id="mny">15</span>両</span>
       <span style="color:#74b9ff;">連合城(右): <span id="pHp">1000</span></span>
     </div>
-    <canvas id="cv" width="700" height="220"></canvas>
+    <canvas id="cv" width="700" height="210"></canvas>
     <div class="unit-bar">
       <button type="button" id="b0" class="unit-btn" onclick="unit(0)"></button>
       <button type="button" id="b1" class="unit-btn" onclick="unit(1)"></button>
@@ -89,8 +96,15 @@
     <button type="button" id="backMap" onclick="go('map')">マップへ戻る</button>
   </div>
 </div>
+
 <script>
-const ALL_CHARS = new Array(
+window.onerror = function(msg, url, line) {
+  var d = document.getElementById('debug');
+  d.style.background = '#c0392b';
+  d.textContent = 'エラー発生(' + line + '行目): ' + msg;
+};
+
+var ALL_CHARS = new Array(
   { rare: 'N',   n: '徳川', full: '徳川 (守り)',   cost: 15,  hp: 200, atk: 10,  r: 30,  sp: 1.0, cd: 45, c: '#27ae60', gun: false },
   { rare: 'N',   n: '豊臣', full: '豊臣 (突撃)',   cost: 30,  hp: 110, atk: 24,  r: 35,  sp: 2.6, cd: 38, c: '#2980b9', gun: false },
   { rare: 'N',   n: '織田', full: '織田 (鉄砲)',   cost: 50,  hp: 80,  atk: 30,  r: 175, sp: 1.1, cd: 60, c: '#8e44ad', gun: true  },
@@ -101,92 +115,113 @@ const ALL_CHARS = new Array(
   { rare: 'SSR', n: '真田', full: '真田 (赤備え)', cost: 160, hp: 460, atk: 115, r: 40,  sp: 2.8, cd: 30, c: '#e74c3c', gun: false },
   { rare: 'UR',  n: '信長', full: '第六天魔王',    cost: 220, hp: 680, atk: 165, r: 210, sp: 1.2, cd: 65, c: '#9b59b6', gun: true  }
 );
-const STS = new Array(
+
+var STS = new Array(
   { n: '長篠の戦い 〜織田・豊臣・徳川〜', hp: 1500, ms: 3200, e1: '武田足軽', e2: '武田騎馬' },
   { n: '関ヶ原の戦い 〜天下分け目〜',     hp: 2200, ms: 2700, e1: '西軍槍兵', e2: '石田三成' },
   { n: '大坂の陣 〜最終決戦〜',           hp: 3000, ms: 2200, e1: '大坂牢人', e2: '真田幸村' }
 );
-let wins = 0, gachaCount = 0;
-let ownedIds = '0,1,2'.split(',').map(Number);
-let teamIds = '0,1,2'.split(',').map(Number);
-let st = 0, mny = 15, pHp = 1000, eHp = 1500, over = false;
-let al = new Array(), en = new Array(), bl = new Array(), cnt = 0, tM = 0, tE = 0;
-const ctx = document.getElementById('cv').getContext('2d');
+
+var wins = 0, gachaCount = 0;
+var ownedIds = '0,1,2'.split(',').map(Number);
+var teamIds = '0,1,2'.split(',').map(Number);
+var st = 0, mny = 15, pHp = 1000, eHp = 1500, over = false;
+var al = new Array(), en = new Array(), bl = new Array(), cnt = 0, tM = 0, tE = 0;
+var ctx = document.getElementById('cv').getContext('2d');
 
 function go(id) {
-  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  var list = document.querySelectorAll('.screen');
+  for (var i = 0; i < list.length; i++) { list.item(i).classList.remove('active'); }
   document.getElementById(id).classList.add('active');
   updateWinUI();
 }
+
 function updateWinUI() {
   document.getElementById('winCount').textContent = wins + '勝';
   document.getElementById('gachaWinCount').textContent = wins;
   document.getElementById('gachaNeed').textContent = gachaCount;
   document.getElementById('gachaBtn').disabled = wins < gachaCount;
 }
+
 function initStages() {
-  document.getElementById('stageList').innerHTML = STS.map((s, idx) =>
-    `<button type="button" class="stage-btn" onclick="play(${idx})">${s.n}（敵城HP: ${s.hp}）</button>`
-  ).join('');
+  var html = '';
+  for (var i = 0; i < STS.length; i++) {
+    var s = STS.at(i);
+    html += '<button type="button" class="stage-btn" onclick="play(' + i + ')">' + s.n + '（敵城HP: ' + s.hp + '）</button>';
+  }
+  document.getElementById('stageList').innerHTML = html;
 }
+
 function openGacha() {
   go('gacha');
   document.getElementById('gachaResult').textContent = '勝利数を貯めて新たな武将を手に入れよう！';
 }
+
 function drawGacha() {
   if (wins < gachaCount) return;
   wins -= gachaCount;
   gachaCount++;
-  const pickedId = Math.floor(Math.random() * ALL_CHARS.length);
-  const picked = ALL_CHARS.at(pickedId);
-  const isNew = !ownedIds.includes(pickedId);
+  var pickedId = Math.floor(Math.random() * ALL_CHARS.length);
+  var picked = ALL_CHARS.at(pickedId);
+  var isNew = ownedIds.indexOf(pickedId) === -1;
   if (isNew) {
     ownedIds.push(pickedId);
     if (teamIds.length < 3) teamIds.push(pickedId);
   }
-  document.getElementById('gachaResult').innerHTML = `【${picked.rare}】<span style="font-size:20px; color:#fff;">${picked.full}</span> を獲得！<br><span style="font-size:12px; color:#4cd137;">${isNew ? '★NEW！編成でチームに入れられます' : '（すでに所持しています）'}</span>`;
+  document.getElementById('gachaResult').innerHTML = '（' + picked.rare + '）<span style="font-size:20px; color:#fff;">' + picked.full + '</span> を獲得！<br><span style="font-size:12px; color:#4cd137;">' + (isNew ? '★NEW！編成でチームに入れられます' : '（すでに所持しています）') + '</span>';
   updateWinUI();
 }
+
 function openTeam() {
   go('team');
   renderTeam();
 }
+
 function renderTeam() {
-  const slotIndexes = '0,1,2'.split(',').map(Number);
-  document.getElementById('teamSlots').innerHTML = slotIndexes.map(idx => {
-    const ch = ALL_CHARS.at(teamIds.at(idx));
-    const hasCh = teamIds.length > idx && ch;
-    return `<div class="slot">${hasCh ? `${ch.full}<br>${ch.cost}両` : '空き枠'}</div>`;
-  }).join('');
-  document.getElementById('charList').innerHTML = ownedIds.map(id => {
-    const ch = ALL_CHARS.at(id);
-    const sel = teamIds.includes(id);
-    return `<button type="button" class="cCard ${sel ? 'selected' : ''}" onclick="toggleMember(${id})">(${ch.rare}) ${ch.full}<br>${ch.cost}両</button>`;
-  }).join('');
+  var slotsHtml = '';
+  for (var i = 0; i < 3; i++) {
+    if (i < teamIds.length) {
+      var ch = ALL_CHARS.at(teamIds.at(i));
+      slotsHtml += '<div class="slot">' + ch.full + '<br>' + ch.cost + '両</div>';
+    } else {
+      slotsHtml += '<div class="slot">空き枠</div>';
+    }
+  }
+  document.getElementById('teamSlots').innerHTML = slotsHtml;
+
+  var listHtml = '';
+  for (var j = 0; j < ownedIds.length; j++) {
+    var id = ownedIds.at(j);
+    var c = ALL_CHARS.at(id);
+    var sel = teamIds.indexOf(id) !== -1;
+    listHtml += '<button type="button" class="cCard ' + (sel ? 'selected' : '') + '" onclick="toggleMember(' + id + ')">(' + c.rare + ') ' + c.full + '<br>' + c.cost + '両</button>';
+  }
+  document.getElementById('charList').innerHTML = listHtml;
 }
 function toggleMember(id) {
-  if (teamIds.includes(id)) {
-    if (teamIds.length > 1) teamIds = teamIds.filter(x => x !== id);
-  } else {
-    if (teamIds.length < 3) teamIds.push(id);
-    else { teamIds.shift(); teamIds.push(id); }
-  }
-  renderTeam();
+var idx = teamIds.indexOf(id);
+if (idx !== -1) {
+if (teamIds.length > 1) teamIds.splice(idx, 1);
+} else {
+if (teamIds.length < 3) teamIds.push(id);
+else { teamIds.shift(); teamIds.push(id); }
+}
+renderTeam();
 }
 function unit(slotIdx) {
-  if (slotIdx >= teamIds.length) return;
-  const ch = ALL_CHARS.at(teamIds.at(slotIdx));
-  if (!ch || over || mny < ch.cost) return;
-  mny -= ch.cost;
-  al.push({ ...ch, mHp: ch.hp, x: 600, y: 145, tm: 0 });
+if (slotIdx >= teamIds.length) return;
+var ch = ALL_CHARS.at(teamIds.at(slotIdx));
+if (!ch || over || mny < ch.cost) return;
+mny -= ch.cost;
+al.push({ n: ch.n, c: ch.c, hp: ch.hp, mHp: ch.hp, atk: ch.atk, r: ch.r, sp: ch.sp, cd: ch.cd, gun: ch.gun, x: 600, y: 140, tm: 0 });
 }
 function addEn(boss) {
-  const s = STS.at(st), m = 1 + st * 0.25;
+var s = STS.at(st), m = 1 + st * 0.25;
 en.push({
 n: boss ? s.e2 : s.e1, c: boss ? '#8e44ad' : '#e74c3c',
 hp: Math.round((boss ? 250 : 120) * m), mHp: Math.round((boss ? 250 : 120) * m),
 atk: Math.round((boss ? 40 : 16) * m), r: boss ? 40 : 35, sp: boss ? 2.4 : 1.2, cd: boss ? 50 : 45,
-x: 90, y: 145, tm: 0
+x: 90, y: 140, tm: 0
 });
 }
 function play(idx) {
@@ -195,12 +230,13 @@ mny = 15; pHp = 1000; eHp = STS.at(st).hp; over = false;
 al = new Array(); en = new Array(); bl = new Array(); cnt = 0; tM = Date.now(); tE = Date.now();
 document.getElementById('stName').textContent = STS.at(st).n;
 document.getElementById('backMap').style.display = 'none';
-for (let i = 0; i < 3; i++) {
-const btn = document.getElementById('b' + i);
+for (var i = 0; i < 3; i++) {
+var btn = document.getElementById('b' + i);
 if (i < teamIds.length) {
-const ch = ALL_CHARS.at(teamIds.at(i));
+var ch = ALL_CHARS.at(teamIds.at(i));
 btn.style.display = 'block';
-btn.innerHTML = ${ch.full}<br>${ch.cost}両;
+btn.innerHTML = ch.full + '
+' + ch.cost + '両';
 } else {
 btn.style.display = 'none';
 }
@@ -219,28 +255,29 @@ ctx.fillRect(u.x - 16, u.y - 23, 32 * Math.max(0, u.hp / u.mHp), 4);
 }
 function loop() {
 if (over) return;
-const now = Date.now();
+var now = Date.now();
 if (now - tM >= 1000) { mny = Math.min(1000, mny + 2); tM += 1000; }
 if (now - tE >= STS.at(st).ms) { cnt++; addEn(cnt % 3 === 0); tE = now; }
 document.getElementById('mny').textContent = mny;
 document.getElementById('pHp').textContent = Math.max(0, pHp);
 document.getElementById('eHp').textContent = Math.max(0, eHp);
-for (let i = 0; i < 3; i++) {
+for (var i = 0; i < 3; i++) {
 if (i < teamIds.length) {
-const ch = ALL_CHARS.at(teamIds.at(i));
+var ch = ALL_CHARS.at(teamIds.at(i));
 document.getElementById('b' + i).disabled = mny < ch.cost;
 }
 }
-ctx.clearRect(0, 0, 700, 220);
-ctx.fillStyle = '#558b2f'; ctx.fillRect(0, 168, 700, 52);
-ctx.fillStyle = '#c23616'; ctx.fillRect(20, 88, 55, 80);
-ctx.fillStyle = '#273c75'; ctx.fillRect(625, 88, 55, 80);
-al.forEach(a => {
+ctx.clearRect(0, 0, 700, 210);
+ctx.fillStyle = '#558b2f'; ctx.fillRect(0, 160, 700, 50);
+ctx.fillStyle = '#c23616'; ctx.fillRect(20, 80, 55, 80);
+ctx.fillStyle = '#273c75'; ctx.fillRect(625, 80, 55, 80);
+for (var i = 0; i < al.length; i++) {
+var a = al.at(i);
 if (a.tm > 0) a.tm--;
-const t = en.find(e => a.x >= e.x - 10 && a.x - e.x <= a.r);
+var t = en.find(function(e) { return a.x >= e.x - 10 && a.x - e.x <= a.r; });
 if (t) {
 if (a.tm === 0) {
-if (a.gun) bl.push({ x: a.x - 15, y: a.y, t, atk: a.atk });
+if (a.gun) bl.push({ x: a.x - 15, y: a.y, t: t, atk: a.atk });
 else t.hp -= a.atk;
 a.tm = a.cd;
 }
@@ -252,32 +289,33 @@ a.tm = a.cd;
 }
 } else { a.x -= a.sp; }
 drawU(a, true);
-});
-en.forEach(e => {
+}
+for (var j = 0; j < en.length; j++) {
+var e = en.at(j);
 if (e.tm > 0) e.tm--;
-const t = al.find(a => a.x >= e.x - 10 && a.x - e.x <= e.r);
-if (t) { if (e.tm === 0) { t.hp -= e.atk; e.tm = e.cd; } }
+var t2 = al.find(function(a) { return a.x >= e.x - 10 && a.x - e.x <= e.r; });
+if (t2) { if (e.tm === 0) { t2.hp -= e.atk; e.tm = e.cd; } }
 else if (625 - e.x <= e.r) { if (e.tm === 0) { pHp -= e.atk; e.tm = e.cd; } }
 else { e.x += e.sp; }
 drawU(e, false);
-});
-ctx.fillStyle = '#ffd32a';
-for (let i = bl.length - 1; i >= 0; i--) {
-const b = bl.at(i); b.x -= 10;
-ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2); ctx.fill();
-if (b.castle && b.x <= 75) { eHp -= b.atk; bl.splice(i, 1); }
-else if (b.t && b.t.hp > 0 && b.x <= b.t.x) { b.t.hp -= b.atk; bl.splice(i, 1); }
-else if (b.x < 20) { bl.splice(i, 1); }
 }
-al = al.filter(a => a.hp > 0);
-en = en.filter(e => e.hp > 0);
+ctx.fillStyle = '#ffd32a';
+for (var k = bl.length - 1; k >= 0; k--) {
+var b = bl.at(k); b.x -= 10;
+ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2); ctx.fill();
+if (b.castle && b.x <= 75) { eHp -= b.atk; bl.splice(k, 1); }
+else if (b.t && b.t.hp > 0 && b.x <= b.t.x) { b.t.hp -= b.atk; bl.splice(k, 1); }
+else if (b.x < 20) { bl.splice(k, 1); }
+}
+al = al.filter(function(a) { return a.hp > 0; });
+en = en.filter(function(e) { return e.hp > 0; });
 if (eHp <= 0 || pHp <= 0) {
 over = true;
-const isWin = eHp <= 0;
+var isWin = eHp <= 0;
 if (isWin) { wins++; updateWinUI(); }
-ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(0, 0, 700, 220);
+ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(0, 0, 700, 210);
 ctx.fillStyle = '#ffd32a'; ctx.font = 'bold 26px sans-serif'; ctx.textAlign = 'center';
-ctx.fillText(isWin ? 'ステージクリア！（+1勝）' : '敗北…', 350, 110);
+ctx.fillText(isWin ? 'ステージクリア！（+1勝）' : '敗北…', 350, 105);
 document.getElementById('backMap').style.display = 'block';
 return;
 }
@@ -285,3 +323,7 @@ requestAnimationFrame(loop);
 }
 initStages();
 updateWinUI();
+var dbg = document.getElementById('debug');
+dbg.style.background = '#27ae60';
+dbg.textContent = 'システム正常起動OK（ボタンを押せます）';
+
