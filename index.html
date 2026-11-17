@@ -174,7 +174,7 @@
   function spawnEnemy(isCavalry) {
     enemyCount++;
     enemies.push({
-      name: isCavalry ? '騎馬' : '足軽',
+      name: isCavalry ? '赤備' : '武田',
       hp: isCavalry ? 240 : 110,
       maxHp: isCavalry ? 240 : 110,
       atk: isCavalry ? 38 : 15,
@@ -210,7 +210,7 @@
 
     var now = Date.now();
     if (now - lastMoneyTime >= 1000) {
-      money = Math.min(1000, money + 2);
+      money = Math.min(1000, money + 3);
       lastMoneyTime += 1000;
     }
     if (now - lastEnemyTime >= 3200) {
