@@ -378,3 +378,13 @@
       document.getElementById('enemyCastle').textContent = Math.max(0, enemyHp);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
       ctx.fillRect(0, 0, 700, 220);
+ctx.fillStyle = '#ffd32a';
+ctx.font = 'bold 28px sans-serif';
+ctx.textAlign = 'center';
+ctx.fillText(isWin ? '勝利！' : '敗北…', 350, 115);
+document.getElementById('restartBtn').style.display = 'block';
+return;
+}
+requestAnimationFrame(gameLoop);
+}
+startGame();
