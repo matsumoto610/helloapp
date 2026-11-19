@@ -113,11 +113,10 @@
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
 
-  // 豊臣を黄色(#f1c40f)、コスト30両に設定
   var UNIT_TYPES = [
-    { name: '徳川', cost: 15, hp: 300, atk: 16, range: 30,  speed: 1.0, cd: 40, color: '#27ae60', textColor: '#fff', isGun: false },
+    { name: '徳川', cost: 15, hp: 300, atk: 16, range: 30,  speed: 1.0, cd: 40, color: '#27ae60', textColor: '#fff',    isGun: false },
     { name: '豊臣', cost: 30, hp: 160, atk: 34, range: 35,  speed: 2.5, cd: 35, color: '#f1c40f', textColor: '#1e272e', isGun: false },
-    { name: '織田', cost: 40, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', textColor: '#fff', isGun: true  }
+    { name: '織田', cost: 40, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', textColor: '#fff',    isGun: true  }
   ];
 
   var money = 100;
@@ -132,6 +131,7 @@
   var lastMoneyTime = 0;
   var lastEnemyTime = 0;
   var enemyCount = 0;
+  var bossAlertTimer = 0;
 
   function startGame() {
     money = 100;
@@ -144,9 +144,10 @@
     lastMoneyTime = Date.now();
     lastEnemyTime = Date.now();
     enemyCount = 0;
+    bossAlertTimer = 0;
 
     document.getElementById('restartBtn').style.display = 'none';
-    spawnEnemy(false);
+    spawnEnemy();
     requestAnimationFrame(gameLoop);
   }
 
@@ -167,46 +168,82 @@
       color: u.color,
       textColor: u.textColor,
       isGun: u.isGun,
+      size: 36,
       x: 600,
-      y: 145,
+      y: 166, // 地面(y=168)に足がつく基準位置
       timer: 0
     });
   }
 
-  function spawnEnemy(isCavalry) {
+  function spawnEnemy() {
     enemyCount++;
-    enemies.push({
-      name: isCavalry ? '赤備' : '武田',
-      hp: isCavalry ? 200 : 100,
-      maxHp: isCavalry ? 200 : 100,
-      atk: isCavalry ? 28 : 12,
-      range: 35,
-      speed: isCavalry ? 2.0 : 1.1,
-      cd: isCavalry ? 55 : 48,
-      reward: isCavalry ? 25 : 10,
-      color: isCavalry ? '#8e44ad' : '#c0392b',
-      textColor: '#fff',
-      x: 90,
-      y: 145,
-      timer: 0
-    });
+    var isBoss = (enemyCount % 8 === 0);
+    var isCavalry = (!isBoss && enemyCount % 4 === 0);
+
+    if (isBoss) {
+      bossAlertTimer = 120; // 約2秒間ボス登場アラートを表示
+      enemies.push({
+        name: '勝頼',
+        hp: 650,
+        maxHp: 650,
+        atk: 45,
+        range: 48,
+        speed: 0.85,
+        cd: 65,
+        reward: 80,
+        color: '#b71540',
+        borderColor: '#f1c40f',
+        textColor: '#f1c40f',
+        size: 64, // でかいボスサイズ
+        x: 100,
+        y: 166,
+        timer: 0
+      });
+    } else {
+      enemies.push({
+        name: isCavalry ? '赤備' : '武田',
+        hp: isCavalry ? 200 : 100,
+        maxHp: isCavalry ? 200 : 100,
+        atk: isCavalry ? 28 : 12,
+        range: 35,
+        speed: isCavalry ? 2.0 : 1.1,
+        cd: isCavalry ? 55 : 48,
+        reward: isCavalry ? 25 : 10,
+        color: isCavalry ? '#8e44ad' : '#c0392b',
+        borderColor: '#fff',
+        textColor: '#fff',
+        size: 36,
+        x: 90,
+        y: 166,
+        timer: 0
+      });
+    }
   }
 
   function drawUnit(u, isAlly) {
+    var s = u.size || 36;
+    var half = s / 2;
+    var topY = u.y - s;
+
     ctx.fillStyle = u.color;
-    ctx.fillRect(u.x - 18, u.y - 15, 36, 36);
-    ctx.strokeStyle = '#fff';
-    ctx.strokeRect(u.x - 18, u.y - 15, 36, 36);
+    ctx.fillRect(u.x - half, topY, s, s);
+
+    ctx.lineWidth = s > 40 ? 3 : 1;
+    ctx.strokeStyle = u.borderColor || '#fff';
+    ctx.strokeRect(u.x - half, topY, s, s);
+    ctx.lineWidth = 1;
 
     ctx.fillStyle = u.textColor || '#fff';
-    ctx.font = 'bold 12px sans-serif';
+    ctx.font = (s > 40 ? 'bold 18px sans-serif' : 'bold 12px sans-serif');
     ctx.textAlign = 'center';
-    ctx.fillText(u.name, u.x, u.y + 7);
+    ctx.fillText(u.name, u.x, topY + half + (s > 40 ? 6 : 4));
 
+    // HPバー（ユニットの幅に合わせて表示）
+    var barW = s - 4;
     ctx.fillStyle = '#333';
-    ctx.fillRect(u.x - 16, u.y - 23, 32, 4);
+    ctx.fillRect(u.x - barW / 2, topY - 8, barW, 5);
     ctx.fillStyle = isAlly ? '#4cd137' : '#ff4757';
-    ctx.fillRect(u.x - 16, u.y - 23, 32 * Math.max(0, u.hp / u.maxHp), 4);
+    ctx.fillRect(u.x - barW / 2, topY - 8, barW * Math.max(0, u.hp / u.maxHp), 5);
   }
 
   function gameLoop() {
@@ -218,7 +255,7 @@
       lastMoneyTime += 1000;
     }
     if (now - lastEnemyTime >= 4500) {
-      spawnEnemy((enemyCount + 1) % 4 === 0);
+      spawnEnemy();
       lastEnemyTime = now;
     }
 
@@ -240,20 +277,36 @@
     ctx.fillStyle = '#273c75';
     ctx.fillRect(625, 88, 55, 80);
 
+    // ボス登場警告テキスト
+    if (bossAlertTimer > 0) {
+      bossAlertTimer--;
+      ctx.fillStyle = 'rgba(183, 21, 64, 0.85)';
+      ctx.fillRect(200, 16, 300, 32);
+      ctx.strokeStyle = '#f1c40f';
+      ctx.strokeRect(200, 16, 300, 32);
+      ctx.fillStyle = '#f1c40f';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('敵将・武田勝頼 出陣！', 350, 38);
+    }
+
     for (var i = 0; i < allies.length; i++) {
       var a = allies[i];
       if (a.timer > 0) a.timer--;
 
-      var target = enemies.find(function(e) { return a.x >= e.x - 10 && a.x - e.x <= a.range; });
+      var target = enemies.find(function(e) {
+        var frontX = e.x + (e.size || 36) / 2;
+        return a.x >= e.x - 10 && a.x - frontX <= a.range;
+      });
       if (target) {
         if (a.timer === 0) {
-          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y, target: target, atk: a.atk, isCastle: false });
+          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: target, atk: a.atk, isCastle: false });
           else target.hp -= a.atk;
           a.timer = a.cd;
         }
       } else if (a.x - 75 <= a.range) {
         if (a.timer === 0) {
-          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y, target: null, atk: a.atk, isCastle: true });
+          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: null, atk: a.atk, isCastle: true });
           else enemyHp -= a.atk;
           a.timer = a.cd;
         }
@@ -267,13 +320,17 @@
       var e = enemies[j];
       if (e.timer > 0) e.timer--;
 
-      var targetAlly = allies.find(function(a) { return a.x >= e.x - 10 && a.x - e.x <= e.range; });
+      var frontX = e.x + (e.size || 36) / 2;
+      var targetAlly = allies.find(function(a) {
+        var allyFrontX = a.x - (a.size || 36) / 2;
+        return allyFrontX >= e.x - 10 && allyFrontX - frontX <= e.range;
+      });
       if (targetAlly) {
         if (e.timer === 0) {
           targetAlly.hp -= e.atk;
           e.timer = e.cd;
         }
-      } else if (625 - e.x <= e.range) {
+      } else if (625 - frontX <= e.range) {
         if (e.timer === 0) {
           playerHp -= e.atk;
           e.timer = e.cd;
@@ -295,7 +352,7 @@
       if (b.isCastle && b.x <= 75) {
         enemyHp -= b.atk;
         bullets.splice(k, 1);
-      } else if (b.target && b.target.hp > 0 && b.x <= b.target.x) {
+      } else if (b.target && b.target.hp > 0 && b.x <= b.target.x + (b.target.size || 36) / 2) {
         b.target.hp -= b.atk;
         bullets.splice(k, 1);
       } else if (b.x < 20) {
@@ -321,18 +378,3 @@
       document.getElementById('enemyCastle').textContent = Math.max(0, enemyHp);
       ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
       ctx.fillRect(0, 0, 700, 220);
-      ctx.fillStyle = '#ffd32a';
-      ctx.font = 'bold 28px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(isWin ? '勝利！' : '敗北…', 350, 115);
-      document.getElementById('restartBtn').style.display = 'block';
-      return;
-    }
-
-    requestAnimationFrame(gameLoop);
-  }
-
-  startGame();
-</script>
-</body>
-</html>
