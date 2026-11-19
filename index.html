@@ -93,7 +93,7 @@
   <h1>長篠の戦い</h1>
 
   <div class="status-bar">
-    <span style="color:#ff6b81;">武田城: <span id="enemyCastle">1200</span></span>
+    <span style="color:#ff6b81;">武田城: <span id="enemyCastle">1500</span></span>
     <span style="color:#f1c40f;">軍資金: <span id="money">100</span>両</span>
     <span style="color:#70a1ff;">連合城: <span id="playerCastle">1000</span></span>
   </div>
@@ -102,7 +102,7 @@
 
   <div class="controls">
     <button type="button" class="unit-btn" id="btn0" onclick="spawnAlly(0)">徳川 15両</button>
-    <button type="button" class="unit-btn" id="btn1" onclick="spawnAlly(1)">豊臣 25両</button>
+    <button type="button" class="unit-btn" id="btn1" onclick="spawnAlly(1)">豊臣 30両</button>
     <button type="button" class="unit-btn" id="btn2" onclick="spawnAlly(2)">織田 40両</button>
   </div>
 
@@ -113,15 +113,16 @@
   var canvas = document.getElementById('canvas');
   var ctx = canvas.getContext('2d');
 
+  // 豊臣を黄色(#f1c40f)、コスト30両に設定
   var UNIT_TYPES = [
-    { name: '徳川', cost: 15, hp: 300, atk: 16, range: 30,  speed: 1.0, cd: 40, color: '#27ae60', isGun: false },
-    { name: '豊臣', cost: 25, hp: 160, atk: 34, range: 35,  speed: 2.5, cd: 35, color: '#2980b9', isGun: false },
-    { name: '織田', cost: 40, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', isGun: true  }
+    { name: '徳川', cost: 15, hp: 300, atk: 16, range: 30,  speed: 1.0, cd: 40, color: '#27ae60', textColor: '#fff', isGun: false },
+    { name: '豊臣', cost: 30, hp: 160, atk: 34, range: 35,  speed: 2.5, cd: 35, color: '#f1c40f', textColor: '#1e272e', isGun: false },
+    { name: '織田', cost: 40, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', textColor: '#fff', isGun: true  }
   ];
 
   var money = 100;
   var playerHp = 1000;
-  var enemyHp = 1200;
+  var enemyHp = 1500;
   var isGameOver = false;
 
   var allies = [];
@@ -135,7 +136,7 @@
   function startGame() {
     money = 100;
     playerHp = 1000;
-    enemyHp = 1200;
+    enemyHp = 1500;
     isGameOver = false;
     allies = [];
     enemies = [];
@@ -164,6 +165,7 @@
       speed: u.speed,
       cd: u.cd,
       color: u.color,
+      textColor: u.textColor,
       isGun: u.isGun,
       x: 600,
       y: 145,
@@ -183,6 +185,7 @@
       cd: isCavalry ? 55 : 48,
       reward: isCavalry ? 25 : 10,
       color: isCavalry ? '#8e44ad' : '#c0392b',
+      textColor: '#fff',
       x: 90,
       y: 145,
       timer: 0
@@ -195,7 +198,7 @@
     ctx.strokeStyle = '#fff';
     ctx.strokeRect(u.x - 18, u.y - 15, 36, 36);
 
-    ctx.fillStyle = '#fff';
+    ctx.fillStyle = u.textColor || '#fff';
     ctx.font = 'bold 12px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(u.name, u.x, u.y + 7);
@@ -210,7 +213,6 @@
     if (isGameOver) return;
 
     var now = Date.now();
-    // 1秒ごとに5両増加
     if (now - lastMoneyTime >= 1000) {
       money = Math.min(1000, money + 5);
       lastMoneyTime += 1000;
