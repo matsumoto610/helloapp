@@ -22,14 +22,14 @@
   <h1>長篠の戦い</h1>
   <div class="status-bar">
     <span style="color:#ff6b81;">武田城: <span id="enemyCastle">1500</span></span>
-    <span style="color:#f1c40f;">軍資金: <span id="money">100</span>両</span>
+    <span style="color:#f1c40f;">軍資金: <span id="money">50</span>両</span>
     <span style="color:#70a1ff;">連合城: <span id="playerCastle">1000</span></span>
   </div>
   <canvas id="canvas" width="700" height="220"></canvas>
   <div class="controls">
     <button type="button" class="unit-btn" id="btn0" onclick="spawnAlly(0)">徳川 15両</button>
     <button type="button" class="unit-btn" id="btn1" onclick="spawnAlly(1)">豊臣 30両</button>
-    <button type="button" class="unit-btn" id="btn2" onclick="spawnAlly(2)">織田 40両</button>
+    <button type="button" class="unit-btn" id="btn2" onclick="spawnAlly(2)">織田 50両</button>
   </div>
   <button type="button" id="restartBtn" onclick="startGame()">再戦</button>
 </div>
@@ -40,15 +40,15 @@
   var UNIT_TYPES = [
     { name: '徳川', cost: 15, hp: 300, atk: 16, range: 30,  speed: 1.0, cd: 40, color: '#27ae60', textColor: '#fff',    isGun: false },
     { name: '豊臣', cost: 30, hp: 160, atk: 34, range: 35,  speed: 2.5, cd: 35, color: '#f1c40f', textColor: '#1e272e', isGun: false },
-    { name: '織田', cost: 40, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', textColor: '#fff',    isGun: true  }
+    { name: '織田', cost: 50, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', textColor: '#fff',    isGun: true  }
   ];
 
-  var money = 100, playerHp = 1000, enemyHp = 1500, isGameOver = false;
+  var money = 50, playerHp = 1000, enemyHp = 1500, isGameOver = false;
   var allies = [], enemies = [], bullets = [];
   var lastMoneyTime = 0, lastEnemyTime = 0, enemyCount = 0, bossAlertTimer = 0;
 
   function startGame() {
-    money = 100; playerHp = 1000; enemyHp = 1500; isGameOver = false;
+    money = 50; playerHp = 1000; enemyHp = 1500; isGameOver = false;
     allies = []; enemies = []; bullets = [];
     lastMoneyTime = Date.now(); lastEnemyTime = Date.now();
     enemyCount = 0; bossAlertTimer = 0;
@@ -76,16 +76,16 @@
     if (isBoss) {
       bossAlertTimer = 120;
       enemies.push({
-        name: '勝頼', hp: 650, maxHp: 650, atk: 45, range: 48, speed: 0.85, cd: 65,
-        reward: 80, color: '#b71540', borderColor: '#f1c40f', textColor: '#f1c40f',
-        size: 64, x: 100, y: 166, timer: 0
+        name: '勝頼', hp: 1200, maxHp: 1200, atk: 75, range: 50, speed: 0.9, cd: 60,
+        color: '#b71540', borderColor: '#f1c40f', textColor: '#f1c40f',
+        size: 68, x: 100, y: 166, timer: 0
       });
     } else {
       enemies.push({
         name: isCavalry ? '赤備' : '武田',
         hp: isCavalry ? 200 : 100, maxHp: isCavalry ? 200 : 100,
         atk: isCavalry ? 28 : 12, range: 35, speed: isCavalry ? 2.0 : 1.1,
-        cd: isCavalry ? 55 : 48, reward: isCavalry ? 25 : 10,
+        cd: isCavalry ? 55 : 48,
         color: isCavalry ? '#8e44ad' : '#c0392b', borderColor: '#fff', textColor: '#fff',
         size: 36, x: 90, y: 166, timer: 0
       });
@@ -114,7 +114,7 @@
   function gameLoop() {
     if (isGameOver) return;
     var now = Date.now();
-    if (now - lastMoneyTime >= 1000) { money = Math.min(1000, money + 5); lastMoneyTime += 1000; }
+    if (now - lastMoneyTime >= 1000) { money = Math.min(1000, money + 3); lastMoneyTime += 1000; }
     if (now - lastEnemyTime >= 4500) { spawnEnemy(); lastEnemyTime = now; }
 
     document.getElementById('money').textContent = money;
@@ -178,12 +178,7 @@
       else if (b.x < 20) { bullets.splice(k, 1); }
     }
 
-    var rem = [];
-    for (var m = 0; m < enemies.length; m++) {
-      if (enemies[m].hp > 0) rem.push(enemies[m]);
-      else money = Math.min(1000, money + enemies[m].reward);
-    }
-    enemies = rem;
+    enemies = enemies.filter(function(e) { return e.hp > 0; });
     allies = allies.filter(function(a) { return a.hp > 0; });
 
     if (enemyHp <= 0 || playerHp <= 0) {
