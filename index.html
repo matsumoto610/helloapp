@@ -19,7 +19,7 @@
 <div id="game">
   <h1>長篠の戦い</h1>
   <div class="bar">
-    <span style="color:#ff6b81">武田城: <span id="eHp">1500</span></span>
+    <span style="color:#ff6b81">武田城: <span id="eHp">3000</span></span>
     <span style="color:#f1c40f">軍資金: <span id="mon">50</span>両</span>
     <span style="color:#70a1ff">連合城: <span id="pHp">1000</span></span>
   </div>
@@ -41,7 +41,7 @@ const ALLY_T = [
 let mon, pHp, eHp, over, allies, enemies, bullets, tMon, tEn, eCnt, bossT;
 
 function init() {
-  mon=50; pHp=1000; eHp=1500; over=0; allies=[]; enemies=[]; bullets=[];
+  mon=50; pHp=1000; eHp=3000; over=0; allies=[]; enemies=[]; bullets=[];
   tMon=tEn=Date.now(); eCnt=bossT=0;
   document.getElementById('restart').style.display='none';
   addEnemy(); requestAnimationFrame(loop);
@@ -53,9 +53,9 @@ function addAlly(i) {
 function addEnemy() {
   eCnt++;
   let boss = eCnt%8===0, cav = !boss && eCnt%4===0, gun = !boss && !cav && eCnt%3===0;
-  if (boss) { bossT=120; enemies.push({name:'勝頼',hp:1200,max:1200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0}); }
-  else if (gun) { enemies.push({name:'鉄砲',hp:80,max:80,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',bc:'#fff',tc:'#fff',gun:1,sz:36,x:90,y:166,tm:0}); }
-  else { enemies.push({name:cav?'赤備':'武田',hp:cav?200:100,max:cav?200:100,atk:cav?28:12,rng:35,spd:cav?2.0:1.1,cd:cav?55:48,col:cav?'#8e44ad':'#c0392b',bc:'#fff',tc:'#fff',gun:0,sz:36,x:90,y:166,tm:0}); }
+  if (boss) { bossT=120; enemies.push({name:'勝頼',hp:2200,max:2200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0}); }
+  else if (gun) { enemies.push({name:'鉄砲',hp:140,max:140,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',bc:'#fff',tc:'#fff',gun:1,sz:36,x:90,y:166,tm:0}); }
+  else { enemies.push({name:cav?'赤備':'武田',hp:cav?350:180,max:cav?350:180,atk:cav?28:12,rng:35,spd:cav?2.0:1.1,cd:cav?55:48,col:cav?'#8e44ad':'#c0392b',bc:'#fff',tc:'#fff',gun:0,sz:36,x:90,y:166,tm:0}); }
 }
 function drawU(u, isA) {
   let s=u.sz, h=s/2, ty=u.y-s;
