@@ -1,223 +1,122 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>長篠の戦い</title>
 <style>
-  body { margin: 0; background: #1e272e; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-  #game { width: 720px; max-width: 96vw; background: #2f3640; border: 2px solid #f1c40f; border-radius: 10px; padding: 16px; box-sizing: border-box; text-align: center; }
-  h1 { margin: 0 0 10px; font-size: 20px; color: #f1c40f; }
-  .status-bar { display: flex; justify-content: space-between; background: #1e272e; padding: 8px 16px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 8px; }
-  canvas { background: #87ceeb; border: 2px solid #fff; border-radius: 6px; display: block; width: 100%; height: 220px; }
-  .controls { display: flex; gap: 12px; margin-top: 12px; }
-  .unit-btn { flex: 1; padding: 14px 8px; font-size: 16px; font-weight: bold; color: #fff; background: #273c75; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
-  .unit-btn:hover:not(:disabled) { background: #40739e; }
-  .unit-btn:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; cursor: not-allowed; }
-  #restartBtn { display: none; margin: 12px auto 0; padding: 10px 24px; font-size: 16px; font-weight: bold; color: #fff; background: #e84118; border: none; border-radius: 6px; cursor: pointer; }
+  body { margin:0; background:#1e272e; color:#fff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; }
+  #game { width:720px; max-width:96vw; background:#2f3640; border:2px solid #f1c40f; border-radius:10px; padding:16px; box-sizing:border-box; text-align:center; }
+  h1 { margin:0 0 10px; font-size:20px; color:#f1c40f; }
+  .bar { display:flex; justify-content:space-between; background:#1e272e; padding:8px 16px; border-radius:6px; font-weight:bold; font-size:15px; margin-bottom:8px; }
+  canvas { background:#87ceeb; border:2px solid #fff; border-radius:6px; display:block; width:100%; height:220px; }
+  .btns { display:flex; gap:12px; margin-top:12px; }
+  .u-btn { flex:1; padding:14px 8px; font-size:16px; font-weight:bold; color:#fff; background:#273c75; border:2px solid #f1c40f; border-radius:8px; cursor:pointer; }
+  .u-btn:disabled { background:#57606f; border-color:#7f8fa6; color:#a4b0be; cursor:not-allowed; }
+  #restart { display:none; margin:12px auto 0; padding:10px 24px; font-size:16px; font-weight:bold; color:#fff; background:#e84118; border:none; border-radius:6px; cursor:pointer; }
 </style>
 </head>
 <body>
 <div id="game">
   <h1>長篠の戦い</h1>
-  <div class="status-bar">
-    <span style="color:#ff6b81;">武田城: <span id="enemyCastle">1500</span></span>
-    <span style="color:#f1c40f;">軍資金: <span id="money">50</span>両</span>
-    <span style="color:#70a1ff;">連合城: <span id="playerCastle">1000</span></span>
+  <div class="bar">
+    <span style="color:#ff6b81">武田城: <span id="eHp">1500</span></span>
+    <span style="color:#f1c40f">軍資金: <span id="mon">50</span>両</span>
+    <span style="color:#70a1ff">連合城: <span id="pHp">1000</span></span>
   </div>
-  <canvas id="canvas" width="700" height="220"></canvas>
-  <div class="controls">
-    <button type="button" class="unit-btn" id="btn0" onclick="spawnAlly(0)">徳川 15両</button>
-    <button type="button" class="unit-btn" id="btn1" onclick="spawnAlly(1)">豊臣 30両</button>
-    <button type="button" class="unit-btn" id="btn2" onclick="spawnAlly(2)">織田 50両</button>
+  <canvas id="cv" width="700" height="220"></canvas>
+  <div class="btns">
+    <button class="u-btn" id="b0" onclick="addAlly(0)">徳川 15両</button>
+    <button class="u-btn" id="b1" onclick="addAlly(1)">豊臣 30両</button>
+    <button class="u-btn" id="b2" onclick="addAlly(2)">織田 50両</button>
   </div>
-  <button type="button" id="restartBtn" onclick="startGame()">再戦</button>
+  <button id="restart" onclick="init()">再戦</button>
 </div>
 <script>
-  var canvas = document.getElementById('canvas');
-  var ctx = canvas.getContext('2d');
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+const ALLY_T = [
+  { name:'徳川', cost:15, hp:300, atk:16, rng:30,  spd:1.0, cd:40, col:'#27ae60', tc:'#fff',    gun:0 },
+  { name:'豊臣', cost:30, hp:160, atk:34, rng:35,  spd:2.5, cd:35, col:'#f1c40f', tc:'#1e272e', gun:0 },
+  { name:'織田', cost:50, hp:100, atk:48, rng:185, spd:1.1, cd:50, col:'#8e44ad', tc:'#fff',    gun:1 }
+];
+let mon, pHp, eHp, over, allies, enemies, bullets, tMon, tEn, eCnt, bossT;
 
-  var UNIT_TYPES = [
-    { name: '徳川', cost: 15, hp: 300, atk: 16, range: 30,  speed: 1.0, cd: 40, color: '#27ae60', textColor: '#fff',    isGun: false },
-    { name: '豊臣', cost: 30, hp: 160, atk: 34, range: 35,  speed: 2.5, cd: 35, color: '#f1c40f', textColor: '#1e272e', isGun: false },
-    { name: '織田', cost: 50, hp: 100, atk: 48, range: 185, speed: 1.1, cd: 50, color: '#8e44ad', textColor: '#fff',    isGun: true  }
-  ];
-
-  var money = 50, playerHp = 1000, enemyHp = 1500, isGameOver = false;
-  var allies = [], enemies = [], bullets = [];
-  var lastMoneyTime = 0, lastEnemyTime = 0, enemyCount = 0, bossAlertTimer = 0;
-
-  function startGame() {
-    money = 50; playerHp = 1000; enemyHp = 1500; isGameOver = false;
-    allies = []; enemies = []; bullets = [];
-    lastMoneyTime = Date.now(); lastEnemyTime = Date.now();
-    enemyCount = 0; bossAlertTimer = 0;
-    document.getElementById('restartBtn').style.display = 'none';
-    spawnEnemy();
-    requestAnimationFrame(gameLoop);
-  }
-
-  function spawnAlly(i) {
-    if (isGameOver) return;
-    var u = UNIT_TYPES[i];
-    if (money < u.cost) return;
-    money -= u.cost;
-    allies.push({
-      name: u.name, hp: u.hp, maxHp: u.hp, atk: u.atk, range: u.range,
-      speed: u.speed, cd: u.cd, color: u.color, textColor: u.textColor,
-      isGun: u.isGun, size: 36, x: 600, y: 166, timer: 0
-    });
-  }
-
-  function spawnEnemy() {
-    enemyCount++;
-    var isBoss = (enemyCount % 8 === 0);
-    var isCavalry = (!isBoss && enemyCount % 4 === 0);
-    var isGunner = (!isBoss && !isCavalry && enemyCount % 3 === 0);
-
-    if (isBoss) {
-      bossAlertTimer = 120;
-      enemies.push({
-        name: '勝頼', hp: 1200, maxHp: 1200, atk: 75, range: 50, speed: 0.9, cd: 60,
-        color: '#b71540', borderColor: '#f1c40f', textColor: '#f1c40f', isGun: false,
-        size: 68, x: 100, y: 166, timer: 0
-      });
-    } else if (isGunner) {
-      enemies.push({
-        name: '鉄砲', hp: 80, maxHp: 80, atk: 32, range: 175, speed: 1.1, cd: 55,
-        color: '#e67e22', borderColor: '#fff', textColor: '#fff', isGun: true,
-        size: 36, x: 90, y: 166, timer: 0
-      });
-    } else {
-      enemies.push({
-        name: isCavalry ? '赤備' : '武田',
-        hp: isCavalry ? 200 : 100, maxHp: isCavalry ? 200 : 100,
-        atk: isCavalry ? 28 : 12, range: 35, speed: isCavalry ? 2.0 : 1.1,
-        cd: isCavalry ? 55 : 48,
-        color: isCavalry ? '#8e44ad' : '#c0392b', borderColor: '#fff', textColor: '#fff', isGun: false,
-        size: 36, x: 90, y: 166, timer: 0
-      });
-    }
-  }
-
-  function drawUnit(u, isAlly) {
-    var s = u.size || 36, half = s / 2, topY = u.y - s;
-    ctx.fillStyle = u.color;
-    ctx.fillRect(u.x - half, topY, s, s);
-    ctx.lineWidth = s > 40 ? 3 : 1;
-    ctx.strokeStyle = u.borderColor || '#fff';
-    ctx.strokeRect(u.x - half, topY, s, s);
-    ctx.lineWidth = 1;
-    ctx.fillStyle = u.textColor || '#fff';
-    ctx.font = (s > 40 ? 'bold 18px sans-serif' : 'bold 12px sans-serif');
-    ctx.textAlign = 'center';
-    ctx.fillText(u.name, u.x, topY + half + (s > 40 ? 6 : 4));
-    var barW = s - 4;
-    ctx.fillStyle = '#333';
-    ctx.fillRect(u.x - barW / 2, topY - 8, barW, 5);
-    ctx.fillStyle = isAlly ? '#4cd137' : '#ff4757';
-    ctx.fillRect(u.x - barW / 2, topY - 8, barW * Math.max(0, u.hp / u.maxHp), 5);
-  }
-
-  function gameLoop() {
-    if (isGameOver) return;
-    var now = Date.now();
-    if (now - lastMoneyTime >= 1000) { money = Math.min(1000, money + 3); lastMoneyTime += 1000; }
-    if (now - lastEnemyTime >= 4500) { spawnEnemy(); lastEnemyTime = now; }
-
-    document.getElementById('money').textContent = money;
-    document.getElementById('playerCastle').textContent = Math.max(0, playerHp);
-    document.getElementById('enemyCastle').textContent = Math.max(0, enemyHp);
-    for (var i = 0; i < 3; i++) document.getElementById('btn' + i).disabled = money < UNIT_TYPES[i].cost;
-
-    ctx.clearRect(0, 0, 700, 220);
-    ctx.fillStyle = '#558b2f'; ctx.fillRect(0, 168, 700, 52);
-    ctx.fillStyle = '#c23616'; ctx.fillRect(20, 88, 55, 80);
-    ctx.fillStyle = '#273c75'; ctx.fillRect(625, 88, 55, 80);
-
-    if (bossAlertTimer > 0) {
-      bossAlertTimer--;
-      ctx.fillStyle = 'rgba(183, 21, 64, 0.85)'; ctx.fillRect(200, 16, 300, 32);
-      ctx.strokeStyle = '#f1c40f'; ctx.strokeRect(200, 16, 300, 32);
-      ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText('敵将・武田勝頼 出陣！', 350, 38);
-    }
-
-    for (var i = 0; i < allies.length; i++) {
-      var a = allies[i];
-      if (a.timer > 0) a.timer--;
-      var target = enemies.find(function(e) { var fx = e.x + (e.size || 36) / 2; return a.x >= e.x - 10 && a.x - fx <= a.range; });
-      if (target) {
-        if (a.timer === 0) {
-          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: target, atk: a.atk, isCastle: false, isAllyBullet: true });
-          else target.hp -= a.atk;
-          a.timer = a.cd;
-        }
-      } else if (a.x - 75 <= a.range) {
-        if (a.timer === 0) {
-          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: null, atk: a.atk, isCastle: true, isAllyBullet: true });
-          else enemyHp -= a.atk;
-          a.timer = a.cd;
-        }
-      } else { a.x -= a.speed; }
-      drawUnit(a, true);
-    }
-
-    for (var j = 0; j < enemies.length; j++) {
-      var e = enemies[j];
-      if (e.timer > 0) e.timer--;
-      var fx = e.x + (e.size || 36) / 2;
-      var targetAlly = allies.find(function(a) { var afx = a.x - (a.size || 36) / 2; return afx >= e.x - 10 && afx - fx <= e.range; });
-      if (targetAlly) {
-        if (e.timer === 0) {
-          if (e.isGun) bullets.push({ x: e.x + 15, y: e.y - 18, target: targetAlly, atk: e.atk, isCastle: false, isAllyBullet: false });
-          else targetAlly.hp -= e.atk;
-          e.timer = e.cd;
-        }
-      } else if (625 - fx <= e.range) {
-        if (e.timer === 0) {
-          if (e.isGun) bullets.push({ x: e.x + 15, y: e.y - 18, target: null, atk: e.atk, isCastle: true, isAllyBullet: false });
-          else playerHp -= e.atk;
-          e.timer = e.cd;
-        }
-      } else { e.x += e.speed; }
-      drawUnit(e, false);
-    }
-
-    for (var k = bullets.length - 1; k >= 0; k--) {
-      var b = bullets[k];
-      ctx.fillStyle = b.isAllyBullet ? '#ffd32a' : '#ff9f43';
-      ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2); ctx.fill();
-
-      if (b.isAllyBullet) {
-        b.x -= 10;
-        if (b.isCastle && b.x <= 75) { enemyHp -= b.atk; bullets.splice(k, 1); }
-        else if (b.target && b.target.hp > 0 && b.x <= b.target.x + (b.target.size || 36) / 2) { b.target.hp -= b.atk; bullets.splice(k, 1); }
-        else if (b.x < 0 || (b.target && b.target.hp <= 0 && !b.isCastle)) { bullets.splice(k, 1); }
-      } else {
-        b.x += 10;
-        if (b.isCastle && b.x >= 625) { playerHp -= b.atk; bullets.splice(k, 1); }
-        else if (b.target && b.target.hp > 0 && b.x >= b.target.x - (b.target.size || 36) / 2) { b.target.hp -= b.atk; bullets.splice(k, 1); }
-        else if (b.x > 700 || (b.target && b.target.hp <= 0 && !b.isCastle)) { bullets.splice(k, 1); }
-      }
-    }
-
-    allies = allies.filter(function(a) { return a.hp > 0; });
-    enemies = enemies.filter(function(e) { return e.hp > 0; });
-
-    if (enemyHp <= 0 || playerHp <= 0) {
-      isGameOver = true;
-      document.getElementById('enemyCastle').textContent = Math.max(0, enemyHp);
-      document.getElementById('playerCastle').textContent = Math.max(0, playerHp);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-      ctx.fillRect(0, 0, 700, 220);
-      ctx.fillStyle = enemyHp <= 0 ? '#f1c40f' : '#ff6b81';
-      ctx.font = 'bold 32px sans-serif';
-ctx.textAlign = 'center';
-ctx.fillText(enemyHp <= 0 ? '連合軍の勝利！' : '武田軍に敗北…', 350, 120);
-document.getElementById('restartBtn').style.display = 'block';
-return;
+function init() {
+  mon=50; pHp=1000; eHp=1500; over=0; allies=[]; enemies=[]; bullets=[];
+  tMon=tEn=Date.now(); eCnt=bossT=0;
+  document.getElementById('restart').style.display='none';
+  addEnemy(); requestAnimationFrame(loop);
 }
-requestAnimationFrame(gameLoop);
+function addAlly(i) {
+  let u = ALLY_T[i];
+  if (!over && mon >= u.cost) { mon -= u.cost; allies.push({...u, max:u.hp, sz:36, x:600, y:166, tm:0}); }
 }
-startGame();
+function addEnemy() {
+  eCnt++;
+  let boss = eCnt%8===0, cav = !boss && eCnt%4===0, gun = !boss && !cav && eCnt%3===0;
+  if (boss) { bossT=120; enemies.push({name:'勝頼',hp:1200,max:1200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0}); }
+  else if (gun) { enemies.push({name:'鉄砲',hp:80,max:80,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',bc:'#fff',tc:'#fff',gun:1,sz:36,x:90,y:166,tm:0}); }
+  else { enemies.push({name:cav?'赤備':'武田',hp:cav?200:100,max:cav?200:100,atk:cav?28:12,rng:35,spd:cav?2.0:1.1,cd:cav?55:48,col:cav?'#8e44ad':'#c0392b',bc:'#fff',tc:'#fff',gun:0,sz:36,x:90,y:166,tm:0}); }
+}
+function drawU(u, isA) {
+  let s=u.sz, h=s/2, ty=u.y-s;
+  ctx.fillStyle=u.col; ctx.fillRect(u.x-h, ty, s, s);
+  ctx.lineWidth=s>40?3:1; ctx.strokeStyle=u.bc||'#fff'; ctx.strokeRect(u.x-h, ty, s, s);
+  ctx.fillStyle=u.tc; ctx.font=`bold ${s>40?18:12}px sans-serif`; ctx.textAlign='center';
+  ctx.fillText(u.name, u.x, ty+h+(s>40?6:4));
+  ctx.fillStyle='#333'; ctx.fillRect(u.x-h+2, ty-8, s-4, 5);
+  ctx.fillStyle=isA?'#4cd137':'#ff4757'; ctx.fillRect(u.x-h+2, ty-8, (s-4)*Math.max(0,u.hp/u.max), 5);
+}
+function loop() {
+  if (over) return;
+  let now = Date.now();
+  if (now-tMon>=1000) { mon=Math.min(1000,mon+3); tMon+=1000; }
+  if (now-tEn>=4500) { addEnemy(); tEn=now; }
+  document.getElementById('mon').textContent=mon;
+  document.getElementById('pHp').textContent=Math.max(0,pHp);
+  document.getElementById('eHp').textContent=Math.max(0,eHp);
+  ALLY_T.forEach((u,i)=>document.getElementById('b'+i).disabled = mon<u.cost);
+
+  ctx.clearRect(0,0,700,220);
+  ctx.fillStyle='#558b2f'; ctx.fillRect(0,168,700,52);
+  ctx.fillStyle='#c23616'; ctx.fillRect(20,88,55,80);
+  ctx.fillStyle='#273c75'; ctx.fillRect(625,88,55,80);
+  if (bossT>0) { bossT--; ctx.fillStyle='rgba(183,21,64,0.85)'; ctx.fillRect(200,16,300,32); ctx.strokeStyle='#f1c40f'; ctx.strokeRect(200,16,300,32); ctx.fillStyle='#f1c40f'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center'; ctx.fillText('敵将・武田勝頼 出陣！',350,38); }
+
+  allies.forEach(a=>{
+    if(a.tm>0) a.tm--;
+    let t = enemies.find(e=>a.x>=e.x-10 && a.x-(e.x+e.sz/2)<=a.rng);
+    if(t) { if(!a.tm){ a.gun?bullets.push({x:a.x-15,y:a.y-18,atk:a.atk,ally:1}):t.hp-=a.atk; a.tm=a.cd; } }
+    else if(a.x-75<=a.rng) { if(!a.tm){ a.gun?bullets.push({x:a.x-15,y:a.y-18,atk:a.atk,ally:1}):eHp-=a.atk; a.tm=a.cd; } }
+    else a.x-=a.spd;
+    drawU(a,1);
+  });
+  enemies.forEach(e=>{
+    if(e.tm>0) e.tm--;
+    let fx=e.x+e.sz/2, t=allies.find(a=>(a.x-a.sz/2)>=e.x-10 && (a.x-a.sz/2)-fx<=e.rng);
+    if(t) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):t.hp-=e.atk; e.tm=e.cd; } }
+    else if(625-fx<=e.rng) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):pHp-=e.atk; e.tm=e.cd; } }
+    else e.x+=e.spd;
+    drawU(e,0);
+  });
+  for(let k=bullets.length-1; k>=0; k--) {
+    let b=bullets[k]; b.x += b.ally?-10:10;
+    ctx.fillStyle=b.ally?'#ffd32a':'#ff9f43'; ctx.beginPath(); ctx.arc(b.x,b.y,4,0,Math.PI*2); ctx.fill();
+    let hit = b.ally ? enemies.find(e=>e.hp>0 && Math.abs(b.x-e.x)<=e.sz/2) : allies.find(a=>a.hp>0 && Math.abs(b.x-a.x)<=a.sz/2);
+    if(hit) { hit.hp-=b.atk; bullets.splice(k,1); }
+    else if(b.ally && b.x<=75) { eHp-=b.atk; bullets.splice(k,1); }
+    else if(!b.ally && b.x>=625) { pHp-=b.atk; bullets.splice(k,1); }
+    else if(b.x<0 || b.x>700) bullets.splice(k,1);
+  }
+  allies=allies.filter(a=>a.hp>0); enemies=enemies.filter(e=>e.hp>0);
+  if(eHp<=0 || pHp<=0) {
+    over=1; document.getElementById('eHp').textContent=Math.max(0,eHp); document.getElementById('pHp').textContent=Math.max(0,pHp);
+    ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,700,220); ctx.fillStyle=eHp<=0?'#f1c40f':'#ff6b81';
+    ctx.font='bold 32px sans-serif'; ctx.textAlign='center'; ctx.fillText(eHp<=0?'連合軍の勝利！':'武田軍に敗北…',350,120);
+    document.getElementById('restart').style.display='block'; return;
+  }
+  requestAnimationFrame(loop);
+}
+init();
+</script>
+</body>
+</html>
