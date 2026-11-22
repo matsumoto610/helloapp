@@ -48,12 +48,16 @@ function init() {
 }
 function addAlly(i) {
   let u = ALLY_T[i];
-  if (!over && mon >= u.cost) { mon -= u.cost; allies.push({...u, max:u.hp, sz:36, x:600, y:166, tm:0}); }
+  if (!over && mon >= u.cost) { mon -= u.cost; allies.push({...u, max:u.hp, sz:36, x:600, y:166, tm:0, kb:0}); }
 }
 function addEnemy() {
   eCnt++;
   let boss = eCnt%8===0, cav = !boss && eCnt%4===0, gun = !boss && !cav && eCnt%3===0;
-  if (boss) { bossT=120; enemies.push({name:'勝頼',hp:2200,max:2200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0}); }
+  if (boss) {
+    bossT=120;
+    allies.forEach(a => a.kb = 220); // 味方全員を右へ吹っ飛ばす！
+    enemies.push({name:'勝頼',hp:2200,max:2200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0});
+  }
   else if (gun) { enemies.push({name:'鉄砲',hp:140,max:140,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',bc:'#fff',tc:'#fff',gun:1,sz:36,x:90,y:166,tm:0}); }
   else { enemies.push({name:cav?'赤備':'武田',hp:cav?350:180,max:cav?350:180,atk:cav?28:12,rng:35,spd:cav?2.0:1.1,cd:cav?55:48,col:cav?'#8e44ad':'#c0392b',bc:'#fff',tc:'#fff',gun:0,sz:36,x:90,y:166,tm:0}); }
 }
@@ -83,16 +87,19 @@ function loop() {
   if (bossT>0) { bossT--; ctx.fillStyle='rgba(183,21,64,0.85)'; ctx.fillRect(200,16,300,32); ctx.strokeStyle='#f1c40f'; ctx.strokeRect(200,16,300,32); ctx.fillStyle='#f1c40f'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center'; ctx.fillText('敵将・武田勝頼 出陣！',350,38); }
 
   allies.forEach(a=>{
-    if(a.tm>0) a.tm--;
-    let t = enemies.find(e=>a.x>=e.x-10 && a.x-(e.x+e.sz/2)<=a.rng);
-    if(t) { if(!a.tm){ a.gun?bullets.push({x:a.x-15,y:a.y-18,atk:a.atk,ally:1}):t.hp-=a.atk; a.tm=a.cd; } }
-    else if(a.x-75<=a.rng) { if(!a.tm){ a.gun?bullets.push({x:a.x-15,y:a.y-18,atk:a.atk,ally:1}):eHp-=a.atk; a.tm=a.cd; } }
-    else a.x-=a.spd;
+    if(a.kb>0) { let step=Math.min(18,a.kb); a.x=Math.min(600,a.x+step); a.kb-=step; }
+    else {
+      if(a.tm>0) a.tm--;
+      let t = enemies.find(e=>a.x>=e.x-45 && a.x-(e.x+e.sz/2)<=a.rng);
+      if(t) { if(!a.tm){ a.gun?bullets.push({x:a.x-15,y:a.y-18,atk:a.atk,ally:1}):t.hp-=a.atk; a.tm=a.cd; } }
+      else if(a.x-75<=a.rng) { if(!a.tm){ a.gun?bullets.push({x:a.x-15,y:a.y-18,atk:a.atk,ally:1}):eHp-=a.atk; a.tm=a.cd; } }
+      else a.x-=a.spd;
+    }
     drawU(a,1);
   });
   enemies.forEach(e=>{
     if(e.tm>0) e.tm--;
-    let fx=e.x+e.sz/2, t=allies.find(a=>(a.x-a.sz/2)>=e.x-10 && (a.x-a.sz/2)-fx<=e.rng);
+    let fx=e.x+e.sz/2, t=allies.find(a=>(a.x-a.sz/2)>=e.x-45 && (a.x-a.sz/2)-fx<=e.rng);
     if(t) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):t.hp-=e.atk; e.tm=e.cd; } }
     else if(625-fx<=e.rng) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):pHp-=e.atk; e.tm=e.cd; } }
     else e.x+=e.spd;
