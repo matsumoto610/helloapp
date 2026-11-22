@@ -73,12 +73,20 @@
     enemyCount++;
     var isBoss = (enemyCount % 8 === 0);
     var isCavalry = (!isBoss && enemyCount % 4 === 0);
+    var isGunner = (!isBoss && !isCavalry && enemyCount % 3 === 0);
+
     if (isBoss) {
       bossAlertTimer = 120;
       enemies.push({
         name: '勝頼', hp: 1200, maxHp: 1200, atk: 75, range: 50, speed: 0.9, cd: 60,
-        color: '#b71540', borderColor: '#f1c40f', textColor: '#f1c40f',
+        color: '#b71540', borderColor: '#f1c40f', textColor: '#f1c40f', isGun: false,
         size: 68, x: 100, y: 166, timer: 0
+      });
+    } else if (isGunner) {
+      enemies.push({
+        name: '鉄砲', hp: 80, maxHp: 80, atk: 32, range: 175, speed: 1.1, cd: 55,
+        color: '#e67e22', borderColor: '#fff', textColor: '#fff', isGun: true,
+        size: 36, x: 90, y: 166, timer: 0
       });
     } else {
       enemies.push({
@@ -86,7 +94,7 @@
         hp: isCavalry ? 200 : 100, maxHp: isCavalry ? 200 : 100,
         atk: isCavalry ? 28 : 12, range: 35, speed: isCavalry ? 2.0 : 1.1,
         cd: isCavalry ? 55 : 48,
-        color: isCavalry ? '#8e44ad' : '#c0392b', borderColor: '#fff', textColor: '#fff',
+        color: isCavalry ? '#8e44ad' : '#c0392b', borderColor: '#fff', textColor: '#fff', isGun: false,
         size: 36, x: 90, y: 166, timer: 0
       });
     }
@@ -141,13 +149,13 @@
       var target = enemies.find(function(e) { var fx = e.x + (e.size || 36) / 2; return a.x >= e.x - 10 && a.x - fx <= a.range; });
       if (target) {
         if (a.timer === 0) {
-          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: target, atk: a.atk, isCastle: false });
+          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: target, atk: a.atk, isCastle: false, isAllyBullet: true });
           else target.hp -= a.atk;
           a.timer = a.cd;
         }
       } else if (a.x - 75 <= a.range) {
         if (a.timer === 0) {
-          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: null, atk: a.atk, isCastle: true });
+          if (a.isGun) bullets.push({ x: a.x - 15, y: a.y - 18, target: null, atk: a.atk, isCastle: true, isAllyBullet: true });
           else enemyHp -= a.atk;
           a.timer = a.cd;
         }
@@ -161,41 +169,55 @@
       var fx = e.x + (e.size || 36) / 2;
       var targetAlly = allies.find(function(a) { var afx = a.x - (a.size || 36) / 2; return afx >= e.x - 10 && afx - fx <= e.range; });
       if (targetAlly) {
-        if (e.timer === 0) { targetAlly.hp -= e.atk; e.timer = e.cd; }
+        if (e.timer === 0) {
+          if (e.isGun) bullets.push({ x: e.x + 15, y: e.y - 18, target: targetAlly, atk: e.atk, isCastle: false, isAllyBullet: false });
+          else targetAlly.hp -= e.atk;
+          e.timer = e.cd;
+        }
       } else if (625 - fx <= e.range) {
-        if (e.timer === 0) { playerHp -= e.atk; e.timer = e.cd; }
+        if (e.timer === 0) {
+          if (e.isGun) bullets.push({ x: e.x + 15, y: e.y - 18, target: null, atk: e.atk, isCastle: true, isAllyBullet: false });
+          else playerHp -= e.atk;
+          e.timer = e.cd;
+        }
       } else { e.x += e.speed; }
       drawUnit(e, false);
     }
 
-    ctx.fillStyle = '#ffd32a';
     for (var k = bullets.length - 1; k >= 0; k--) {
       var b = bullets[k];
-      b.x -= 10;
+      ctx.fillStyle = b.isAllyBullet ? '#ffd32a' : '#ff9f43';
       ctx.beginPath(); ctx.arc(b.x, b.y, 4, 0, Math.PI * 2); ctx.fill();
-      if (b.isCastle && b.x <= 75) { enemyHp -= b.atk; bullets.splice(k, 1); }
-      else if (b.target && b.target.hp > 0 && b.x <= b.target.x + (b.target.size || 36) / 2) { b.target.hp -= b.atk; bullets.splice(k, 1); }
-      else if (b.x < 20) { bullets.splice(k, 1); }
+
+      if (b.isAllyBullet) {
+        b.x -= 10;
+        if (b.isCastle && b.x <= 75) { enemyHp -= b.atk; bullets.splice(k, 1); }
+        else if (b.target && b.target.hp > 0 && b.x <= b.target.x + (b.target.size || 36) / 2) { b.target.hp -= b.atk; bullets.splice(k, 1); }
+        else if (b.x < 0 || (b.target && b.target.hp <= 0 && !b.isCastle)) { bullets.splice(k, 1); }
+      } else {
+        b.x += 10;
+        if (b.isCastle && b.x >= 625) { playerHp -= b.atk; bullets.splice(k, 1); }
+        else if (b.target && b.target.hp > 0 && b.x >= b.target.x - (b.target.size || 36) / 2) { b.target.hp -= b.atk; bullets.splice(k, 1); }
+        else if (b.x > 700 || (b.target && b.target.hp <= 0 && !b.isCastle)) { bullets.splice(k, 1); }
+      }
     }
 
-    enemies = enemies.filter(function(e) { return e.hp > 0; });
     allies = allies.filter(function(a) { return a.hp > 0; });
+    enemies = enemies.filter(function(e) { return e.hp > 0; });
 
     if (enemyHp <= 0 || playerHp <= 0) {
       isGameOver = true;
-      var isWin = enemyHp <= 0;
-      document.getElementById('playerCastle').textContent = Math.max(0, playerHp);
       document.getElementById('enemyCastle').textContent = Math.max(0, enemyHp);
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.75)'; ctx.fillRect(0, 0, 700, 220);
-      ctx.fillStyle = '#ffd32a'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(isWin ? '勝利！' : '敗北…', 350, 115);
-      document.getElementById('restartBtn').style.display = 'block';
-      return;
-    }
-    requestAnimationFrame(gameLoop);
-  }
-
-  startGame();
-</script>
-</body>
-</html>
+      document.getElementById('playerCastle').textContent = Math.max(0, playerHp);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+      ctx.fillRect(0, 0, 700, 220);
+      ctx.fillStyle = enemyHp <= 0 ? '#f1c40f' : '#ff6b81';
+      ctx.font = 'bold 32px sans-serif';
+ctx.textAlign = 'center';
+ctx.fillText(enemyHp <= 0 ? '連合軍の勝利！' : '武田軍に敗北…', 350, 120);
+document.getElementById('restartBtn').style.display = 'block';
+return;
+}
+requestAnimationFrame(gameLoop);
+}
+startGame();
