@@ -1,177 +1,63 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>戦国大戦争</title>
 <style>
-  body { margin:0; background:#1e272e; color:#fff; font-family:sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; }
-  #game { width:720px; max-width:96vw; background:#2f3640; border:2px solid #f1c40f; border-radius:10px; padding:16px; box-sizing:border-box; text-align:center; }
-  .scr { display:none; height:360px; flex-direction:column; justify-content:center; align-items:center; position:relative; border-radius:8px; }
-  .scr.on { display:flex; }
-  #s-title { background:radial-gradient(circle,#353b48,#1e272e); }
-  #s-home { background:linear-gradient(135deg,#2c3e50,#1e272e); }
-  #s-map { background:#3d5a3c radial-gradient(#4a6b48 2px,transparent 2px) 0 0/24px 24px; border:2px solid #78e08f; }
-  #s-bat { height:auto; }
-  .logo { font-size:44px; font-weight:bold; color:#f1c40f; text-shadow:3px 3px 0 #c23616; margin:-60px 0 36px; letter-spacing:4px; }
-  .tag { position:absolute; top:12px; left:16px; font-size:16px; font-weight:bold; color:#f1c40f; }
-  .m-btn { padding:14px 36px; font-size:20px; font-weight:bold; color:#fff; background:#c23616; border:3px solid #f1c40f; border-radius:8px; cursor:pointer; }
-  .m-btn:hover { background:#e84118; }
-  .b-btn { position:absolute; bottom:12px; left:12px; padding:6px 14px; font-size:13px; background:#57606f; color:#fff; border:1px solid #a4b0be; border-radius:4px; cursor:pointer; }
-  .bar { width:100%; box-sizing:border-box; display:flex; justify-content:space-between; background:#1e272e; padding:8px 16px; border-radius:6px; font-weight:bold; font-size:15px; margin-bottom:8px; }
-  canvas { background:#87ceeb; border:2px solid #fff; border-radius:6px; display:block; width:100%; height:220px; }
-  .btns { width:100%; display:flex; gap:8px; margin-top:12px; }
-  .u-btn { flex:1; padding:12px 4px; font-size:14px; font-weight:bold; color:#fff; background:#273c75; border:2px solid #f1c40f; border-radius:8px; cursor:pointer; }
-  .u-btn:disabled { background:#57606f; border-color:#7f8fa6; color:#a4b0be; cursor:not-allowed; }
-  #end { display:none; gap:12px; margin-top:12px; }
+body{margin:0;background:#1e272e;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+#g{width:720px;max-width:96vw;background:#2f3640;border:2px solid #f1c40f;border-radius:10px;padding:16px;box-sizing:border-box;text-align:center}
+.s{display:none;height:360px;flex-direction:column;justify-content:center;align-items:center;position:relative;border-radius:8px}
+.s.on{display:flex}
+#s0{background:radial-gradient(circle,#353b48,#1e272e)}
+#s1{background:linear-gradient(135deg,#2c3e50,#1e272e)}
+#s2{background:#3d5a3c radial-gradient(#4a6b48 2px,transparent 2px) 0 0/24px 24px;border:2px solid #78e08f}
+#s3{height:auto}
+.lg{font-size:44px;font-weight:bold;color:#f1c40f;text-shadow:3px 3px 0 #c23616;margin:-60px 0 36px;letter-spacing:4px}
+.tg{position:absolute;top:12px;left:16px;font-size:16px;font-weight:bold;color:#f1c40f}
+.mb{padding:12px 28px;font-size:18px;font-weight:bold;color:#fff;background:#c23616;border:3px solid #f1c40f;border-radius:8px;cursor:pointer}
+.mb:hover{background:#e84118}
+.nd{position:absolute;border-radius:50px;transform:translate(-50%,-50%)}
+.bb{position:absolute;bottom:12px;left:12px;padding:6px 14px;font-size:13px;background:#57606f;color:#fff;border:1px solid #a4b0be;border-radius:4px;cursor:pointer}
+.br{width:100%;box-sizing:border-box;display:flex;justify-content:space-between;background:#1e272e;padding:8px 16px;border-radius:6px;font-weight:bold;font-size:15px;margin-bottom:8px}
+canvas{border:2px solid #fff;border-radius:6px;display:block;width:100%;height:220px}
+.bs{width:100%;display:flex;gap:8px;margin-top:12px}
+.ub{flex:1;padding:12px 4px;font-size:14px;font-weight:bold;color:#fff;background:#273c75;border:2px solid #f1c40f;border-radius:8px;cursor:pointer}
+.ub:disabled{background:#57606f;border-color:#7f8fa6;color:#a4b0be;cursor:not-allowed}
+#ed{display:none;gap:12px;margin-top:12px}
 </style>
 </head>
 <body>
-<div id="game">
-  <div id="s-title" class="scr on">
-    <div class="logo">戦国大戦争</div>
-    <button class="m-btn" onclick="go('home')">出陣</button>
-  </div>
-  <div id="s-home" class="scr">
-    <div class="tag">本陣（ホーム）</div>
-    <button class="m-btn" style="position:absolute;top:32%;left:34%;transform:translate(-50%,-50%)" onclick="go('map')">出陣</button>
-    <button class="b-btn" onclick="go('title')">タイトルへ</button>
-  </div>
-  <div id="s-map" class="scr">
-    <div class="tag" style="background:rgba(0,0,0,.6);padding:4px 12px;border-radius:4px">合戦場を選択</div>
-    <button class="m-btn" style="border-radius:50px" onclick="go('bat');init()">⚔️ 長篠</button>
-    <button class="b-btn" onclick="go('home')">ホームへ戻る</button>
-  </div>
-  <div id="s-bat" class="scr">
-    <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <b style="font-size:18px;color:#f1c40f">長篠の戦い</b>
-      <button onclick="over=1;go('map')" style="padding:4px 10px;font-size:12px;background:#57606f;color:#fff;border:1px solid #a4b0be;border-radius:4px;cursor:pointer">撤退（マップへ）</button>
-    </div>
-    <div class="bar">
-      <span style="color:#ff6b81">武田城: <span id="eHp">3000</span></span>
-      <span style="color:#f1c40f">軍資金: <span id="mon">50</span>両</span>
-      <span style="color:#70a1ff">連合城: <span id="pHp">1000</span></span>
-    </div>
+<div id="g">
+  <div id="s0" class="s on"><div class="lg">戦国大戦争</div><button class="mb" onclick="go(1)">出陣</button></div>
+  <div id="s1" class="s"><div class="tg">本陣（ホーム）</div><button class="mb" style="position:absolute;top:32%;left:34%;transform:translate(-50%,-50%)" onclick="go(2)">出陣</button><button class="bb" onclick="go(0)">タイトルへ</button></div>
+  <div id="s2" class="s"><div class="tg" style="background:rgba(0,0,0,.6);padding:4px 12px;border-radius:4px">合戦場を選択</div><button class="mb nd" style="top:28%;left:24%;background:#2980b9" onclick="pl(0)">⚔️ 桶狭間</button><button class="mb nd" style="top:52%;left:50%" onclick="pl(1)">⚔️ 長篠</button><button class="mb nd" style="top:74%;left:76%;background:#6c3483" onclick="pl(2)">⚔️ 関ヶ原</button><button class="bb" onclick="go(1)">ホームへ戻る</button></div>
+  <div id="s3" class="s">
+    <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b id="bt" style="font-size:18px;color:#f1c40f"></b><button class="bb" style="position:static" onclick="ov=1;go(2)">撤退（マップへ）</button></div>
+    <div class="br"><span style="color:#ff6b81"><span id="en"></span>: <span id="eh"></span></span><span style="color:#f1c40f">軍資金: <span id="mn"></span>両</span><span style="color:#70a1ff">連合城: <span id="ph"></span></span></div>
     <canvas id="cv" width="700" height="220"></canvas>
-    <div class="btns">
-      <button class="u-btn" id="b0" onclick="addA(0)">徳川 15両</button>
-      <button class="u-btn" id="b1" onclick="addA(1)">豊臣 30両</button>
-      <button class="u-btn" id="b2" onclick="addA(2)">織田 50両</button>
-      <button class="u-btn" id="b3" onclick="addA(3)" style="background:#4a1c40;border-color:#ff9ff3">信長 100両</button>
-      <button class="u-btn" id="bSp" onclick="sp()" style="background:#c23616;border-color:#ffd32a" disabled>三段撃ち(60s)</button>
+    <div class="bs">
+      <button class="ub" id="b0" onclick="aa(0)">徳川 15両</button>
+      <button class="ub" id="b1" onclick="aa(1)">豊臣 30両</button>
+      <button class="ub" id="b2" onclick="aa(2)">織田 50両</button>
+      <button class="ub" id="b3" onclick="aa(3)" style="background:#4a1c40;border-color:#ff9ff3">信長 100両</button>
+      <button class="ub" id="bp" onclick="sp()" style="background:#c23616;border-color:#ffd32a" disabled>三段撃ち(60s)</button>
     </div>
-    <div id="end">
-      <button class="m-btn" style="padding:10px 24px;font-size:16px" onclick="init()">再戦</button>
-      <button class="m-btn" style="padding:10px 24px;font-size:16px;background:#273c75" onclick="go('map')">マップへ戻る</button>
-    </div>
+    <div id="ed"><button class="mb" style="padding:10px 24px;font-size:16px" onclick="ini()">再戦</button><button class="mb" style="padding:10px 24px;font-size:16px;background:#273c75" onclick="go(2)">マップへ戻る</button></div>
   </div>
 </div>
 <script>
-const $=id=>document.getElementById(id), ctx=$('cv').getContext('2d');
-const AT=[
-  {n:'徳川',c:15,hp:300,atk:16,rng:30,spd:1,cd:40,col:'#27ae60',tc:'#fff',sz:36},
-  {n:'豊臣',c:30,hp:160,atk:34,rng:35,spd:2.5,cd:35,col:'#f1c40f',tc:'#1e272e',sz:36},
-  {n:'織田',c:50,hp:100,atk:48,rng:185,spd:1.1,cd:50,col:'#8e44ad',tc:'#fff',gun:1,sz:36},
-  {n:'信長',c:100,hp:2000,atk:80,rng:55,spd:.9,cd:55,col:'#192a56',bc:'#f1c40f',tc:'#f1c40f',sz:68}
-];
-let mon,pHp,eHp,over,al,en,bl,tM,tE,tS,eC,bT,bTx,bCl,aid;
-
-const go=s=>{document.querySelectorAll('.scr').forEach(e=>e.classList.remove('on'));$('s-'+s).classList.add('on');};
-const ban=(t,c)=>{bTx=t;bCl=c;bT=120;};
-
-function init(){
-  cancelAnimationFrame(aid);
-  mon=50;pHp=1000;eHp=3000;over=0;al=[];en=[];bl=[];tM=tE=tS=Date.now();eC=bT=0;
-  $('end').style.display='none'; addE(); aid=requestAnimationFrame(loop);
-}
-function addA(i){
-  let u=AT[i];
-  if(!over&&mon>=u.c){
-    mon-=u.c;
-    if(i===3){ban('総大将・織田信長 出陣！','rgba(25,42,86,.9)');en.forEach(e=>e.kb=220);}
-    al.push({...u,max:u.hp,x:590,tm:0,kb:0});
-  }
-}
-function sp(){
-  let now=Date.now();
-  if(over||now-tS<60000)return;
-  tS=now; ban('必殺・鉄砲三段撃ち！！','rgba(194,54,22,.9)');
-  for(let w=0;w<3;w++)setTimeout(()=>{if(!over)for(let r=0;r<5;r++)bl.push({x:620,y:95+r*15,atk:45,a:1,sp:1});},w*280);
-}
-function addE(){
-  eC++;
-  let b=eC%8===0,c=!b&&eC%4===0,g=!b&&!c&&eC%3===0;
-  if(b){ban('敵将・武田勝頼 出陣！','rgba(183,21,64,.85)');al.forEach(a=>a.kb=220);en.push({n:'勝頼',hp:2200,max:2200,atk:75,rng:50,spd:.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',sz:68,x:100,tm:0,kb:0});}
-  else if(g)en.push({n:'鉄砲',hp:140,max:140,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',tc:'#fff',gun:1,sz:36,x:90,tm:0,kb:0});
-  else en.push({n:c?'赤備':'武田',hp:c?350:180,max:c?350:180,atk:c?28:12,rng:35,spd:c?2:1.1,cd:c?55:48,col:c?'#8e44ad':'#c0392b',tc:'#fff',sz:36,x:90,tm:0,kb:0});
-}
-function draw(u,isA){
-  let s=u.sz,h=s/2,ty=166-s;
-  ctx.fillStyle=u.col;ctx.fillRect(u.x-h,ty,s,s);
-  ctx.lineWidth=s>40?3:1;ctx.strokeStyle=u.bc||'#fff';ctx.strokeRect(u.x-h,ty,s,s);
-  ctx.fillStyle=u.tc;ctx.font=`bold ${s>40?18:12}px sans-serif`;ctx.textAlign='center';
-  ctx.fillText(u.n,u.x,ty+h+(s>40?6:4));
-  ctx.fillStyle='#333';ctx.fillRect(u.x-h+2,ty-8,s-4,5);
-  ctx.fillStyle=isA?'#4cd137':'#ff4757';ctx.fillRect(u.x-h+2,ty-8,(s-4)*Math.max(0,u.hp/u.max),5);
-}
-function loop(){
-  if(over)return;
-  let now=Date.now(),rem=Math.ceil((60000-(now-tS))/1000);
-  if(now-tM>=1000){mon=Math.min(1000,mon+3);tM+=1000;}
-  if(now-tE>=4500){addE();tE=now;}
-  $('mon').textContent=mon;$('pHp').textContent=Math.max(0,pHp);$('eHp').textContent=Math.max(0,eHp);
-  AT.forEach((u,i)=>$('b'+i).disabled=mon<u.c);
-  $('bSp').disabled=rem>0;$('bSp').textContent=rem>0?`三段撃ち(${rem}s)`:'三段撃ち 発動！';
-
-  ctx.clearRect(0,0,700,220);
-  ctx.fillStyle='#558b2f';ctx.fillRect(0,168,700,52);
-  ctx.fillStyle='#c23616';ctx.fillRect(20,88,55,80);
-  ctx.fillStyle='#273c75';ctx.fillRect(625,88,55,80);
-  if(bT>0){bT--;ctx.fillStyle=bCl;ctx.fillRect(180,14,340,32);ctx.strokeStyle='#f1c40f';ctx.strokeRect(180,14,340,32);ctx.fillStyle='#f1c40f';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText(bTx,350,36);}
-
-  al.forEach(a=>{
-    if(a.kb>0){let s=Math.min(18,a.kb);a.x=Math.min(600,a.x+s);a.kb-=s;}
-    else{
-      if(a.tm>0)a.tm--;
-      let t=en.find(e=>a.x>=e.x-45&&a.x-(e.x+e.sz/2)<=a.rng);
-      if(t){if(!a.tm){a.gun?bl.push({x:a.x-15,y:148,atk:a.atk,a:1}):t.hp-=a.atk;a.tm=a.cd;}}
-      else if(a.x-75<=a.rng){if(!a.tm){a.gun?bl.push({x:a.x-15,y:148,atk:a.atk,a:1}):eHp-=a.atk;a.tm=a.cd;}}
-      else a.x-=a.spd;
-    }
-    draw(a,1);
-  });
-  en.forEach(e=>{
-    if(e.kb>0){let s=Math.min(18,e.kb);e.x=Math.max(100,e.x-s);e.kb-=s;}
-    else{
-      if(e.tm>0)e.tm--;
-      let fx=e.x+e.sz/2,t=al.find(a=>(a.x-a.sz/2)>=e.x-45&&(a.x-a.sz/2)-fx<=e.rng);
-      if(t){if(!e.tm){e.gun?bl.push({x:e.x+15,y:148,atk:e.atk,a:0}):t.hp-=e.atk;e.tm=e.cd;}}
-      else if(625-fx<=e.rng){if(!e.tm){e.gun?bl.push({x:e.x+15,y:148,atk:e.atk,a:0}):pHp-=e.atk;e.tm=e.cd;}}
-      else e.x+=e.spd;
-    }
-    draw(e,0);
-  });
-  for(let k=bl.length-1;k>=0;k--){
-    let b=bl[k];b.x+=b.a?(b.sp?-15:-10):10;
-    ctx.fillStyle=b.sp?'#ff3f34':(b.a?'#ffd32a':'#ff9f43');
-    ctx.beginPath();ctx.arc(b.x,b.y,b.sp?5:4,0,Math.PI*2);ctx.fill();
-    let hit=b.a?en.find(e=>e.hp>0&&Math.abs(b.x-e.x)<=e.sz/2):al.find(a=>a.hp>0&&Math.abs(b.x-a.x)<=a.sz/2);
-    if(hit){hit.hp-=b.atk;bl.splice(k,1);}
-    else if(b.a&&b.x<=75){eHp-=b.atk;bl.splice(k,1);}
-    else if(!b.a&&b.x>=625){pHp-=b.atk;bl.splice(k,1);}
-    else if(b.x<0||b.x>700)bl.splice(k,1);
-  }
-  al=al.filter(a=>a.hp>0);
-  mon=Math.min(1000,mon+en.filter(e=>e.hp<=0).length*5);
-  en=en.filter(e=>e.hp>0);
-
-  if(eHp<=0||pHp<=0){
-    over=1;$('eHp').textContent=Math.max(0,eHp);$('pHp').textContent=Math.max(0,pHp);
-    ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,700,220);ctx.fillStyle=eHp<=0?'#f1c40f':'#ff6b81';
-    ctx.font='bold 32px sans-serif';ctx.textAlign='center';ctx.fillText(eHp<=0?'連合軍の勝利！':'武田軍に敗北…',350,120);
-    $('end').style.display='flex';return;
-  }
-  aid=requestAnimationFrame(loop);
-}
+const $=i=>document.getElementById(i),c=$('cv').getContext('2d'),
+A=[{n:'徳川',c:15,h:300,a:16,r:30,s:1,d:40,l:'#27ae60',t:'#fff',z:36},{n:'豊臣',c:30,h:160,a:34,r:35,s:2.5,d:35,l:'#f1c40f',t:'#1e272e',z:36},{n:'織田',c:50,h:100,a:48,r:185,s:1.1,d:50,l:'#8e44ad',t:'#fff',g:1,z:36},{n:'信長',c:100,h:2e3,a:80,r:55,s:.9,d:55,l:'#192a56',b:'#f1c40f',t:'#f1c40f',z:68}],
+S=[{t:'桶狭間の戦い',n:'今川本陣',h:1800,w:5200,b:'#576574',e:['今川','弓兵','侍大将','義元'],bh:1400,ba:55},{t:'長篠の戦い',n:'武田城',h:3e3,w:4500,b:'#87ceeb',e:['武田','鉄砲','赤備','勝頼'],bh:2200,ba:75},{t:'関ヶ原の戦い',n:'西軍本陣',h:5e3,w:3600,b:'#b2bec3',e:['西軍','鉄砲','島津','三成'],bh:3200,ba:95}];
+let cr=1,mn,ph,eh,ov,al,en,bl,tm,te,ts,ec,bt,bx,bc,id;
+const go=n=>{document.querySelectorAll('.s').forEach(e=>e.classList.remove('on'));$('s'+n).classList.add('on')},
+pl=n=>{cr=n;go(3);ini()},bn=(t,l)=>{bx=t;bc=l;bt=120};
+function ini(){cancelAnimationFrame(id);let s=S[cr];$('bt').textContent=s.t;$('en').textContent=s.n;$('cv').style.background=s.b;mn=50;ph=1e3;eh=s.h;ov=0;al=[];en=[];bl=[];tm=te=ts=Date.now();ec=bt=0;$('ed').style.display='none';ae();id=requestAnimationFrame(lp)}
+function aa(i){let u=A[i];if(!ov&&mn>=u.c){mn-=u.c;if(i==3){bn('総大将・織田信長 出陣！','rgba(25,42,86,.9)');en.forEach(e=>e.k=220)}al.push({...u,m:u.h,x:590,o:0,k:0})}}
+function sp(){let w=Date.now();if(ov||w-ts<6e4)return;ts=w;bn('必殺・鉄砲三段撃ち！！','rgba(194,54,22,.9)');for(let i=0;i<3;i++)setTimeout(()=>{if(!ov)for(let r=0;r<5;r++)bl.push({x:620,y:95+r*15,a:45,f:1,p:1})},i*280)}
+function ae(){ec++;let s=S[cr],b=ec%8==0,v=!b&&ec%4==0,g=!b&&!v&&ec%3==0;if(b){bn(`敵将・${s.e[3]} 出陣！`,'rgba(183,21,64,.85)');al.forEach(a=>a.k=220);en.push({n:s.e[3],h:s.bh,m:s.bh,a:s.ba,r:50,s:.9,d:60,l:'#b71540',b:'#f1c40f',t:'#f1c40f',z:68,x:100,o:0,k:0})}else if(g)en.push({n:s.e[1],h:140,m:140,a:32,r:175,s:1.1,d:55,l:'#e67e22',t:'#fff',g:1,z:36,x:90,o:0,k:0});else en.push({n:v?s.e[2]:s.e[0],h:v?350:180,m:v?350:180,a:v?28:12,r:35,s:v?2:1.1,d:v?55:48,l:v?'#8e44ad':'#c0392b',t:'#fff',z:36,x:90,o:0,k:0})}
+function dr(u,f){let s=u.z,h=s/2,y=166-s;c.fillStyle=u.l;c.fillRect(u.x-h,y,s,s);c.lineWidth=s>40?3:1;c.strokeStyle=u.b||'#fff';c.strokeRect(u.x-h,y,s,s);c.fillStyle=u.t;c.font=`bold ${s>40?18:12}px sans-serif`;c.textAlign='center';c.fillText(u.n,u.x,y+h+(s>40?6:4));c.fillStyle='#333';c.fillRect(u.x-h+2,y-8,s-4,5);c.fillStyle=f?'#4cd137':'#ff4757';c.fillRect(u.x-h+2,y-8,(s-4)*Math.max(0,u.h/u.m),5)}
+function lp(){if(ov)return;let w=Date.now(),rm=Math.ceil((6e4-(w-ts))/1e3);if(w-tm>=1e3){mn=Math.min(1e3,mn+3);tm+=1e3}if(w-te>=S[cr].w){ae();te=w}$('mn').textContent=mn;$('ph').textContent=Math.max(0,ph);$('eh').textContent=Math.max(0,eh);A.forEach((u,i)=>$('b'+i).disabled=mn<u.c);$('bp').disabled=rm>0;$('bp').textContent=rm>0?`三段撃ち(${rm}s)`:'三段撃ち 発動！';c.clearRect(0,0,700,220);c.fillStyle='#558b2f';c.fillRect(0,168,700,52);c.fillStyle='#c23616';c.fillRect(20,88,55,80);c.fillStyle='#273c75';c.fillRect(625,88,55,80);if(bt>0){bt--;c.fillStyle=bc;c.fillRect(180,14,340,32);c.strokeStyle='#f1c40f';c.strokeRect(180,14,340,32);c.fillStyle='#f1c40f';c.font='bold 16px sans-serif';c.textAlign='center';c.fillText(bx,350,36)}al.forEach(a=>{if(a.k>0){let s=Math.min(18,a.k);a.x=Math.min(600,a.x+s);a.k-=s}else{if(a.o>0)a.o--;let t=en.find(e=>a.x>=e.x-45&&a.x-(e.x+e.z/2)<=a.r);if(t){if(!a.o){a.g?bl.push({x:a.x-15,y:148,a:a.a,f:1}):t.h-=a.a;a.o=a.d}}else if(a.x-75<=a.r){if(!a.o){a.g?bl.push({x:a.x-15,y:148,a:a.a,f:1}):eh-=a.a;a.o=a.d}}else a.x-=a.s}dr(a,1)});en.forEach(e=>{if(e.k>0){let s=Math.min(18,e.k);e.x=Math.max(100,e.x-s);e.k-=s}else{if(e.o>0)e.o--;let x=e.x+e.z/2,t=al.find(a=>(a.x-a.z/2)>=e.x-45&&(a.x-a.z/2)-x<=e.r);if(t){if(!e.o){e.g?bl.push({x:e.x+15,y:148,a:e.a,f:0}):t.h-=e.a;e.o=e.d}}else if(625-x<=e.r){if(!e.o){e.g?bl.push({x:e.x+15,y:148,a:e.a,f:0}):ph-=e.a;e.o=e.d}}else e.x+=e.s}dr(e,0)});for(let k=bl.length-1;k>=0;k--){let b=bl[k];b.x+=b.f?(b.p?-15:-10):10;c.fillStyle=b.p?'#ff3f34':(b.f?'#ffd32a':'#ff9f43');c.beginPath();c.arc(b.x,b.y,b.p?5:4,0,Math.PI*2);c.fill();let h=b.f?en.find(e=>e.h>0&&Math.abs(b.x-e.x)<=e.z/2):al.find(a=>a.h>0&&Math.abs(b.x-a.x)<=a.z/2);if(h){h.h-=b.a;bl.splice(k,1)}else if(b.f&&b.x<=75){eh-=b.a;bl.splice(k,1)}else if(!b.f&&b.x>=625){ph-=b.a;bl.splice(k,1)}else if(b.x<0||b.x>700)bl.splice(k,1)}al=al.filter(a=>a.h>0);mn=Math.min(1e3,mn+en.filter(e=>e.h<=0).length*5);en=en.filter(e=>e.h>0);if(eh<=0||ph<=0){ov=1;$('eh').textContent=Math.max(0,eh);$('ph').textContent=Math.max(0,ph);c.fillStyle='rgba(0,0,0,.7)';c.fillRect(0,0,700,220);c.fillStyle=eh<=0?'#f1c40f':'#ff6b81';c.font='bold 32px sans-serif';c.textAlign='center';c.fillText(eh<=0?'連合軍の勝利！':'連合軍の敗北…',350,120);$('ed').style.display='flex';return}id=requestAnimationFrame(lp)}
 </script>
 </body>
 </html>
