@@ -5,192 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>戦国大戦争</title>
 <style>
-  body {
-    margin: 0;
-    background: #1e272e;
-    color: #fff;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
-  #game {
-    width: 720px;
-    max-width: 96vw;
-    background: #2f3640;
-    border: 2px solid #f1c40f;
-    border-radius: 10px;
-    padding: 16px;
-    box-sizing: border-box;
-    text-align: center;
-  }
-  .screen {
-    display: none;
-    height: 360px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    border-radius: 8px;
-  }
-  .screen.active {
-    display: flex;
-  }
+  body { margin: 0; background: #1e272e; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+  #game { width: 720px; max-width: 96vw; background: #2f3640; border: 2px solid #f1c40f; border-radius: 10px; padding: 16px; box-sizing: border-box; text-align: center; }
+  .screen { display: none; height: 360px; flex-direction: column; justify-content: center; align-items: center; position: relative; border-radius: 8px; }
+  .screen.active { display: flex; }
   #scr-title { background: radial-gradient(circle, #353b48, #1e272e); }
   #scr-home { background: linear-gradient(135deg, #2c3e50, #1e272e); }
-  #scr-map {
-    background: #3d5a3c radial-gradient(#4a6b48 2px, transparent 2px) 0 0 / 24px 24px;
-    border: 2px solid #78e08f;
-  }
+  #scr-map { background: #3d5a3c radial-gradient(#4a6b48 2px, transparent 2px) 0 0 / 24px 24px; border: 2px solid #78e08f; }
   #scr-battle { height: auto; }
-  #scr-gacha, #scr-deck {
-    background: #1e272e;
-    border: 1px solid #f1c40f;
-    justify-content: flex-start;
-    padding: 44px 12px 46px;
-    box-sizing: border-box;
-  }
-  .title-logo {
-    font-size: 44px;
-    font-weight: bold;
-    color: #f1c40f;
-    text-shadow: 3px 3px 0 #c23616;
-    margin: -50px 0 36px;
-    letter-spacing: 4px;
-  }
-  .header-tag {
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #f1c40f;
-  }
-  .koban-box {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffd32a;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 4px 12px;
-    border-radius: 12px;
-  }
-  .main-btn {
-    padding: 12px 24px;
-    font-size: 17px;
-    font-weight: bold;
-    color: #fff;
-    background: #c23616;
-    border: 2px solid #f1c40f;
-    border-radius: 8px;
-    cursor: pointer;
-  }
+  #scr-gacha, #scr-deck { background: #1e272e; border: 1px solid #f1c40f; justify-content: flex-start; padding: 44px 12px 46px; box-sizing: border-box; }
+  .title-logo { font-size: 44px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #c23616; margin: -50px 0 36px; letter-spacing: 4px; }
+  .header-tag { position: absolute; top: 12px; left: 16px; font-size: 16px; font-weight: bold; color: #f1c40f; }
+  .koban-box { position: absolute; top: 12px; right: 16px; font-size: 14px; font-weight: bold; color: #ffd32a; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 12px; }
+  .main-btn { padding: 12px 24px; font-size: 17px; font-weight: bold; color: #fff; background: #c23616; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
   .main-btn:hover { background: #e84118; }
-  .main-btn:disabled {
-    background: #57606f;
-    border-color: #7f8fa6;
-    color: #a4b0be;
-    cursor: not-allowed;
-  }
-  .map-node {
-    position: absolute;
-    border-radius: 50px;
-    transform: translate(-50%, -50%);
-  }
-  .back-btn {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    padding: 6px 14px;
-    font-size: 13px;
-    background: #57606f;
-    color: #fff;
-    border: 1px solid #a4b0be;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  .status-bar {
-    width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: space-between;
-    background: #1e272e;
-    padding: 8px 14px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-size: 15px;
-    margin-bottom: 8px;
-  }
-  canvas {
-    border: 2px solid #fff;
-    border-radius: 6px;
-    display: block;
-    width: 100%;
-    height: 220px;
-  }
-  .unit-btns {
-    width: 100%;
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-  .unit-btn {
-    flex: 1;
-    padding: 10px 4px;
-    font-size: 13px;
-    font-weight: bold;
-    color: #fff;
-    background: #273c75;
-    border: 2px solid #f1c40f;
-    border-radius: 8px;
-    cursor: pointer;
-  }
-  .unit-btn:disabled {
-    background: #57606f;
-    border-color: #7f8fa6;
-    color: #a4b0be;
-    cursor: not-allowed;
-  }
-  #end-btns {
-    display: none;
-    gap: 12px;
-    margin-top: 12px;
-  }
-  .card-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 6px;
-    width: 100%;
-    overflow-y: auto;
-    margin-top: 8px;
-  }
-  .card {
-    background: #2f3640;
-    border: 2px solid #7f8fa6;
-    border-radius: 6px;
-    padding: 6px 2px;
-    font-size: 11px;
-    cursor: pointer;
-  }
-  .card.selected {
-    border-color: #f1c40f;
-    background: #3d3d29;
-  }
+  .main-btn:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; cursor: not-allowed; }
+  .map-node { position: absolute; border-radius: 50px; transform: translate(-50%, -50%); }
+  .back-btn { position: absolute; bottom: 12px; left: 12px; padding: 6px 14px; font-size: 13px; background: #57606f; color: #fff; border: 1px solid #a4b0be; border-radius: 4px; cursor: pointer; }
+  .status-bar { width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; background: #1e272e; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 15px; margin-bottom: 8px; }
+  canvas { border: 2px solid #fff; border-radius: 6px; display: block; width: 100%; height: 220px; }
+  .unit-btns { width: 100%; display: flex; gap: 8px; margin-top: 10px; }
+  .unit-btn { flex: 1; padding: 10px 4px; font-size: 13px; font-weight: bold; color: #fff; background: #273c75; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
+  .unit-btn:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; cursor: not-allowed; }
+  #end-btns { display: none; gap: 12px; margin-top: 12px; }
+  .card-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; overflow-y: auto; margin-top: 8px; }
+  .card { background: #2f3640; border: 2px solid #7f8fa6; border-radius: 6px; padding: 6px 2px; font-size: 11px; cursor: pointer; }
+  .card.selected { border-color: #f1c40f; background: #3d3d29; }
 </style>
 </head>
 <body>
 
 <div id="game">
-  <!-- タイトル画面 -->
   <div id="scr-title" class="screen active">
     <div class="title-logo">戦国大戦争</div>
     <button class="main-btn" onclick="showScreen('home')">出陣</button>
   </div>
 
-  <!-- ホーム画面 -->
   <div id="scr-home" class="screen">
     <div class="header-tag">本陣（ホーム）</div>
     <div class="koban-box">小判: <span id="koban-home">300</span>両</div>
@@ -200,7 +50,6 @@
     <button class="back-btn" onclick="showScreen('title')">タイトルへ</button>
   </div>
 
-  <!-- マップ画面 -->
   <div id="scr-map" class="screen">
     <div class="header-tag" style="background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:4px;">合戦場を選択（勝利で小判+150両）</div>
     <button class="main-btn map-node" style="top:28%; left:24%; background:#2980b9;" onclick="startStage(0)">⚔️ 桶狭間</button>
@@ -209,7 +58,6 @@
     <button class="back-btn" onclick="showScreen('home')">ホームへ戻る</button>
   </div>
 
-  <!-- バトル画面 -->
   <div id="scr-battle" class="screen">
     <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <b id="battle-title" style="font-size:18px; color:#f1c40f;"></b>
@@ -234,7 +82,6 @@
     </div>
   </div>
 
-  <!-- ガチャ画面 -->
   <div id="scr-gacha" class="screen">
     <div class="header-tag">武将ガチャ（1回100両）</div>
     <div class="koban-box">小判: <span id="koban-gacha">300</span>両</div>
@@ -243,7 +90,6 @@
     <button class="back-btn" onclick="showScreen('home')">ホームへ戻る</button>
   </div>
 
-  <!-- 編成画面 -->
   <div id="scr-deck" class="screen">
     <div class="header-tag">部隊編成（最大4体）</div>
     <div class="koban-box" id="deck-summary"></div>
@@ -253,7 +99,7 @@
 </div>
 
 <script>
-const UNITS = [
+const UNITS = new Array(
   { name: '徳川軍', rarity: 'N', cost: 15, hp: 300, atk: 16, rng: 30, spd: 1.0, cd: 40, col: '#27ae60', border: '', txt: '#fff', gun: false, size: 36, boss: false },
   { name: '豊臣軍', rarity: 'N', cost: 30, hp: 160, atk: 34, rng: 35, spd: 2.5, cd: 35, col: '#f1c40f', border: '', txt: '#1e272e', gun: false, size: 36, boss: false },
   { name: '織田軍', rarity: 'N', cost: 50, hp: 100, atk: 48, rng: 185, spd: 1.1, cd: 50, col: '#8e44ad', border: '', txt: '#fff', gun: true, size: 36, boss: false },
@@ -264,36 +110,37 @@ const UNITS = [
   { name: 'メタル豊臣', rarity: 'SR', cost: 55, hp: 900, atk: 50, rng: 38, spd: 2.8, cd: 30, col: '#bdc3c7', border: '#f1c40f', txt: '#1e272e', gun: false, size: 38, boss: false },
   { name: 'メタル家康', rarity: 'SR', cost: 60, hp: 1500, atk: 32, rng: 35, spd: 1.1, cd: 38, col: '#7f8c8d', border: '#2ecc71', txt: '#fff', gun: false, size: 38, boss: false },
   { name: '魔王信長', rarity: 'UR', cost: 140, hp: 3200, atk: 120, rng: 180, spd: 1.0, cd: 45, col: '#2c003e', border: '#ff3f34', txt: '#ffdd59', gun: true, size: 72, boss: true }
-];
+);
 
-const STAGES = [
+const STAGES = new Array(
   { title: '桶狭間の戦い', castle: '今川本陣', hp: 1800, rate: 5200, bg: '#576574', e1: '今川', e2: '弓兵', e3: '侍大将', boss: '義元', bossHp: 1400, bossAtk: 55 },
   { title: '長篠の戦い', castle: '武田城', hp: 3000, rate: 4500, bg: '#87ceeb', e1: '武田', e2: '鉄砲', e3: '赤備', boss: '勝頼', bossHp: 2200, bossAtk: 75 },
   { title: '関ヶ原の戦い', castle: '西軍本陣', hp: 5000, rate: 3600, bg: '#b2bec3', e1: '西軍', e2: '鉄砲', e3: '島津', boss: '三成', bossHp: 3200, bossAtk: 95 }
-];
+);
 
 let koban = 300;
-let owned =;
-let deck =;
+let owned = new Array(0, 1, 2, 3);
+let deck = new Array(0, 1, 2, 3);
 let currentStage = 1;
 
 let money, playerHp, enemyHp, isOver;
 let allies, enemies, bullets;
 let timeMoney, timeEnemy, timeSpecial;
 let enemyCount, bannerTimer, bannerText, bannerColor, animId;
+
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
+
 function showScreen(name) {
-document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-document.getElementById('scr-' + name).classList.add('active');
-updateKobanUI();
-if (name === 'deck') {
-renderDeck();
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('scr-' + name).classList.add('active');
+  updateKobanUI();
+  if (name === 'deck') renderDeck();
 }
-}
+
 function updateKobanUI() {
-document.getElementById('koban-home').textContent = koban;
-document.getElementById('koban-gacha').textContent = koban;
+  document.getElementById('koban-home').textContent = koban;
+  document.getElementById('koban-gacha').textContent = koban;
 document.getElementById('btn-pull').disabled = koban < 100;
 }
 function pullGacha() {
@@ -301,45 +148,40 @@ if (koban < 100) return;
 koban -= 100;
 const roll = Math.random() * 100;
 let pool;
-if (roll < 8) {
-pool =;
-} else if (roll < 28) {
-pool =;
-} else if (roll < 63) {
-pool =;
-} else {
-pool =;
-}
-const unitId = pool[Math.floor(Math.random() * pool.length)];
-const unit = UNITS[unitId];
+if (roll < 8) pool = new Array(9);
+else if (roll < 28) pool = new Array(6, 7, 8);
+else if (roll < 63) pool = new Array(3, 4, 5);
+else pool = new Array(0, 1, 2);
+const unitId = pool.at(Math.floor(Math.random() * pool.length));
+const unit = UNITS.at(unitId);
 const isNew = !owned.includes(unitId);
-if (isNew) {
-owned.push(unitId);
-} else {
-koban += 30;
-}
+if (isNew) owned.push(unitId);
+else koban += 30;
 updateKobanUI();
 const color = unit.rarity === 'UR' ? '#ff6b81' : (unit.rarity === 'SR' ? '#00d2d3' : '#f1c40f');
 const msg = isNew ? '✨ NEW! 仲間になった！' : 'すでに所持（小判+30両 返還）';
 document.getElementById('gacha-result').innerHTML =
-<div style="color:${color}; font-size:22px;">[${unit.rarity}] ${unit.name}</div> +
-<div style="font-size:13px; margin-top:8px; color:#fff;">${msg}</div>;
+'[' + unit.rarity + '] ' + unit.name + '' +
+'' + msg + '';
 }
 function renderDeck() {
-document.getElementById('deck-summary').textContent = '出陣枠: ' + deck.map(id => UNITS[id].name).join(' / ');
+document.getElementById('deck-summary').textContent = '出陣枠: ' + deck.map(id => UNITS.at(id).name).join(' / ');
 const poolEl = document.getElementById('unit-pool');
 poolEl.innerHTML = owned.map(id => {
-const u = UNITS[id];
+const u = UNITS.at(id);
 const isSelected = deck.includes(id);
 const color = u.rarity === 'UR' ? '#ff6b81' : (u.rarity === 'SR' ? '#00d2d3' : '#f1c40f');
-return <div class="card ${isSelected ? 'selected' : ''}" onclick="toggleDeck(${id})"> <b style="color:${color}">[${u.rarity}] ${u.name}</b><br> コスト:${u.cost}両 / HP:${u.hp}<br> ${isSelected ? '★編成中' : 'タップで選択'} </div>;
+return '' +
+'[' + u.rarity + '] ' + u.name + '
+' +
+'コスト:' + u.cost + '両 / HP:' + u.hp + '
+' +
+(isSelected ? '★編成中' : 'タップで選択') + '';
 }).join('');
 }
 function toggleDeck(id) {
 if (deck.includes(id)) {
-if (deck.length > 1) {
-deck = deck.filter(x => x !== id);
-}
+if (deck.length > 1) deck = deck.filter(x => x !== id);
 } else if (deck.length < 4) {
 deck.push(id);
 }
@@ -361,7 +203,7 @@ bannerTimer = 120;
 }
 function initBattle() {
 if (animId) cancelAnimationFrame(animId);
-const st = STAGES[currentStage];
+const st = STAGES.at(currentStage);
 document.getElementById('battle-title').textContent = st.title;
 document.getElementById('enemy-castle-name').textContent = st.castle;
 cv.style.background = st.bg;
@@ -369,19 +211,21 @@ money = 50;
 playerHp = 1000;
 enemyHp = st.hp;
 isOver = false;
-allies = [];
-enemies = [];
-bullets = [];
+allies = new Array();
+enemies = new Array();
+bullets = new Array();
 timeMoney = timeEnemy = timeSpecial = Date.now();
 enemyCount = 0;
 bannerTimer = 0;
 document.getElementById('end-btns').style.display = 'none';
 for (let i = 0; i < 4; i++) {
 const btn = document.getElementById('btn-u' + i);
-const unit = UNITS[deck[i]];
+const uid = deck.at(i);
+const unit = uid != null ? UNITS.at(uid) : null;
 if (unit) {
 btn.style.display = 'block';
-btn.innerHTML = ${unit.name}<br>${unit.cost}両;
+btn.innerHTML = unit.name + '
+' + unit.cost + '両';
 btn.style.background = unit.boss ? '#4a1c40' : '#273c75';
 btn.style.borderColor = unit.border || '#f1c40f';
 } else {
@@ -392,20 +236,16 @@ spawnEnemy();
 animId = requestAnimationFrame(gameLoop);
 }
 function spawnAlly(slotIdx) {
-const unit = UNITS[deck[slotIdx]];
+const uid = deck.at(slotIdx);
+if (uid == null) return;
+const unit = UNITS.at(uid);
 if (!unit || isOver || money < unit.cost) return;
 money -= unit.cost;
 if (unit.boss) {
-showBanner(総大将・${unit.name} 出陣！, 'rgba(25, 42, 86, 0.9)');
+showBanner('総大将・' + unit.name + ' 出陣！', 'rgba(25, 42, 86, 0.9)');
 enemies.forEach(e => e.kb = 220);
 }
-allies.push({
-...unit,
-maxHp: unit.hp,
-x: 590,
-timer: 0,
-kb: 0
-});
+allies.push({ ...unit, maxHp: unit.hp, x: 590, timer: 0, kb: 0 });
 }
 function fireSandan() {
 const now = Date.now();
@@ -423,12 +263,12 @@ bullets.push({ x: 620, y: 95 + r * 15, atk: 45, isAlly: true, isSpecial: true })
 }
 function spawnEnemy() {
 enemyCount++;
-const st = STAGES[currentStage];
+const st = STAGES.at(currentStage);
 const isBoss = enemyCount % 8 === 0;
 const isCav = !isBoss && enemyCount % 4 === 0;
 const isGun = !isBoss && !isCav && enemyCount % 3 === 0;
 if (isBoss) {
-showBanner(敵将・${st.boss} 出陣！, 'rgba(183, 21, 64, 0.85)');
+showBanner('敵将・' + st.boss + ' 出陣！', 'rgba(183, 21, 64, 0.85)');
 allies.forEach(a => a.kb = 220);
 enemies.push({
 name: st.boss, hp: st.bossHp, maxHp: st.bossHp, atk: st.bossAtk,
@@ -460,7 +300,7 @@ ctx.lineWidth = s > 40 ? 3 : 1;
 ctx.strokeStyle = u.border || '#fff';
 ctx.strokeRect(u.x - half, topY, s, s);
 ctx.fillStyle = u.txt;
-ctx.font = bold ${s > 40 ? 16 : 11}px sans-serif;
+ctx.font = 'bold ' + (s > 40 ? 16 : 11) + 'px sans-serif';
 ctx.textAlign = 'center';
 ctx.fillText(u.name, u.x, topY + half + (s > 40 ? 6 : 4));
 ctx.fillStyle = '#333';
@@ -475,7 +315,7 @@ if (now - timeMoney >= 1000) {
 money = Math.min(1000, money + 3);
 timeMoney += 1000;
 }
-if (now - timeEnemy >= STAGES[currentStage].rate) {
+if (now - timeEnemy >= STAGES.at(currentStage).rate) {
 spawnEnemy();
 timeEnemy = now;
 }
@@ -483,13 +323,14 @@ document.getElementById('money').textContent = money;
 document.getElementById('player-hp').textContent = Math.max(0, playerHp);
 document.getElementById('enemy-hp').textContent = Math.max(0, enemyHp);
 deck.forEach((unitId, i) => {
-document.getElementById('btn-u' + i).disabled = money < UNITS[unitId].cost;
+document.getElementById('btn-u' + i).disabled = money < UNITS.at(unitId).cost;
 });
 const spRemain = Math.ceil((60000 - (now - timeSpecial)) / 1000);
 const spBtn = document.getElementById('btn-sp');
 if (spRemain > 0) {
 spBtn.disabled = true;
-spBtn.innerHTML = 三段撃ち<br>(${spRemain}s);
+spBtn.innerHTML = '三段撃ち
+(' + spRemain + 's)';
 } else {
 spBtn.disabled = false;
 spBtn.innerHTML = '三段撃ち
@@ -523,20 +364,14 @@ if (a.timer > 0) a.timer--;
 const target = enemies.find(e => a.x >= e.x - 45 && a.x - (e.x + e.size / 2) <= a.rng);
 if (target) {
 if (a.timer === 0) {
-if (a.gun) {
-bullets.push({ x: a.x - 15, y: 148, atk: a.atk, isAlly: true, isSpecial: false });
-} else {
-target.hp -= a.atk;
-}
+if (a.gun) bullets.push({ x: a.x - 15, y: 148, atk: a.atk, isAlly: true, isSpecial: false });
+else target.hp -= a.atk;
 a.timer = a.cd;
 }
 } else if (a.x - 75 <= a.rng) {
 if (a.timer === 0) {
-if (a.gun) {
-bullets.push({ x: a.x - 15, y: 148, atk: a.atk, isAlly: true, isSpecial: false });
-} else {
-enemyHp -= a.atk;
-}
+if (a.gun) bullets.push({ x: a.x - 15, y: 148, atk: a.atk, isAlly: true, isSpecial: false });
+else enemyHp -= a.atk;
 a.timer = a.cd;
 }
 } else {
@@ -556,20 +391,14 @@ const frontX = e.x + e.size / 2;
 const target = allies.find(a => (a.x - a.size / 2) >= e.x - 45 && (a.x - a.size / 2) - frontX <= e.rng);
 if (target) {
 if (e.timer === 0) {
-if (e.gun) {
-bullets.push({ x: e.x + 15, y: 148, atk: e.atk, isAlly: false, isSpecial: false });
-} else {
-target.hp -= e.atk;
-}
+if (e.gun) bullets.push({ x: e.x + 15, y: 148, atk: e.atk, isAlly: false, isSpecial: false });
+else target.hp -= e.atk;
 e.timer = e.cd;
 }
 } else if (625 - frontX <= e.rng) {
 if (e.timer === 0) {
-if (e.gun) {
-bullets.push({ x: e.x + 15, y: 148, atk: e.atk, isAlly: false, isSpecial: false });
-} else {
-playerHp -= e.atk;
-}
+if (e.gun) bullets.push({ x: e.x + 15, y: 148, atk: e.atk, isAlly: false, isSpecial: false });
+else playerHp -= e.atk;
 e.timer = e.cd;
 }
 } else {
@@ -579,41 +408,29 @@ e.x += e.spd;
 drawUnit(e, false);
 });
 for (let k = bullets.length - 1; k >= 0; k--) {
-const b = bullets[k];
+const b = bullets.at(k);
 b.x += b.isAlly ? (b.isSpecial ? -15 : -10) : 10;
 ctx.fillStyle = b.isSpecial ? '#ff3f34' : (b.isAlly ? '#ffd32a' : '#ff9f43');
 ctx.beginPath();
-ctx.arc(b.x, b.y, b.isSpecial ? 5 : 4, 0, Math.PI * 2);
+ctx.arc(b.x, b.y, b.isSpecial ? 5 : 4, 0, 6.283);
 ctx.fill();
 const hit = b.isAlly
 ? enemies.find(e => e.hp > 0 && Math.abs(b.x - e.x) <= e.size / 2)
 : allies.find(a => a.hp > 0 && Math.abs(b.x - a.x) <= a.size / 2);
-if (hit) {
-hit.hp -= b.atk;
-bullets.splice(k, 1);
-} else if (b.isAlly && b.x <= 75) {
-enemyHp -= b.atk;
-bullets.splice(k, 1);
-} else if (!b.isAlly && b.x >= 625) {
-playerHp -= b.atk;
-bullets.splice(k, 1);
-} else if (b.x < 0 || b.x > 700) {
-bullets.splice(k, 1);
-}
+if (hit) { hit.hp -= b.atk; bullets.splice(k, 1); }
+else if (b.isAlly && b.x <= 75) { enemyHp -= b.atk; bullets.splice(k, 1); }
+else if (!b.isAlly && b.x >= 625) { playerHp -= b.atk; bullets.splice(k, 1); }
+else if (b.x < 0 || b.x > 700) bullets.splice(k, 1);
 }
 allies = allies.filter(a => a.hp > 0);
 const deadCount = enemies.filter(e => e.hp <= 0).length;
-if (deadCount > 0) {
-money = Math.min(1000, money + deadCount * 5);
-}
+if (deadCount > 0) money = Math.min(1000, money + deadCount * 5);
 enemies = enemies.filter(e => e.hp > 0);
 if (enemyHp <= 0 || playerHp <= 0) {
 isOver = true;
 document.getElementById('enemy-hp').textContent = Math.max(0, enemyHp);
 document.getElementById('player-hp').textContent = Math.max(0, playerHp);
-if (enemyHp <= 0) {
-koban += 150;
-}
+if (enemyHp <= 0) koban += 150;
 ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
 ctx.fillRect(0, 0, 700, 220);
 ctx.fillStyle = enemyHp <= 0 ? '#f1c40f' : '#ff6b81';
@@ -625,3 +442,6 @@ return;
 }
 animId = requestAnimationFrame(gameLoop);
 }
+</script>
+</body>
+</html>
