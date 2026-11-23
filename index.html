@@ -9,8 +9,10 @@
   h1 { margin:0 0 10px; font-size:20px; color:#f1c40f; }
   .bar { display:flex; justify-content:space-between; background:#1e272e; padding:8px 16px; border-radius:6px; font-weight:bold; font-size:15px; margin-bottom:8px; }
   canvas { background:#87ceeb; border:2px solid #fff; border-radius:6px; display:block; width:100%; height:220px; }
-  .btns { display:flex; gap:12px; margin-top:12px; }
-  .u-btn { flex:1; padding:14px 8px; font-size:16px; font-weight:bold; color:#fff; background:#273c75; border:2px solid #f1c40f; border-radius:8px; cursor:pointer; }
+  .btns { display:flex; gap:8px; margin-top:12px; }
+  .u-btn { flex:1; padding:12px 4px; font-size:14px; font-weight:bold; color:#fff; background:#273c75; border:2px solid #f1c40f; border-radius:8px; cursor:pointer; }
+  .u-btn.boss { background:#4a1c40; border-color:#ff9ff3; }
+  .u-btn.sp { background:#c23616; border-color:#ffd32a; }
   .u-btn:disabled { background:#57606f; border-color:#7f8fa6; color:#a4b0be; cursor:not-allowed; }
   #restart { display:none; margin:12px auto 0; padding:10px 24px; font-size:16px; font-weight:bold; color:#fff; background:#e84118; border:none; border-radius:6px; cursor:pointer; }
 </style>
@@ -28,38 +30,60 @@
     <button class="u-btn" id="b0" onclick="addAlly(0)">徳川 15両</button>
     <button class="u-btn" id="b1" onclick="addAlly(1)">豊臣 30両</button>
     <button class="u-btn" id="b2" onclick="addAlly(2)">織田 50両</button>
+    <button class="u-btn boss" id="b3" onclick="addAlly(3)">信長 100両</button>
+    <button class="u-btn sp" id="bSp" onclick="fireSandan()" disabled>三段撃ち(60s)</button>
   </div>
   <button id="restart" onclick="init()">再戦</button>
 </div>
 <script>
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 const ALLY_T = [
-  { name:'徳川', cost:15, hp:300, atk:16, rng:30,  spd:1.0, cd:40, col:'#27ae60', tc:'#fff',    gun:0 },
-  { name:'豊臣', cost:30, hp:160, atk:34, rng:35,  spd:2.5, cd:35, col:'#f1c40f', tc:'#1e272e', gun:0 },
-  { name:'織田', cost:50, hp:100, atk:48, rng:185, spd:1.1, cd:50, col:'#8e44ad', tc:'#fff',    gun:1 }
+  { name:'徳川', cost:15,  hp:300,  atk:16, rng:30,  spd:1.0, cd:40, col:'#27ae60', tc:'#fff',    gun:0, sz:36 },
+  { name:'豊臣', cost:30,  hp:160,  atk:34, rng:35,  spd:2.5, cd:35, col:'#f1c40f', tc:'#1e272e', gun:0, sz:36 },
+  { name:'織田', cost:50,  hp:100,  atk:48, rng:185, spd:1.1, cd:50, col:'#8e44ad', tc:'#fff',    gun:1, sz:36 },
+  { name:'信長', cost:100, hp:2000, atk:80, rng:55,  spd:0.9, cd:55, col:'#192a56', bc:'#f1c40f', tc:'#f1c40f', gun:0, sz:68 }
 ];
-let mon, pHp, eHp, over, allies, enemies, bullets, tMon, tEn, eCnt, bossT;
+let mon, pHp, eHp, over, allies, enemies, bullets, tMon, tEn, tSp, eCnt, banT, banTxt, banCol;
 
 function init() {
   mon=50; pHp=1000; eHp=3000; over=0; allies=[]; enemies=[]; bullets=[];
-  tMon=tEn=Date.now(); eCnt=bossT=0;
+  tMon=tEn=tSp=Date.now(); eCnt=banT=0;
   document.getElementById('restart').style.display='none';
   addEnemy(); requestAnimationFrame(loop);
 }
+function showBanner(txt, col) { banTxt=txt; banCol=col; banT=120; }
 function addAlly(i) {
   let u = ALLY_T[i];
-  if (!over && mon >= u.cost) { mon -= u.cost; allies.push({...u, max:u.hp, sz:36, x:600, y:166, tm:0, kb:0}); }
+  if (!over && mon >= u.cost) {
+    mon -= u.cost;
+    if (i === 3) { showBanner('総大将・織田信長 出陣！', 'rgba(25,42,86,0.9)'); enemies.forEach(e => e.kb = 220); }
+    allies.push({...u, max:u.hp, x:590, y:166, tm:0, kb:0});
+  }
+}
+function fireSandan() {
+  let now = Date.now();
+  if (over || now - tSp < 60000) return;
+  tSp = now;
+  showBanner('必殺・鉄砲三段撃ち！！', 'rgba(194,54,22,0.9)');
+  for (let w = 0; w < 3; w++) {
+    setTimeout(() => {
+      if (over) return;
+      for (let r = 0; r < 5; r++) {
+        bullets.push({ x:620, y:95 + r*15, atk:45, ally:1, sp:1 });
+      }
+    }, w * 280);
+  }
 }
 function addEnemy() {
   eCnt++;
   let boss = eCnt%8===0, cav = !boss && eCnt%4===0, gun = !boss && !cav && eCnt%3===0;
   if (boss) {
-    bossT=120;
-    allies.forEach(a => a.kb = 220); // 味方全員を右へ吹っ飛ばす！
-    enemies.push({name:'勝頼',hp:2200,max:2200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0});
+    showBanner('敵将・武田勝頼 出陣！', 'rgba(183,21,64,0.85)');
+    allies.forEach(a => a.kb = 220);
+    enemies.push({name:'勝頼',hp:2200,max:2200,atk:75,rng:50,spd:0.9,cd:60,col:'#b71540',bc:'#f1c40f',tc:'#f1c40f',gun:0,sz:68,x:100,y:166,tm:0,kb:0});
   }
-  else if (gun) { enemies.push({name:'鉄砲',hp:140,max:140,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',bc:'#fff',tc:'#fff',gun:1,sz:36,x:90,y:166,tm:0}); }
-  else { enemies.push({name:cav?'赤備':'武田',hp:cav?350:180,max:cav?350:180,atk:cav?28:12,rng:35,spd:cav?2.0:1.1,cd:cav?55:48,col:cav?'#8e44ad':'#c0392b',bc:'#fff',tc:'#fff',gun:0,sz:36,x:90,y:166,tm:0}); }
+  else if (gun) { enemies.push({name:'鉄砲',hp:140,max:140,atk:32,rng:175,spd:1.1,cd:55,col:'#e67e22',bc:'#fff',tc:'#fff',gun:1,sz:36,x:90,y:166,tm:0,kb:0}); }
+  else { enemies.push({name:cav?'赤備':'武田',hp:cav?350:180,max:cav?350:180,atk:cav?28:12,rng:35,spd:cav?2.0:1.1,cd:cav?55:48,col:cav?'#8e44ad':'#c0392b',bc:'#fff',tc:'#fff',gun:0,sz:36,x:90,y:166,tm:0,kb:0}); }
 }
 function drawU(u, isA) {
   let s=u.sz, h=s/2, ty=u.y-s;
@@ -80,11 +104,21 @@ function loop() {
   document.getElementById('eHp').textContent=Math.max(0,eHp);
   ALLY_T.forEach((u,i)=>document.getElementById('b'+i).disabled = mon<u.cost);
 
+  let spRem = Math.ceil((60000 - (now - tSp)) / 1000);
+  let bSp = document.getElementById('bSp');
+  if (spRem > 0) { bSp.disabled = true; bSp.textContent = `三段撃ち(${spRem}s)`; }
+  else { bSp.disabled = false; bSp.textContent = '三段撃ち 発動！'; }
+
   ctx.clearRect(0,0,700,220);
   ctx.fillStyle='#558b2f'; ctx.fillRect(0,168,700,52);
   ctx.fillStyle='#c23616'; ctx.fillRect(20,88,55,80);
   ctx.fillStyle='#273c75'; ctx.fillRect(625,88,55,80);
-  if (bossT>0) { bossT--; ctx.fillStyle='rgba(183,21,64,0.85)'; ctx.fillRect(200,16,300,32); ctx.strokeStyle='#f1c40f'; ctx.strokeRect(200,16,300,32); ctx.fillStyle='#f1c40f'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center'; ctx.fillText('敵将・武田勝頼 出陣！',350,38); }
+  if (banT>0) {
+    banT--; ctx.fillStyle=banCol; ctx.fillRect(180,14,340,32);
+    ctx.strokeStyle='#f1c40f'; ctx.strokeRect(180,14,340,32);
+    ctx.fillStyle='#f1c40f'; ctx.font='bold 16px sans-serif'; ctx.textAlign='center';
+    ctx.fillText(banTxt,350,36);
+  }
 
   allies.forEach(a=>{
     if(a.kb>0) { let step=Math.min(18,a.kb); a.x=Math.min(600,a.x+step); a.kb-=step; }
@@ -98,23 +132,31 @@ function loop() {
     drawU(a,1);
   });
   enemies.forEach(e=>{
-    if(e.tm>0) e.tm--;
-    let fx=e.x+e.sz/2, t=allies.find(a=>(a.x-a.sz/2)>=e.x-45 && (a.x-a.sz/2)-fx<=e.rng);
-    if(t) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):t.hp-=e.atk; e.tm=e.cd; } }
-    else if(625-fx<=e.rng) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):pHp-=e.atk; e.tm=e.cd; } }
-    else e.x+=e.spd;
+    if(e.kb>0) { let step=Math.min(18,e.kb); e.x=Math.max(100,e.x-step); e.kb-=step; }
+    else {
+      if(e.tm>0) e.tm--;
+      let fx=e.x+e.sz/2, t=allies.find(a=>(a.x-a.sz/2)>=e.x-45 && (a.x-a.sz/2)-fx<=e.rng);
+      if(t) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):t.hp-=e.atk; e.tm=e.cd; } }
+      else if(625-fx<=e.rng) { if(!e.tm){ e.gun?bullets.push({x:e.x+15,y:e.y-18,atk:e.atk,ally:0}):pHp-=e.atk; e.tm=e.cd; } }
+      else e.x+=e.spd;
+    }
     drawU(e,0);
   });
   for(let k=bullets.length-1; k>=0; k--) {
-    let b=bullets[k]; b.x += b.ally?-10:10;
-    ctx.fillStyle=b.ally?'#ffd32a':'#ff9f43'; ctx.beginPath(); ctx.arc(b.x,b.y,4,0,Math.PI*2); ctx.fill();
+    let b=bullets[k]; b.x += b.ally ? (b.sp?-15:-10) : 10;
+    ctx.fillStyle = b.sp ? '#ff3f34' : (b.ally?'#ffd32a':'#ff9f43');
+    ctx.beginPath(); ctx.arc(b.x,b.y,b.sp?5:4,0,Math.PI*2); ctx.fill();
     let hit = b.ally ? enemies.find(e=>e.hp>0 && Math.abs(b.x-e.x)<=e.sz/2) : allies.find(a=>a.hp>0 && Math.abs(b.x-a.x)<=a.sz/2);
     if(hit) { hit.hp-=b.atk; bullets.splice(k,1); }
     else if(b.ally && b.x<=75) { eHp-=b.atk; bullets.splice(k,1); }
     else if(!b.ally && b.x>=625) { pHp-=b.atk; bullets.splice(k,1); }
     else if(b.x<0 || b.x>700) bullets.splice(k,1);
   }
-  allies=allies.filter(a=>a.hp>0); enemies=enemies.filter(e=>e.hp>0);
+  allies=allies.filter(a=>a.hp>0);
+  let deadE = enemies.filter(e=>e.hp<=0).length;
+  if (deadE > 0) mon = Math.min(1000, mon + deadE * 5);
+  enemies=enemies.filter(e=>e.hp>0);
+
   if(eHp<=0 || pHp<=0) {
     over=1; document.getElementById('eHp').textContent=Math.max(0,eHp); document.getElementById('pHp').textContent=Math.max(0,pHp);
     ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.fillRect(0,0,700,220); ctx.fillStyle=eHp<=0?'#f1c40f':'#ff6b81';
