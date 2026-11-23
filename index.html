@@ -2,90 +2,626 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>戦国大戦争</title>
 <style>
-body{margin:0;background:#1e272e;color:#fff;font-family:sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
-#g{width:720px;max-width:96vw;background:#2f3640;border:2px solid #f1c40f;border-radius:10px;padding:12px;box-sizing:border-box;text-align:center}
-.s{display:none;height:350px;flex-direction:column;justify-content:center;align-items:center;position:relative;border-radius:8px}.s.on{display:flex}
-#s0{background:radial-gradient(circle,#353b48,#1e272e)}#s1{background:linear-gradient(135deg,#2c3e50,#1e272e)}
-#s2{background:#3d5a3c;border:2px solid #78e08f}#s3{height:auto}#s4,#s5{background:#1e272e;border:1px solid #f1c40f;justify-content:flex-start;padding:38px 10px 40px;box-sizing:border-box}
-.lg{font-size:40px;font-weight:bold;color:#f1c40f;text-shadow:3px 3px 0 #c23616;margin:-40px 0 28px}
-.tg{position:absolute;top:10px;left:12px;font-size:15px;font-weight:bold;color:#f1c40f}
-.kb{position:absolute;top:10px;right:12px;font-size:13px;font-weight:bold;color:#ffd32a;background:rgba(0,0,0,.5);padding:2px 8px;border-radius:10px}
-.mb{padding:10px 20px;font-size:15px;font-weight:bold;color:#fff;background:#c23616;border:2px solid #f1c40f;border-radius:8px;cursor:pointer}.mb:disabled{background:#57606f;border-color:#7f8fa6;color:#a4b0be}
-.nd{position:absolute;border-radius:50px;transform:translate(-50%,-50%)}
-.bb{position:absolute;bottom:10px;left:10px;padding:4px 10px;font-size:12px;background:#57606f;color:#fff;border:1px solid #a4b0be;border-radius:4px;cursor:pointer}
-.br{width:100%;box-sizing:border-box;display:flex;justify-content:space-between;background:#1e272e;padding:6px 12px;border-radius:6px;font-weight:bold;font-size:14px;margin-bottom:6px}
-canvas{border:2px solid #fff;border-radius:6px;display:block;width:100%;height:200px}
-.bs{width:100%;display:flex;gap:6px;margin-top:8px}
-.ub{flex:1;padding:8px 2px;font-size:12px;font-weight:bold;color:#fff;background:#273c75;border:2px solid #f1c40f;border-radius:8px;cursor:pointer}.ub:disabled{background:#57606f;border-color:#7f8fa6;color:#a4b0be}
-#ed{display:none;gap:10px;margin-top:8px}.gr{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;width:100%;overflow-y:auto;margin-top:6px}
-.cd{background:#2f3640;border:2px solid #7f8fa6;border-radius:6px;padding:5px 2px;font-size:11px;cursor:pointer}.cd.on{border-color:#f1c40f;background:#3d3d29}
+  body {
+    margin: 0;
+    background: #1e272e;
+    color: #fff;
+    font-family: sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  #game {
+    width: 720px;
+    max-width: 96vw;
+    background: #2f3640;
+    border: 2px solid #f1c40f;
+    border-radius: 10px;
+    padding: 16px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  .screen {
+    display: none;
+    height: 360px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    border-radius: 8px;
+  }
+  .screen.active {
+    display: flex;
+  }
+  #scr-title { background: radial-gradient(circle, #353b48, #1e272e); }
+  #scr-home { background: linear-gradient(135deg, #2c3e50, #1e272e); }
+  #scr-map {
+    background: #3d5a3c radial-gradient(#4a6b48 2px, transparent 2px) 0 0 / 24px 24px;
+    border: 2px solid #78e08f;
+  }
+  #scr-battle { height: auto; }
+  #scr-gacha, #scr-deck {
+    background: #1e272e;
+    border: 1px solid #f1c40f;
+    justify-content: flex-start;
+    padding: 44px 12px 46px;
+    box-sizing: border-box;
+  }
+  .title-logo {
+    font-size: 44px;
+    font-weight: bold;
+    color: #f1c40f;
+    text-shadow: 3px 3px 0 #c23616;
+    margin: -50px 0 36px;
+    letter-spacing: 4px;
+  }
+  .header-tag {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #f1c40f;
+  }
+  .koban-box {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffd32a;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 4px 12px;
+    border-radius: 12px;
+  }
+  .main-btn {
+    padding: 12px 24px;
+    font-size: 17px;
+    font-weight: bold;
+    color: #fff;
+    background: #c23616;
+    border: 2px solid #f1c40f;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .main-btn:hover { background: #e84118; }
+  .main-btn:disabled {
+    background: #57606f;
+    border-color: #7f8fa6;
+    color: #a4b0be;
+    cursor: not-allowed;
+  }
+  .map-node {
+    position: absolute;
+    border-radius: 50px;
+    transform: translate(-50%, -50%);
+  }
+  .back-btn {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    padding: 6px 14px;
+    font-size: 13px;
+    background: #57606f;
+    color: #fff;
+    border: 1px solid #a4b0be;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .status-bar {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: space-between;
+    background: #1e272e;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  canvas {
+    border: 2px solid #fff;
+    border-radius: 6px;
+    display: block;
+    width: 100%;
+    height: 220px;
+  }
+  .unit-btns {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .unit-btn {
+    flex: 1;
+    padding: 10px 4px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #fff;
+    background: #273c75;
+    border: 2px solid #f1c40f;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .unit-btn:disabled {
+    background: #57606f;
+    border-color: #7f8fa6;
+    color: #a4b0be;
+    cursor: not-allowed;
+  }
+  #end-btns {
+    display: none;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    width: 100%;
+    overflow-y: auto;
+    margin-top: 8px;
+  }
+  .card {
+    background: #2f3640;
+    border: 2px solid #7f8fa6;
+    border-radius: 6px;
+    padding: 6px 2px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .card.selected {
+    border-color: #f1c40f;
+    background: #3d3d29;
+  }
 </style>
 </head>
 <body>
-<div id="g">
-<div id="s0" class="s on"><div class="lg">戦国大戦争</div><button class="mb" onclick="go(1)">出陣</button></div>
-<div id="s1" class="s"><div class="tg">本陣</div><div class="kb">小判:<span id="k1">300</span>両</div>
-<button class="mb" style="position:absolute;top:30%;left:32%;transform:translate(-50%,-50%)" onclick="go(2)">⚔️出陣</button>
-<button class="mb" style="position:absolute;top:62%;left:32%;transform:translate(-50%,-50%);background:#8e44ad" onclick="go(4)">🔮ガチャ</button>
-<button class="mb" style="position:absolute;top:62%;left:68%;transform:translate(-50%,-50%);background:#273c75" onclick="go(5)">🛡️編成</button>
-<button class="bb" onclick="go(0)">タイトル</button></div>
-<div id="s2" class="s"><div class="tg">合戦場(勝利+150両)</div>
-<button class="mb nd" style="top:28%;left:24%;background:#2980b9" onclick="pl(0)">⚔️桶狭間</button>
-<button class="mb nd" style="top:52%;left:50%" onclick="pl(1)">⚔️長篠</button>
-<button class="mb nd" style="top:74%;left:76%;background:#6c3483" onclick="pl(2)">⚔️関ヶ原</button>
-<button class="bb" onclick="go(1)">戻る</button></div>
-<div id="s3" class="s"><div style="width:100%;display:flex;justify-content:space-between;margin-bottom:6px"><b id="bt" style="color:#f1c40f"></b><button class="bb" style="position:static" onclick="ov=1;go(2)">撤退</button></div>
-<div class="br"><span style="color:#ff6b81"><span id="en"></span>:<span id="eh"></span></span><span style="color:#f1c40f">資金:<span id="mn"></span>両</span><span style="color:#70a1ff">連合城:<span id="ph"></span></span></div>
-<canvas id="cv" width="700" height="220"></canvas>
-<div class="bs"><button class="ub" id="b0" onclick="aa(0)"></button><button class="ub" id="b1" onclick="aa(1)"></button><button class="ub" id="b2" onclick="aa(2)"></button><button class="ub" id="b3" onclick="aa(3)"></button><button class="ub" id="bp" onclick="sp()" style="background:#c23616" disabled>三段撃ち</button></div>
-<div id="ed"><button class="mb" onclick="ini()">再戦</button><button class="mb" style="background:#273c75" onclick="go(2)">マップへ</button></div></div>
-<div id="s4" class="s"><div class="tg">武将ガチャ(100両)</div><div class="kb">小判:<span id="k4">300</span>両</div><div id="grs" style="margin:auto;font-size:17px;font-weight:bold">ボタンを押して召喚！</div><button class="mb" id="gb" onclick="pull()" style="background:#8e44ad;margin-bottom:8px">ガチャを引く</button><button class="bb" onclick="go(1)">戻る</button></div>
-<div id="s5" class="s"><div class="tg">部隊編成(4体まで)</div><div class="kb" id="dk"></div><div id="pl" class="gr"></div><button class="bb" onclick="go(1)">戻る</button></div>
+
+<div id="game">
+  <!-- タイトル画面 -->
+  <div id="scr-title" class="screen active">
+    <div class="title-logo">戦国大戦争</div>
+    <button class="main-btn" onclick="showScreen('home')">出陣</button>
+  </div>
+
+  <!-- ホーム画面 -->
+  <div id="scr-home" class="screen">
+    <div class="header-tag">本陣（ホーム）</div>
+    <div class="koban-box">小判: <span id="koban-home">300</span>両</div>
+    <button class="main-btn" style="position:absolute; top:30%; left:32%; transform:translate(-50%,-50%);" onclick="showScreen('map')">⚔️ 出陣</button>
+    <button class="main-btn" style="position:absolute; top:62%; left:32%; transform:translate(-50%,-50%); background:#8e44ad;" onclick="showScreen('gacha')">🔮 ガチャ</button>
+    <button class="main-btn" style="position:absolute; top:62%; left:68%; transform:translate(-50%,-50%); background:#273c75;" onclick="showScreen('deck')">🛡️ 編成</button>
+    <button class="back-btn" onclick="showScreen('title')">タイトルへ</button>
+  </div>
+
+  <!-- マップ画面 -->
+  <div id="scr-map" class="screen">
+    <div class="header-tag" style="background:rgba(0,0,0,0.6); padding:4px 10px; border-radius:4px;">合戦場を選択（勝利で小判+150両）</div>
+    <button class="main-btn map-node" style="top:28%; left:24%; background:#2980b9;" onclick="startStage(0)">⚔️ 桶狭間</button>
+    <button class="main-btn map-node" style="top:52%; left:50%;" onclick="startStage(1)">⚔️ 長篠</button>
+    <button class="main-btn map-node" style="top:74%; left:76%; background:#6c3483;" onclick="startStage(2)">⚔️ 関ヶ原</button>
+    <button class="back-btn" onclick="showScreen('home')">ホームへ戻る</button>
+  </div>
+
+  <!-- バトル画面 -->
+  <div id="scr-battle" class="screen">
+    <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <b id="battle-title" style="font-size:18px; color:#f1c40f;"></b>
+      <button class="back-btn" style="position:static;" onclick="quitBattle()">撤退（マップへ）</button>
+    </div>
+    <div class="status-bar">
+      <span style="color:#ff6b81;"><span id="enemy-castle-name"></span>: <span id="enemy-hp"></span></span>
+      <span style="color:#f1c40f;">軍資金: <span id="money"></span>両</span>
+      <span style="color:#70a1ff;">連合城: <span id="player-hp"></span></span>
+    </div>
+    <canvas id="cv" width="700" height="220"></canvas>
+    <div class="unit-btns">
+      <button class="unit-btn" id="btn-u0" onclick="spawnAlly(0)"></button>
+      <button class="unit-btn" id="btn-u1" onclick="spawnAlly(1)"></button>
+      <button class="unit-btn" id="btn-u2" onclick="spawnAlly(2)"></button>
+      <button class="unit-btn" id="btn-u3" onclick="spawnAlly(3)"></button>
+      <button class="unit-btn" id="btn-sp" onclick="fireSandan()" style="background:#c23616; border-color:#ffd32a;" disabled>三段撃ち</button>
+    </div>
+    <div id="end-btns">
+      <button class="main-btn" style="padding:8px 20px; font-size:15px;" onclick="initBattle()">再戦</button>
+      <button class="main-btn" style="padding:8px 20px; font-size:15px; background:#273c75;" onclick="showScreen('map')">マップへ戻る</button>
+    </div>
+  </div>
+
+  <!-- ガチャ画面 -->
+  <div id="scr-gacha" class="screen">
+    <div class="header-tag">武将ガチャ（1回100両）</div>
+    <div class="koban-box">小判: <span id="koban-gacha">300</span>両</div>
+    <div id="gacha-result" style="margin:auto; font-size:18px; font-weight:bold;">ボタンを押して武将を召喚！</div>
+    <button class="main-btn" id="btn-pull" onclick="pullGacha()" style="background:#8e44ad; margin-bottom:10px;">ガチャを引く（100両）</button>
+    <button class="back-btn" onclick="showScreen('home')">ホームへ戻る</button>
+  </div>
+
+  <!-- 編成画面 -->
+  <div id="scr-deck" class="screen">
+    <div class="header-tag">部隊編成（最大4体）</div>
+    <div class="koban-box" id="deck-summary"></div>
+    <div id="unit-pool" class="card-grid"></div>
+    <button class="back-btn" onclick="showScreen('home')">ホームへ戻る</button>
+  </div>
 </div>
+
 <script>
-const $=i=>document.getElementById(i),c=$('cv').getContext('2d');
-const A=[
-{n:'徳川軍',r:'N',c:15,h:300,a:16,g:30,s:1,d:40,l:'#27ae60',b:'',t:'#fff',u:0,z:36,bs:0},
-{n:'豊臣軍',r:'N',c:30,h:160,a:34,g:35,s:2.5,d:35,l:'#f1c40f',b:'',t:'#1e272e',u:0,z:36,bs:0},
-{n:'織田軍',r:'N',c:50,h:100,a:48,g:185,s:1.1,d:50,l:'#8e44ad',b:'',t:'#fff',u:1,z:36,bs:0},
-{n:'信長',r:'R',c:100,h:2e3,a:80,g:55,s:.9,d:55,l:'#192a56',b:'#f1c40f',t:'#f1c40f',u:0,z:68,bs:1},
-{n:'家康',r:'R',c:90,h:2600,a:55,g:45,s:.8,d:50,l:'#1e8449',b:'#f1c40f',t:'#f1c40f',u:0,z:64,bs:1},
-{n:'秀吉',r:'R',c:95,h:1600,a:75,g:50,s:1.7,d:40,l:'#d4ac0d',b:'#fff',t:'#1e272e',u:0,z:64,bs:1},
-{n:'メタル織田',r:'SR',c:70,h:700,a:65,g:195,s:1.2,d:45,l:'#95a5a6',b:'#00d2d3',t:'#1e272e',u:1,z:38,bs:0},
-{n:'メタル豊臣',r:'SR',c:55,h:900,a:50,g:38,s:2.8,d:30,l:'#bdc3c7',b:'#f1c40f',t:'#1e272e',u:0,z:38,bs:0},
-{n:'メタル家康',r:'SR',c:60,h:1500,a:32,g:35,s:1.1,d:38,l:'#7f8c8d',b:'#2ecc71',t:'#fff',u:0,z:38,bs:0},
-{n:'魔王信長',r:'UR',c:140,h:3200,a:120,g:180,s:1,d:45,l:'#2c003e',b:'#ff3f34',t:'#ffdd59',u:1,z:72,bs:1}
+const UNITS = [
+  { name: '徳川軍', rarity: 'N', cost: 15, hp: 300, atk: 16, rng: 30, spd: 1.0, cd: 40, col: '#27ae60', border: '', txt: '#fff', gun: false, size: 36, boss: false },
+  { name: '豊臣軍', rarity: 'N', cost: 30, hp: 160, atk: 34, rng: 35, spd: 2.5, cd: 35, col: '#f1c40f', border: '', txt: '#1e272e', gun: false, size: 36, boss: false },
+  { name: '織田軍', rarity: 'N', cost: 50, hp: 100, atk: 48, rng: 185, spd: 1.1, cd: 50, col: '#8e44ad', border: '', txt: '#fff', gun: true, size: 36, boss: false },
+  { name: '信長', rarity: 'R', cost: 100, hp: 2000, atk: 80, rng: 55, spd: 0.9, cd: 55, col: '#192a56', border: '#f1c40f', txt: '#f1c40f', gun: false, size: 68, boss: true },
+  { name: '家康', rarity: 'R', cost: 90, hp: 2600, atk: 55, rng: 45, spd: 0.8, cd: 50, col: '#1e8449', border: '#f1c40f', txt: '#f1c40f', gun: false, size: 64, boss: true },
+  { name: '秀吉', rarity: 'R', cost: 95, hp: 1600, atk: 75, rng: 50, spd: 1.7, cd: 40, col: '#d4ac0d', border: '#fff', txt: '#1e272e', gun: false, size: 64, boss: true },
+  { name: 'メタル織田', rarity: 'SR', cost: 70, hp: 700, atk: 65, rng: 195, spd: 1.2, cd: 45, col: '#95a5a6', border: '#00d2d3', txt: '#1e272e', gun: true, size: 38, boss: false },
+  { name: 'メタル豊臣', rarity: 'SR', cost: 55, hp: 900, atk: 50, rng: 38, spd: 2.8, cd: 30, col: '#bdc3c7', border: '#f1c40f', txt: '#1e272e', gun: false, size: 38, boss: false },
+  { name: 'メタル家康', rarity: 'SR', cost: 60, hp: 1500, atk: 32, rng: 35, spd: 1.1, cd: 38, col: '#7f8c8d', border: '#2ecc71', txt: '#fff', gun: false, size: 38, boss: false },
+  { name: '魔王信長', rarity: 'UR', cost: 140, hp: 3200, atk: 120, rng: 180, spd: 1.0, cd: 45, col: '#2c003e', border: '#ff3f34', txt: '#ffdd59', gun: true, size: 72, boss: true }
 ];
-const S=[
-{t:'桶狭間の戦い',n:'今川本陣',h:1800,w:5200,b:'#576574',e:['今川','弓兵','侍大将','義元'],bh:1400,ba:55},
-{t:'長篠の戦い',n:'武田城',h:3e3,w:4500,b:'#87ceeb',e:['武田','鉄砲','赤備','勝頼'],bh:2200,ba:75},
-{t:'関ヶ原の戦い',n:'西軍本陣',h:5e3,w:3600,b:'#b2bec3',e:['西軍','鉄砲','島津','三成'],bh:3200,ba:95}
+
+const STAGES = [
+  { title: '桶狭間の戦い', castle: '今川本陣', hp: 1800, rate: 5200, bg: '#576574', e1: '今川', e2: '弓兵', e3: '侍大将', boss: '義元', bossHp: 1400, bossAtk: 55 },
+  { title: '長篠の戦い', castle: '武田城', hp: 3000, rate: 4500, bg: '#87ceeb', e1: '武田', e2: '鉄砲', e3: '赤備', boss: '勝頼', bossHp: 2200, bossAtk: 75 },
+  { title: '関ヶ原の戦い', castle: '西軍本陣', hp: 5000, rate: 3600, bg: '#b2bec3', e1: '西軍', e2: '鉄砲', e3: '島津', boss: '三成', bossHp: 3200, bossAtk: 95 }
 ];
-let kb=300,ow=[0,1,2,3],dk=[0,1,2,3],cr=1,mn,ph,eh,ov,al,en,bl,tm,te,ts,ec,bt,bx,bc,id;
-const go=n=>{document.querySelectorAll('.s').forEach(e=>e.classList.remove('on'));$('s'+n).classList.add('on');$('k1').textContent=$('k4').textContent=kb;$('gb').disabled=kb<100;if(n==5)rnD()};
-const pl=n=>{cr=n;go(3);ini()},bn=(t,l)=>{bx=t;bc=l;bt=120};
-function pull(){if(kb<100)return;kb-=100;let r=Math.random()*100,p=r<8?[9]:r<28?[6,7,8]:r<63?[3,4,5]:[0,1,2],u=p[Math.floor(Math.random()*p.length)],nw=!ow.includes(u);if(nw)ow.push(u);else kb+=30;$('k1').textContent=$('k4').textContent=kb;$('gb').disabled=kb<100;$('grs').innerHTML='<div style="color:'+(A[u].r=='UR'?'#ff6b81':A[u].r=='SR'?'#00d2d3':'#f1c40f')+'">['+A[u].r+'] '+A[u].n+'</div><div style="font-size:12px;margin-top:6px">'+(nw?'NEW! 仲間になった！':'所持済（小判+30返還）')+'</div>'}
-function rnD(){$('dk').textContent='出陣枠:'+dk.map(i=>A[i].n).join('/');$('pl').innerHTML=ow.map(i=>{let u=A[i],on=dk.includes(i);return'<div class="cd '+(on?'on':'')+'" onclick="tgD('+i+')"><b style="color:'+(u.r=='UR'?'#ff6b81':u.r=='SR'?'#00d2d3':'#f1c40f')+'">['+u.r+']'+u.n+'</b><br>'+u.c+'両/HP'+u.h+'<br>'+(on?'★編成中':'選択')+'</div>'}).join('')}
-function tgD(i){if(dk.includes(i)){if(dk.length>1)dk=dk.filter(x=>x!=i)}else if(dk.length<4)dk.push(i);rnD()}
-function ini(){cancelAnimationFrame(id);let s=S[cr];$('bt').textContent=s.t;$('en').textContent=s.n;$('cv').style.background=s.b;mn=50;ph=1e3;eh=s.h;ov=0;al=[];en=[];bl=[];tm=te=ts=Date.now();ec=bt=0;$('ed').style.display='none';for(let i=0;i<4;i++){let b=$('b'+i),u=A[dk[i]];if(u){b.style.display='block';b.innerHTML=u.n+'<br>'+u.c+'両';b.style.background=u.bs?'#4a1c40':'#273c75';b.style.borderColor=u.b||'#f1c40f'}else b.style.display='none'}ae();id=requestAnimationFrame(lp)}
-function aa(i){let u=A[dk[i]];if(u&&!ov&&mn>=u.c){mn-=u.c;if(u.bs){bn('総大将・'+u.n+' 出陣！','rgba(25,42,86,.9)');en.forEach(e=>e.k=220)}al.push({...u,m:u.h,x:590,o:0,k:0})}}
-function sp(){let w=Date.now();if(ov||w-ts<6e4)return;ts=w;bn('必殺・鉄砲三段撃ち！！','rgba(194,54,22,.9)');for(let i=0;i<3;i++)setTimeout(()=>{if(!ov)for(let r=0;r<5;r++)bl.push({x:620,y:95+r*15,a:45,f:1,p:1})},i*280)}
-function ae(){ec++;let s=S[cr],b=ec%8==0,v=!b&&ec%4==0,g=!b&&!v&&ec%3==0;if(b){bn('敵将・'+s.e[3]+' 出陣！','rgba(183,21,64,.85)');al.forEach(a=>a.k=220);en.push({n:s.e[3],h:s.bh,m:s.bh,a:s.ba,g:50,s:.9,d:60,l:'#b71540',b:'#f1c40f',t:'#f1c40f',z:68,x:100,o:0,k:0})}else if(g)en.push({n:s.e[1],h:140,m:140,a:32,g:175,s:1.1,d:55,l:'#e67e22',t:'#fff',u:1,z:36,x:90,o:0,k:0});else en.push({n:v?s.e[2]:s.e[0],h:v?350:180,m:v?350:180,a:v?28:12,g:35,s:v?2:1.1,d:v?55:48,l:v?'#8e44ad':'#c0392b',t:'#fff',z:36,x:90,o:0,k:0})}
-function dr(u,f){let s=u.z,h=s/2,y=166-s;c.fillStyle=u.l;c.fillRect(u.x-h,y,s,s);c.lineWidth=s>40?3:1;c.strokeStyle=u.b||'#fff';c.strokeRect(u.x-h,y,s,s);c.fillStyle=u.t;c.font='bold '+(s>40?15:11)+'px sans-serif';c.textAlign='center';c.fillText(u.n,u.x,y+h+(s>40?5:4));c.fillStyle='#333';c.fillRect(u.x-h+2,y-8,s-4,5);c.fillStyle=f?'#4cd137':'#ff4757';c.fillRect(u.x-h+2,y-8,(s-4)*Math.max(0,u.h/u.m),5)}
 
-  function lp(){if(ov)return;let w=Date.now(),rm=Math.ceil((6e4-(w-ts))/1e3);if(w-tm>=1e3){mn=Math.min(1e3,mn+3);tm+=1e3}if(w-te>=S[cr].w){ae();te=w}$('mn').textContent=mn;$('ph').textContent=Math.max(0,ph);$('eh').textContent=Math.max(0,eh);dk.forEach((u,i)=>$('b'+i).disabled=mn<A[u].c);$('bp').disabled=rm>0;$('bp').innerHTML=rm>0?'三段撃ち
-('+rm+'s)':'三段撃ち
-発動！';c.clearRect(0,0,700,220);c.fillStyle='#558b2f';c.fillRect(0,168,700,52);c.fillStyle='#c23616';c.fillRect(20,88,55,80);c.fillStyle='#273c75';c.fillRect(625,88,55,80);if(bt>0){bt--;c.fillStyle=bc;c.fillRect(180,14,340,32);c.strokeStyle='#f1c40f';c.strokeRect(180,14,340,32);c.fillStyle='#f1c40f';c.font='bold 16px sans-serif';c.textAlign='center';c.fillText(bx,350,36)}al.forEach(a=>{if(a.k>0){let s=Math.min(18,a.k);a.x=Math.min(600,a.x+s);a.k-=s}else{if(a.o>0)a.o--;let t=en.find(e=>a.x>=e.x-45&&a.x-(e.x+e.z/2)<=a.g);if(t){if(!a.o){a.u?bl.push({x:a.x-15,y:148,a:a.a,f:1}):t.h-=a.a;a.o=a.d}}else if(a.x-75<=a.g){if(!a.o){a.u?bl.push({x:a.x-15,y:148,a:a.a,f:1}):eh-=a.a;a.o=a.d}}else a.x-=a.s}dr(a,1)});en.forEach(e=>{if(e.k>0){let s=Math.min(18,e.k);e.x=Math.max(100,e.x-s);e.k-=s}else{if(e.o>0)e.o--;let x=e.x+e.z/2,t=al.find(a=>(a.x-a.z/2)>=e.x-45&&(a.x-a.z/2)-x<=e.g);if(t){if(!e.o){e.u?bl.push({x:e.x+15,y:148,a:e.a,f:0}):t.h-=e.a;e.o=e.d}}else if(625-x<=e.g){if(!e.o){e.u?bl.push({x:e.x+15,y:148,a:e.a,f:0}):ph-=e.a;e.o=e.d}}else e.x+=e.s}dr(e,0)});for(let k=bl.length-1;k>=0;k--){let b=bl[k];b.x+=b.f?(b.p?-15:-10):10;c.fillStyle=b.p?'#ff3f34':(b.f?'#ffd32a':'#ff9f43');c.beginPath();c.arc(b.x,b.y,b.p?5:4,0,6.28);c.fill();let h=b.f?en.find(e=>e.h>0&&Math.abs(b.x-e.x)<=e.z/2):al.find(a=>a.h>0&&Math.abs(b.x-a.x)<=a.z/2);if(h){h.h-=b.a;bl.splice(k,1)}else if(b.f&&b.x<=75){eh-=b.a;bl.splice(k,1)}else if(!b.f&&b.x>=625){ph-=b.a;bl.splice(k,1)}else if(b.x<0||b.x>700)bl.splice(k,1)}al=al.filter(a=>a.h>0);mn=Math.min(1e3,mn+en.filter(e=>e.h<=0).length*5);en=en.filter(e=>e.h>0);if(eh<=0||ph<=0){ov=1;$('eh').textContent=Math.max(0,eh);$('ph').textContent=Math.max(0,ph);if(eh<=0)kb+=150;c.fillStyle='rgba(0,0,0,.7)';c.fillRect(0,0,700,220);c.fillStyle=eh<=0?'#f1c40f':'#ff6b81';c.font='bold 28px sans-serif';c.textAlign='center';c.fillText(eh<=0?'勝利！小判150両獲得！':'連合軍の敗北…',350,120);$('ed').style.display='flex';return}id=requestAnimationFrame(lp)}
-</script>
-</body>
-</html>
+let koban = 300;
+let owned =;
+let deck =;
+let currentStage = 1;
 
-
-
-
-
-
-  
+let money, playerHp, enemyHp, isOver;
+let allies, enemies, bullets;
+let timeMoney, timeEnemy, timeSpecial;
+let enemyCount, bannerTimer, bannerText, bannerColor, animId;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+function showScreen(name) {
+document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+document.getElementById('scr-' + name).classList.add('active');
+updateKobanUI();
+if (name === 'deck') {
+renderDeck();
+}
+}
+function updateKobanUI() {
+document.getElementById('koban-home').textContent = koban;
+document.getElementById('koban-gacha').textContent = koban;
+document.getElementById('btn-pull').disabled = koban < 100;
+}
+function pullGacha() {
+if (koban < 100) return;
+koban -= 100;
+const roll = Math.random() * 100;
+let pool;
+if (roll < 8) {
+pool =;
+} else if (roll < 28) {
+pool =;
+} else if (roll < 63) {
+pool =;
+} else {
+pool =;
+}
+const unitId = pool[Math.floor(Math.random() * pool.length)];
+const unit = UNITS[unitId];
+const isNew = !owned.includes(unitId);
+if (isNew) {
+owned.push(unitId);
+} else {
+koban += 30;
+}
+updateKobanUI();
+const color = unit.rarity === 'UR' ? '#ff6b81' : (unit.rarity === 'SR' ? '#00d2d3' : '#f1c40f');
+const msg = isNew ? '✨ NEW! 仲間になった！' : 'すでに所持（小判+30両 返還）';
+document.getElementById('gacha-result').innerHTML =
+<div style="color:${color}; font-size:22px;">[${unit.rarity}] ${unit.name}</div> +
+<div style="font-size:13px; margin-top:8px; color:#fff;">${msg}</div>;
+}
+function renderDeck() {
+document.getElementById('deck-summary').textContent = '出陣枠: ' + deck.map(id => UNITS[id].name).join(' / ');
+const poolEl = document.getElementById('unit-pool');
+poolEl.innerHTML = owned.map(id => {
+const u = UNITS[id];
+const isSelected = deck.includes(id);
+const color = u.rarity === 'UR' ? '#ff6b81' : (u.rarity === 'SR' ? '#00d2d3' : '#f1c40f');
+return <div class="card ${isSelected ? 'selected' : ''}" onclick="toggleDeck(${id})"> <b style="color:${color}">[${u.rarity}] ${u.name}</b><br> コスト:${u.cost}両 / HP:${u.hp}<br> ${isSelected ? '★編成中' : 'タップで選択'} </div>;
+}).join('');
+}
+function toggleDeck(id) {
+if (deck.includes(id)) {
+if (deck.length > 1) {
+deck = deck.filter(x => x !== id);
+}
+} else if (deck.length < 4) {
+deck.push(id);
+}
+renderDeck();
+}
+function startStage(stageIdx) {
+currentStage = stageIdx;
+showScreen('battle');
+initBattle();
+}
+function quitBattle() {
+isOver = true;
+showScreen('map');
+}
+function showBanner(text, color) {
+bannerText = text;
+bannerColor = color;
+bannerTimer = 120;
+}
+function initBattle() {
+if (animId) cancelAnimationFrame(animId);
+const st = STAGES[currentStage];
+document.getElementById('battle-title').textContent = st.title;
+document.getElementById('enemy-castle-name').textContent = st.castle;
+cv.style.background = st.bg;
+money = 50;
+playerHp = 1000;
+enemyHp = st.hp;
+isOver = false;
+allies = [];
+enemies = [];
+bullets = [];
+timeMoney = timeEnemy = timeSpecial = Date.now();
+enemyCount = 0;
+bannerTimer = 0;
+document.getElementById('end-btns').style.display = 'none';
+for (let i = 0; i < 4; i++) {
+const btn = document.getElementById('btn-u' + i);
+const unit = UNITS[deck[i]];
+if (unit) {
+btn.style.display = 'block';
+btn.innerHTML = ${unit.name}<br>${unit.cost}両;
+btn.style.background = unit.boss ? '#4a1c40' : '#273c75';
+btn.style.borderColor = unit.border || '#f1c40f';
+} else {
+btn.style.display = 'none';
+}
+}
+spawnEnemy();
+animId = requestAnimationFrame(gameLoop);
+}
+function spawnAlly(slotIdx) {
+const unit = UNITS[deck[slotIdx]];
+if (!unit || isOver || money < unit.cost) return;
+money -= unit.cost;
+if (unit.boss) {
+showBanner(総大将・${unit.name} 出陣！, 'rgba(25, 42, 86, 0.9)');
+enemies.forEach(e => e.kb = 220);
+}
+allies.push({
+...unit,
+maxHp: unit.hp,
+x: 590,
+timer: 0,
+kb: 0
+});
+}
+function fireSandan() {
+const now = Date.now();
+if (isOver || now - timeSpecial < 60000) return;
+timeSpecial = now;
+showBanner('必殺・鉄砲三段撃ち！！', 'rgba(194, 54, 22, 0.9)');
+for (let w = 0; w < 3; w++) {
+setTimeout(() => {
+if (isOver) return;
+for (let r = 0; r < 5; r++) {
+bullets.push({ x: 620, y: 95 + r * 15, atk: 45, isAlly: true, isSpecial: true });
+}
+}, w * 280);
+}
+}
+function spawnEnemy() {
+enemyCount++;
+const st = STAGES[currentStage];
+const isBoss = enemyCount % 8 === 0;
+const isCav = !isBoss && enemyCount % 4 === 0;
+const isGun = !isBoss && !isCav && enemyCount % 3 === 0;
+if (isBoss) {
+showBanner(敵将・${st.boss} 出陣！, 'rgba(183, 21, 64, 0.85)');
+allies.forEach(a => a.kb = 220);
+enemies.push({
+name: st.boss, hp: st.bossHp, maxHp: st.bossHp, atk: st.bossAtk,
+rng: 50, spd: 0.9, cd: 60, col: '#b71540', border: '#f1c40f',
+txt: '#f1c40f', gun: false, size: 68, x: 100, timer: 0, kb: 0
+});
+} else if (isGun) {
+enemies.push({
+name: st.e2, hp: 140, maxHp: 140, atk: 32,
+rng: 175, spd: 1.1, cd: 55, col: '#e67e22', border: '#fff',
+txt: '#fff', gun: true, size: 36, x: 90, timer: 0, kb: 0
+});
+} else {
+enemies.push({
+name: isCav ? st.e3 : st.e1, hp: isCav ? 350 : 180, maxHp: isCav ? 350 : 180,
+atk: isCav ? 28 : 12, rng: 35, spd: isCav ? 2.0 : 1.1, cd: isCav ? 55 : 48,
+col: isCav ? '#8e44ad' : '#c0392b', border: '#fff',
+txt: '#fff', gun: false, size: 36, x: 90, timer: 0, kb: 0
+});
+}
+}
+function drawUnit(u, isAlly) {
+const s = u.size;
+const half = s / 2;
+const topY = 166 - s;
+ctx.fillStyle = u.col;
+ctx.fillRect(u.x - half, topY, s, s);
+ctx.lineWidth = s > 40 ? 3 : 1;
+ctx.strokeStyle = u.border || '#fff';
+ctx.strokeRect(u.x - half, topY, s, s);
+ctx.fillStyle = u.txt;
+ctx.font = bold ${s > 40 ? 16 : 11}px sans-serif;
+ctx.textAlign = 'center';
+ctx.fillText(u.name, u.x, topY + half + (s > 40 ? 6 : 4));
+ctx.fillStyle = '#333';
+ctx.fillRect(u.x - half + 2, topY - 8, s - 4, 5);
+ctx.fillStyle = isAlly ? '#4cd137' : '#ff4757';
+ctx.fillRect(u.x - half + 2, topY - 8, (s - 4) * Math.max(0, u.hp / u.maxHp), 5);
+}
+function gameLoop() {
+if (isOver) return;
+const now = Date.now();
+if (now - timeMoney >= 1000) {
+money = Math.min(1000, money + 3);
+timeMoney += 1000;
+}
+if (now - timeEnemy >= STAGES[currentStage].rate) {
+spawnEnemy();
+timeEnemy = now;
+}
+document.getElementById('money').textContent = money;
+document.getElementById('player-hp').textContent = Math.max(0, playerHp);
+document.getElementById('enemy-hp').textContent = Math.max(0, enemyHp);
+deck.forEach((unitId, i) => {
+document.getElementById('btn-u' + i).disabled = money < UNITS[unitId].cost;
+});
+const spRemain = Math.ceil((60000 - (now - timeSpecial)) / 1000);
+const spBtn = document.getElementById('btn-sp');
+if (spRemain > 0) {
+spBtn.disabled = true;
+spBtn.innerHTML = 三段撃ち<br>(${spRemain}s);
+} else {
+spBtn.disabled = false;
+spBtn.innerHTML = '三段撃ち
+発動！';
+}
+ctx.clearRect(0, 0, 700, 220);
+ctx.fillStyle = '#558b2f';
+ctx.fillRect(0, 168, 700, 52);
+ctx.fillStyle = '#c23616';
+ctx.fillRect(20, 88, 55, 80);
+ctx.fillStyle = '#273c75';
+ctx.fillRect(625, 88, 55, 80);
+if (bannerTimer > 0) {
+bannerTimer--;
+ctx.fillStyle = bannerColor;
+ctx.fillRect(180, 14, 340, 32);
+ctx.strokeStyle = '#f1c40f';
+ctx.strokeRect(180, 14, 340, 32);
+ctx.fillStyle = '#f1c40f';
+ctx.font = 'bold 16px sans-serif';
+ctx.textAlign = 'center';
+ctx.fillText(bannerText, 350, 36);
+}
+allies.forEach(a => {
+if (a.kb > 0) {
+const step = Math.min(18, a.kb);
+a.x = Math.min(600, a.x + step);
+a.kb -= step;
+} else {
+if (a.timer > 0) a.timer--;
+const target = enemies.find(e => a.x >= e.x - 45 && a.x - (e.x + e.size / 2) <= a.rng);
+if (target) {
+if (a.timer === 0) {
+if (a.gun) {
+bullets.push({ x: a.x - 15, y: 148, atk: a.atk, isAlly: true, isSpecial: false });
+} else {
+target.hp -= a.atk;
+}
+a.timer = a.cd;
+}
+} else if (a.x - 75 <= a.rng) {
+if (a.timer === 0) {
+if (a.gun) {
+bullets.push({ x: a.x - 15, y: 148, atk: a.atk, isAlly: true, isSpecial: false });
+} else {
+enemyHp -= a.atk;
+}
+a.timer = a.cd;
+}
+} else {
+a.x -= a.spd;
+}
+}
+drawUnit(a, true);
+});
+enemies.forEach(e => {
+if (e.kb > 0) {
+const step = Math.min(18, e.kb);
+e.x = Math.max(100, e.x - step);
+e.kb -= step;
+} else {
+if (e.timer > 0) e.timer--;
+const frontX = e.x + e.size / 2;
+const target = allies.find(a => (a.x - a.size / 2) >= e.x - 45 && (a.x - a.size / 2) - frontX <= e.rng);
+if (target) {
+if (e.timer === 0) {
+if (e.gun) {
+bullets.push({ x: e.x + 15, y: 148, atk: e.atk, isAlly: false, isSpecial: false });
+} else {
+target.hp -= e.atk;
+}
+e.timer = e.cd;
+}
+} else if (625 - frontX <= e.rng) {
+if (e.timer === 0) {
+if (e.gun) {
+bullets.push({ x: e.x + 15, y: 148, atk: e.atk, isAlly: false, isSpecial: false });
+} else {
+playerHp -= e.atk;
+}
+e.timer = e.cd;
+}
+} else {
+e.x += e.spd;
+}
+}
+drawUnit(e, false);
+});
+for (let k = bullets.length - 1; k >= 0; k--) {
+const b = bullets[k];
+b.x += b.isAlly ? (b.isSpecial ? -15 : -10) : 10;
+ctx.fillStyle = b.isSpecial ? '#ff3f34' : (b.isAlly ? '#ffd32a' : '#ff9f43');
+ctx.beginPath();
+ctx.arc(b.x, b.y, b.isSpecial ? 5 : 4, 0, Math.PI * 2);
+ctx.fill();
+const hit = b.isAlly
+? enemies.find(e => e.hp > 0 && Math.abs(b.x - e.x) <= e.size / 2)
+: allies.find(a => a.hp > 0 && Math.abs(b.x - a.x) <= a.size / 2);
+if (hit) {
+hit.hp -= b.atk;
+bullets.splice(k, 1);
+} else if (b.isAlly && b.x <= 75) {
+enemyHp -= b.atk;
+bullets.splice(k, 1);
+} else if (!b.isAlly && b.x >= 625) {
+playerHp -= b.atk;
+bullets.splice(k, 1);
+} else if (b.x < 0 || b.x > 700) {
+bullets.splice(k, 1);
+}
+}
+allies = allies.filter(a => a.hp > 0);
+const deadCount = enemies.filter(e => e.hp <= 0).length;
+if (deadCount > 0) {
+money = Math.min(1000, money + deadCount * 5);
+}
+enemies = enemies.filter(e => e.hp > 0);
+if (enemyHp <= 0 || playerHp <= 0) {
+isOver = true;
+document.getElementById('enemy-hp').textContent = Math.max(0, enemyHp);
+document.getElementById('player-hp').textContent = Math.max(0, playerHp);
+if (enemyHp <= 0) {
+koban += 150;
+}
+ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+ctx.fillRect(0, 0, 700, 220);
+ctx.fillStyle = enemyHp <= 0 ? '#f1c40f' : '#ff6b81';
+ctx.font = 'bold 28px sans-serif';
+ctx.textAlign = 'center';
+ctx.fillText(enemyHp <= 0 ? '勝利！小判150両獲得！' : '連合軍の敗北…', 350, 120);
+document.getElementById('end-btns').style.display = 'flex';
+return;
+}
+animId = requestAnimationFrame(gameLoop);
+}
