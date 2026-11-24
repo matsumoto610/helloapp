@@ -144,7 +144,7 @@ function playBattleHorn() {
   playTone(220.00, 0.85, 'sawtooth', 0.08, 196.00, 0.1);
 }
 
-/* BGM制御（home: 2拍音＋1拍休みの戦太鼓 / battle: ドキドキする紧迫メロディ） */
+/* BGM制御（home: 2拍音＋1拍休みの戦太鼓 / battle: ドキドキする緊迫メロディ） */
 function setBgm(mode) {
   if (bgmMode === mode && bgmTimer) return;
   bgmMode = mode;
@@ -154,7 +154,6 @@ function setBgm(mode) {
 
   let step = 0;
   if (mode === 'home') {
-    /* 3拍子（0:ドン, 1:ドン, 2:休み） */
     bgmTimer = setInterval(() => {
       if (!sndOn || bgmMode !== 'home') return;
       initAudio();
@@ -168,16 +167,13 @@ function setBgm(mode) {
       step++;
     }, 460);
   } else if (mode === 'battle') {
-    /* 緊迫感ある和風マイナー・高速パルス（ドキドキメロディ） */
     const mel = [329.63, 329.63, 349.23, 329.63, 440.00, 392.00, 349.23, 329.63,
                  293.66, 293.66, 329.63, 349.23, 392.00, 349.23, 329.63, 246.94];
     bgmTimer = setInterval(() => {
       if (!sndOn || bgmMode !== 'battle') return;
       initAudio();
       const idx = step % 16;
-      /* 心臓の鼓動のような低音ベース */
       if (idx % 2 === 0) playTone(idx % 4 === 0 ? 110 : 123.47, 0.14, 'triangle', 0.16, 65);
-      /* 緊迫メロディ */
       playTone(mel[idx], 0.15, 'square', 0.06);
       step++;
     }, 175);
@@ -344,7 +340,8 @@ const EXTRA_DATA = [
 ];
 
 EXTRA_DATA.forEach(d => {
-  A.push({ n:d[0], r:d[1], c:d[2], h:d[3], a:d[4], g:d[5], s:d[6], d:d[7], l:d[8], b:d[9], t:d[10], u:d[11], z:d[12], bs:d[13] });
+  const [n, r, c, h, a, g, s, dp, l, b, t, u, z, bs] = d;
+  A.push({ n, r, c, h, a, g, s, d: dp, l, b, t, u, z, bs });
 });
 
 const S = [
@@ -354,8 +351,8 @@ const S = [
 ];
 
 let kb = 300;
-let ow =;
-let dk =;
+let ow = '0,1,2,3'.split(',').map(Number);
+let dk = '0,1,2,3'.split(',').map(Number);
 let cr = 1, mn, ph, eh, ov, al, en, bl, souls, tm, te, ts, ec, bt, bx, bc, aid;
 
 function go(n) {
@@ -380,7 +377,7 @@ function pull() {
   let r = Math.random() * 100;
   let targetR = r < 8 ? 'UR' : r < 24 ? 'SSR' : r < 50 ? 'SR' : r < 78 ? 'R' : 'N';
   let pool = A.map((u, idx) => ({ u, idx })).filter(x => x.u.r === targetR);
-  let pick = pool[Math.floor(Math.random() * pool.length)];
+  let pick = pool.at(Math.floor(Math.random() * pool.length));
   let u = pick.idx, x = pick.u;
   let nw = !ow.includes(u);
   if (nw) ow.push(u); else kb += 30;
@@ -393,9 +390,9 @@ function pull() {
 }
 
 function rnD() {
-  $('dk').textContent = '出陣枠:' + dk.map(i => A[i].n).join('/');
+  $('dk').textContent = '出陣枠:' + dk.map(i => A.at(i).n).join('/');
   $('pl').innerHTML = ow.map(i => {
-    let u = A[i], on = dk.includes(i);
+    let u = A.at(i), on = dk.includes(i);
     let cl = u.r === 'UR' ? '#ff6b81' : u.r === 'SSR' ? '#ff9ff3' : u.r === 'SR' ? '#00d2d3' : u.r === 'R' ? '#f1c40f' : '#dfe6e9';
     return '<div class="cd ' + (on ? 'on' : '') + '" data-id="' + i + '"><b style="color:' + cl + '">[' + u.r + ']' + u.n + '</b><br>' + u.c + '両/HP' + u.h + '<br>' + (on ? '★編成中' : '選択') + '</div>';
   }).join('');
@@ -409,18 +406,16 @@ function rnD() {
   });
 }
 function ini() {
-  if (!Array.isArray(ow) || !ow.length) ow =;
-  if (!Array.isArray(dk) || !dk.length) dk =;
   cancelAnimationFrame(aid);
   playBattleHorn();
   setBgm('battle');
-  let s = S[cr];
+  let s = S.at(cr);
   $('bt').textContent = s.t; $('en').textContent = s.n; $('cv').style.background = s.b;
   mn = 50; ph = 1000; eh = s.h; ov = 0; al = []; en = []; bl = []; souls = [];
   tm = te = ts = Date.now(); ec = bt = 0;
   $('ed').style.display = 'none';
   for (let i = 0; i < 4; i++) {
-    let b = $('b' + i), uid = dk[i], u = uid !== undefined ? A[uid] : null;
+    let b = $('b' + i), uid = dk.at(i), u = uid !== undefined ? A.at(uid) : null;
     if (u) {
       b.style.display = 'block'; b.innerHTML = u.n + '<br>' + u.c + '両';
       b.style.background = u.bs ? '#4a1c40' : '#273c75'; b.style.borderColor = u.b || '#f1c40f';
@@ -435,7 +430,7 @@ function addSoul(x, y, isAlly) {
 
 function drawSouls() {
   for (let i = souls.length - 1; i >= 0; i--) {
-    let s = souls[i];
+    let s = souls.at(i);
     s.y -= s.vy;
     s.phase += 0.14;
     s.alpha -= 0.014;
@@ -457,9 +452,9 @@ function drawSouls() {
 
 function aa(i) {
   initAudio();
-  let uid = dk[i];
+  let uid = dk.at(i);
   if (uid === undefined) return;
-  let u = A[uid];
+  let u = A.at(uid);
   if (u && !ov && mn >= u.c) {
     mn -= u.c;
     if (u.bs) {
@@ -488,7 +483,7 @@ function sp() {
 
 function ae() {
   ec++;
-  let s = S[cr], b = ec % 8 === 0, v = !b && ec % 4 === 0, g = !b && !v && ec % 3 === 0;
+  let s = S.at(cr), b = ec % 8 === 0, v = !b && ec % 4 === 0, g = !b && !v && ec % 3 === 0;
   if (b) { bn('敵将・' + s.eb + ' 出陣！', 'rgba(183,21,64,.85)'); al.forEach(a => a.k = 220); en.push({ n: s.eb, h: s.bh, m: s.bh, a: s.ba, g: 50, s: 0.9, d: 60, l: '#b71540', b: '#f1c40f', t: '#f1c40f', z: 68, x: 100, o: 0, k: 0 }); }
   else if (g) en.push({ n: s.e2, h: 140, m: 140, a: 32, g: 175, s: 1.1, d: 55, l: '#e67e22', t: '#fff', u: 1, z: 36, x: 90, o: 0, k: 0 });
   else en.push({ n: v ? s.e3 : s.e1, h: v ? 350 : 180, m: v ? 350 : 180, a: v ? 28 : 12, g: 35, s: v ? 2 : 1.1, d: v ? 55 : 48, l: v ? '#8e44ad' : '#c0392b', t: '#fff', z: 36, x: 90, o: 0, k: 0 });
@@ -508,9 +503,9 @@ function lp() {
   if (ov) return;
   let w = Date.now(), rm = Math.ceil((60000 - (w - ts)) / 1000);
   if (w - tm >= 1000) { mn = Math.min(1000, mn + 3); tm += 1000; }
-  if (w - te >= S[cr].w) { ae(); te = w; }
+  if (w - te >= S.at(cr).w) { ae(); te = w; }
   $('mn').textContent = mn; $('ph').textContent = Math.max(0, ph); $('eh').textContent = Math.max(0, eh);
-  dk.forEach((u, i) => $('b' + i).disabled = mn < A[u].c);
+  dk.forEach((u, i) => $('b' + i).disabled = mn < A.at(u).c);
   $('bp').disabled = rm > 0;
   $('bp').innerHTML = rm > 0 ? '三段撃ち<br>(' + rm + 's)' : '三段撃ち<br>発動！';
 
@@ -545,7 +540,7 @@ function lp() {
   });
 
   for (let k = bl.length - 1; k >= 0; k--) {
-    let b = bl[k]; b.x += b.f ? (b.p ? -15 : -10) : 10;
+    let b = bl.at(k); b.x += b.f ? (b.p ? -15 : -10) : 10;
     ctx.fillStyle = b.p ? '#ff3f34' : (b.f ? '#ffd32a' : '#ff9f43');
     ctx.beginPath(); ctx.arc(b.x, b.y, b.p ? 5 : 4, 0, 6.283); ctx.fill();
     let h = b.f ? en.find(e => e.h > 0 && Math.abs(b.x - e.x) <= e.z / 2) : al.find(a => a.h > 0 && Math.abs(b.x - a.x) <= a.z / 2);
@@ -555,7 +550,6 @@ function lp() {
     else if (b.x < 0 || b.x > 700) bl.splice(k, 1);
   }
 
-  /* 倒れたユニットから魂を発生させる */
   al.filter(a => a.h <= 0).forEach(a => addSoul(a.x, 160 - a.z / 2, true));
   en.filter(e => e.h <= 0).forEach(e => addSoul(e.x, 160 - e.z / 2, false));
 
