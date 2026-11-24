@@ -69,7 +69,7 @@
   .ub { flex: 1; padding: 8px 2px; font-size: 12px; font-weight: bold; color: #fff; background: #273c75; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
   .ub:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; }
   #ed { display: none; gap: 10px; margin-top: 8px; }
-  .gr { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; width: 100%; overflow-y: auto; margin-top: 6px; }
+  .gr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 100%; overflow-y: auto; margin-top: 6px; padding-right: 2px; }
   .cd { background: #2f3640; border: 2px solid #7f8fa6; border-radius: 6px; padding: 5px 2px; font-size: 11px; cursor: pointer; }
   .cd.on { border-color: #f1c40f; background: #3d3d29; }
 </style>
@@ -167,16 +167,22 @@ function drawFire() {
 drawFire();
 
 const A = [
-  { n:'徳川軍', r:'N', c:15, h:300, a:16, g:30, s:1.0, d:40, l:'#27ae60', b:'', t:'#fff', u:0, z:36, bs:0 },
-  { n:'豊臣軍', r:'N', c:30, h:160, a:34, g:35, s:2.5, d:35, l:'#f1c40f', b:'', t:'#1e272e', u:0, z:36, bs:0 },
   { n:'織田軍', r:'N', c:50, h:100, a:48, g:185, s:1.1, d:50, l:'#8e44ad', b:'', t:'#fff', u:1, z:36, bs:0 },
+  { n:'豊臣軍', r:'N', c:30, h:160, a:34, g:35, s:2.5, d:35, l:'#f1c40f', b:'', t:'#1e272e', u:0, z:36, bs:0 },
+  { n:'徳川軍', r:'N', c:15, h:300, a:16, g:30, s:1.0, d:40, l:'#27ae60', b:'', t:'#fff', u:0, z:36, bs:0 },
   { n:'信長', r:'R', c:100, h:2000, a:80, g:55, s:0.9, d:55, l:'#192a56', b:'#f1c40f', t:'#f1c40f', u:0, z:68, bs:1 },
-  { n:'家康', r:'R', c:90, h:2600, a:55, g:45, s:0.8, d:50, l:'#1e8449', b:'#f1c40f', t:'#f1c40f', u:0, z:64, bs:1 },
   { n:'秀吉', r:'R', c:95, h:1600, a:75, g:50, s:1.7, d:40, l:'#d4ac0d', b:'#fff', t:'#1e272e', u:0, z:64, bs:1 },
+  { n:'家康', r:'R', c:90, h:2600, a:55, g:45, s:0.8, d:50, l:'#1e8449', b:'#f1c40f', t:'#f1c40f', u:0, z:64, bs:1 },
   { n:'メタル織田', r:'SR', c:70, h:700, a:65, g:195, s:1.2, d:45, l:'#95a5a6', b:'#00d2d3', t:'#1e272e', u:1, z:38, bs:0 },
   { n:'メタル豊臣', r:'SR', c:55, h:900, a:50, g:38, s:2.8, d:30, l:'#bdc3c7', b:'#f1c40f', t:'#1e272e', u:0, z:38, bs:0 },
-  { n:'メタル家康', r:'SR', c:60, h:1500, a:32, g:35, s:1.1, d:38, l:'#7f8c8d', b:'#2ecc71', t:'#fff', u:0, z:38, bs:0 },
-  { n:'魔王信長', r:'UR', c:140, h:3200, a:120, g:180, s:1.0, d:45, l:'#2c003e', b:'#ff3f34', t:'#ffdd59', u:1, z:72, bs:1 }
+  { n:'メタル徳川', r:'SR', c:60, h:1600, a:32, g:35, s:1.1, d:38, l:'#7f8c8d', b:'#2ecc71', t:'#fff', u:0, z:38, bs:0 },
+  { n:'メタル信長', r:'SSR', c:125, h:3500, a:95, g:60, s:1.0, d:50, l:'#718093', b:'#00d2d3', t:'#fff', u:0, z:68, bs:1 },
+  { n:'メタル秀吉', r:'SSR', c:120, h:2900, a:90, g:55, s:1.9, d:35, l:'#a4b0be', b:'#f1c40f', t:'#1e272e', u:0, z:66, bs:1 },
+  { n:'メタル家康', r:'SSR', c:115, h:4500, a:70, g:50, s:0.9, d:45, l:'#57606f', b:'#2ecc71', t:'#fff', u:0, z:66, bs:1 },
+  { n:'魔王信長', r:'UR', c:140, h:3200, a:120, g:180, s:1.0, d:45, l:'#2c003e', b:'#ff3f34', t:'#ffdd59', u:1, z:72, bs:1 },
+  { n:'狼信長', r:'UR', c:135, h:2800, a:135, g:65, s:2.3, d:32, l:'#3d3d3d', b:'#ff4757', t:'#fff', u:0, z:70, bs:1 },
+  { n:'猿秀吉', r:'UR', c:130, h:2500, a:105, g:55, s:3.1, d:24, l:'#e67e22', b:'#ffdd59', t:'#fff', u:0, z:68, bs:1 },
+  { n:'狸家康', r:'UR', c:135, h:5500, a:85, g:50, s:1.0, d:42, l:'#6D4C41', b:'#2ecc71', t:'#ffdd59', u:0, z:70, bs:1 }
 ];
 
 const S = [
@@ -205,7 +211,7 @@ function pull() {
   if (kb < 100) return;
   kb -= 100;
   let r = Math.random() * 100;
-  let p = r < 8 ? '9' : r < 28 ? '6,7,8' : r < 63 ? '3,4,5' : '0,1,2';
+  let p = r < 10 ? '12,13,14,15' : r < 28 ? '9,10,11' : r < 52 ? '6,7,8' : r < 78 ? '3,4,5' : '0,1,2';
   let arr = p.split(',').map(Number);
   let u = arr[Math.floor(Math.random() * arr.length)];
   let nw = !ow.includes(u);
@@ -213,7 +219,7 @@ function pull() {
   $('k1').textContent = $('k4').textContent = kb;
   $('gb').disabled = kb < 100;
   let x = A[u];
-  let cl = x.r === 'UR' ? '#ff6b81' : x.r === 'SR' ? '#00d2d3' : '#f1c40f';
+  let cl = x.r === 'UR' ? '#ff6b81' : x.r === 'SSR' ? '#ff9ff3' : x.r === 'SR' ? '#00d2d3' : '#f1c40f';
   $('grs').innerHTML = '<div style="color:' + cl + '">[' + x.r + '] ' + x.n + '</div><div style="font-size:12px;margin-top:6px">' + (nw ? 'NEW! 仲間になった！' : '所持済（小判+30返還）') + '</div>';
 }
 
@@ -221,7 +227,7 @@ function rnD() {
   $('dk').textContent = '出陣枠:' + dk.map(i => A[i].n).join('/');
   $('pl').innerHTML = ow.map(i => {
     let u = A[i], on = dk.includes(i);
-    let cl = u.r === 'UR' ? '#ff6b81' : u.r === 'SR' ? '#00d2d3' : '#f1c40f';
+    let cl = u.r === 'UR' ? '#ff6b81' : u.r === 'SSR' ? '#ff9ff3' : u.r === 'SR' ? '#00d2d3' : '#f1c40f';
     return '<div class="cd ' + (on ? 'on' : '') + '" data-id="' + i + '"><b style="color:' + cl + '">[' + u.r + ']' + u.n + '</b><br>' + u.c + '両/HP' + u.h + '<br>' + (on ? '★編成中' : '選択') + '</div>';
   }).join('');
   document.querySelectorAll('.cd').forEach(el => {
