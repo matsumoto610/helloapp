@@ -7,22 +7,64 @@
 <style>
   body { margin: 0; background: #1e272e; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
   #g { width: 720px; max-width: 96vw; background: #2f3640; border: 2px solid #f1c40f; border-radius: 10px; padding: 14px; box-sizing: border-box; text-align: center; }
-  .s { display: none; height: 350px; flex-direction: column; justify-content: center; align-items: center; position: relative; border-radius: 8px; }
+  .s { display: none; height: 350px; flex-direction: column; justify-content: center; align-items: center; position: relative; border-radius: 8px; overflow: hidden; }
   .s.on { display: flex; }
-  #s0 { background: radial-gradient(circle, #353b48, #1e272e); }
-  #s1 { background: linear-gradient(135deg, #2c3e50, #1e272e); }
+
+  /* タイトル画面：燃え盛る戦場風 */
+  #s0 {
+    background:
+      radial-gradient(ellipse at 20% 100%, rgba(255, 165, 2, 0.7) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(255, 71, 87, 0.75) 0%, transparent 55%),
+      radial-gradient(circle at 50% 95%, #ff6348 0%, #c23616 40%, #2f0909 85%, #120303 100%);
+    animation: fireGlow 2.4s infinite alternate ease-in-out;
+  }
+  @keyframes fireGlow {
+    0% { filter: brightness(0.95) contrast(1.05); }
+    100% { filter: brightness(1.15) contrast(1.15); }
+  }
+  #fx0 { position: absolute; inset: 0; width: 100%; height: 100%; border: none; pointer-events: none; z-index: 1; }
+  #s0 .lg, #s0 .mb { position: relative; z-index: 2; }
+
+  /* ホーム画面（本陣）：和室風（障子・木枠・畳） */
+  #s1 {
+    background-color: #f4ecd8;
+    background-image:
+      linear-gradient(to bottom, transparent 268px, #1e4620 268px, #2e6f40 274px, #1e4620 278px, transparent 278px),
+      linear-gradient(to bottom, transparent 278px, #8fa858 278px, #768f42 350px),
+      repeating-linear-gradient(to bottom, #5c3a21 0px, #5c3a21 5px, transparent 5px, transparent 68px),
+      repeating-linear-gradient(to right, #5c3a21 0px, #5c3a21 6px, transparent 6px, transparent 142px);
+    box-shadow: inset 0 0 0 10px #4a2e18, inset 0 0 35px rgba(42, 24, 10, 0.45);
+  }
+  #s1 .tg {
+    background: #3e2723;
+    color: #f1c40f;
+    padding: 4px 14px;
+    border: 2px solid #8d6e63;
+    border-radius: 4px;
+    top: 14px;
+    left: 16px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+  }
+  #s1 .kb {
+    background: rgba(62, 39, 35, 0.9);
+    border: 1px solid #d7ccc8;
+    top: 14px;
+    right: 16px;
+  }
+
   #s2 { background: #3d5a3c; border: 2px solid #78e08f; }
   #s3 { height: auto; }
   #s4, #s5 { background: #1e272e; border: 1px solid #f1c40f; justify-content: flex-start; padding: 40px 10px 42px; box-sizing: border-box; }
-  .lg { font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #c23616; margin: -40px 0 30px; }
+  .lg { font-size: 40px; font-weight: bold; color: #f1c40f; text-shadow: 3px 3px 0 #c23616, 0 0 18px rgba(255, 107, 129, 0.8); margin: -40px 0 30px; }
   .tg { position: absolute; top: 10px; left: 12px; font-size: 15px; font-weight: bold; color: #f1c40f; }
   .kb { position: absolute; top: 10px; right: 12px; font-size: 13px; font-weight: bold; color: #ffd32a; background: rgba(0,0,0,0.5); padding: 3px 9px; border-radius: 10px; }
-  .mb { padding: 10px 20px; font-size: 15px; font-weight: bold; color: #fff; background: #c23616; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
+  .mb { padding: 10px 20px; font-size: 15px; font-weight: bold; color: #fff; background: #c23616; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.35); }
   .mb:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; }
   .nd { position: absolute; border-radius: 50px; transform: translate(-50%, -50%); }
   .bb { position: absolute; bottom: 10px; left: 10px; padding: 5px 12px; font-size: 12px; background: #57606f; color: #fff; border: 1px solid #a4b0be; border-radius: 4px; cursor: pointer; }
+  #s1 .bb { bottom: 14px; left: 16px; background: #4a2e18; border-color: #d7ccc8; }
   .br { width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; background: #1e272e; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-bottom: 6px; }
-  canvas { border: 2px solid #fff; border-radius: 6px; display: block; width: 100%; height: 210px; }
+  canvas#cv { border: 2px solid #fff; border-radius: 6px; display: block; width: 100%; height: 210px; }
   .bs { width: 100%; display: flex; gap: 6px; margin-top: 8px; }
   .ub { flex: 1; padding: 8px 2px; font-size: 12px; font-weight: bold; color: #fff; background: #273c75; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
   .ub:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; }
@@ -34,7 +76,11 @@
 </head>
 <body>
 <div id="g">
-  <div id="s0" class="s on"><div class="lg">戦国大戦争</div><button class="mb" id="btn-start">出陣</button></div>
+  <div id="s0" class="s on">
+    <canvas id="fx0" width="700" height="350"></canvas>
+    <div class="lg">戦国大戦争</div>
+    <button class="mb" id="btn-start">出陣</button>
+  </div>
   <div id="s1" class="s">
     <div class="tg">本陣</div><div class="kb">小判:<span id="k1">300</span>両</div>
     <button class="mb" id="btn-map" style="position:absolute;top:30%;left:32%;transform:translate(-50%,-50%)">⚔️出陣</button>
@@ -75,6 +121,50 @@
 <script>
 const $ = i => document.getElementById(i);
 const ctx = $('cv').getContext('2d');
+const fctx = $('fx0').getContext('2d');
+
+/* タイトル画面の炎・火の粉エフェクト */
+const sparks = Array.from({ length: 55 }, () => ({
+  x: Math.random() * 700,
+  y: Math.random() * 350,
+  r: 1.5 + Math.random() * 3.5,
+  vy: 0.8 + Math.random() * 2.2,
+  vx: (Math.random() - 0.5) * 1.2,
+  a: 0.4 + Math.random() * 0.6,
+  c: Math.random() < 0.5 ? '#ffdd59' : '#ff5e57'
+}));
+
+function drawFire() {
+  if ($('s0').classList.contains('on')) {
+    fctx.clearRect(0, 0, 700, 350);
+    const t = Date.now() * 0.004;
+    for (let i = 0; i < 14; i++) {
+      const fx = i * 55 + Math.sin(t + i) * 12;
+      const fh = 75 + Math.sin(t * 1.5 + i * 1.7) * 28;
+      const grad = fctx.createRadialGradient(fx, 350, 5, fx, 350 - fh * 0.4, fh);
+      grad.addColorStop(0, 'rgba(255, 234, 167, 0.85)');
+      grad.addColorStop(0.5, 'rgba(255, 118, 117, 0.45)');
+      grad.addColorStop(1, 'rgba(214, 48, 49, 0)');
+      fctx.fillStyle = grad;
+      fctx.beginPath();
+      fctx.arc(fx, 350, fh, Math.PI, 0);
+      fctx.fill();
+    }
+    sparks.forEach(s => {
+      s.y -= s.vy;
+      s.x += s.vx + Math.sin(t + s.y * 0.03) * 0.5;
+      if (s.y < -10) { s.y = 355; s.x = Math.random() * 700; }
+      fctx.globalAlpha = s.a * (s.y / 350);
+      fctx.fillStyle = s.c;
+      fctx.beginPath();
+      fctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      fctx.fill();
+    });
+    fctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(drawFire);
+}
+drawFire();
 
 const A = [
   { n:'徳川軍', r:'N', c:15, h:300, a:16, g:30, s:1.0, d:40, l:'#27ae60', b:'', t:'#fff', u:0, z:36, bs:0 },
@@ -143,7 +233,6 @@ function rnD() {
     };
   });
 }
-
 function ini() {
   cancelAnimationFrame(aid);
   let s = S[cr];
