@@ -9,9 +9,6 @@
   #g { width: 720px; max-width: 96vw; background: #2f3640; border: 2px solid #f1c40f; border-radius: 10px; padding: 14px; box-sizing: border-box; text-align: center; position: relative; }
   .s { display: none; height: 350px; flex-direction: column; justify-content: center; align-items: center; position: relative; border-radius: 8px; overflow: hidden; }
   .s.on { display: flex; }
-  #s-intro { background: #000; cursor: pointer; }
-  .intro-txt { font-size: 38px; font-weight: bold; letter-spacing: 8px; color: #f5f6fa; text-shadow: 0 0 14px rgba(255,255,255,0.5); opacity: 0; animation: fadeIntro 3.6s ease-in-out forwards; }
-  @keyframes fadeIntro { 0% { opacity: 0; transform: scale(0.95); } 35% { opacity: 1; transform: scale(1); } 65% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.03); } }
   #s0 { background: radial-gradient(ellipse at 20% 100%, rgba(255,165,2,.7) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(255,71,87,.75) 0%, transparent 55%), radial-gradient(circle at 50% 95%, #ff6348 0%, #c23616 40%, #2f0909 85%, #120303 100%); animation: fg 2.4s infinite alternate ease-in-out; }
   @keyframes fg { 0% { filter: brightness(.95) contrast(1.05); } 100% { filter: brightness(1.15) contrast(1.15); } }
   #fx0 { position: absolute; inset: 0; width: 100%; height: 100%; border: none; pointer-events: none; z-index: 1; }
@@ -44,8 +41,7 @@
 </head>
 <body>
 <div id="g">
-  <div id="s-intro" class="s on"><div class="intro-txt">知らん図書</div></div>
-  <div id="s0" class="s"><canvas id="fx0" width="700" height="350"></canvas><div class="lg">戦国大戦争</div><button class="mb" id="btn-start">出陣</button></div>
+  <div id="s0" class="s on"><canvas id="fx0" width="700" height="350"></canvas><div class="lg">戦国大戦争</div><button class="mb" id="btn-start">出陣</button></div>
   <div id="s1" class="s">
     <div class="tg">本陣</div><div class="kb">小判:<span id="k1">300</span>両</div>
     <button class="mb" id="btn-map" style="position:absolute;top:30%;left:32%;transform:translate(-50%,-50%)">⚔️出陣</button>
@@ -84,20 +80,6 @@ const el = id => document.getElementById(id);
 const ctx = el("cv").getContext("2d");
 const fctx = el("fx0").getContext("2d");
 
-let introDone = false;
-function finishIntro() {
-  if (!introDone) {
-    introDone = true;
-    el("s-intro").classList.remove("on");
-    el("s0").classList.add("on");
-  }
-}
-const introTimer = setTimeout(finishIntro, 3600);
-el("s-intro").onclick = () => {
-  clearTimeout(introTimer);
-  finishIntro();
-};
-
 let actx = null, sndOn = true, bgmTimer = null, bgmMode = "";
 function initAudio() {
   if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -132,32 +114,32 @@ function setBgm(m) {
   if (!m || !sndOn) return;
   let st = 0;
   if (m === "home") {
-bgmTimer = setInterval(() => {
-if (!sndOn || bgmMode !== "home") return;
-initAudio();
-const b = st % 3;
-if (b === 0) {
-playTone(110, 0.28, "sine", 0.28, 48);
-playTone(165, 0.12, "triangle", 0.12, 70);
-} else if (b === 1) {
-playTone(130, 0.24, "sine", 0.24, 55);
-}
-st++;
-}, 460);
-} else if (m === "battle") {
-const mel = "330,330,349,330,440,392,349,330,294,294,330,349,392,349,330,247".split(",").map(Number);
-bgmTimer = setInterval(() => {
-if (!sndOn || bgmMode !== "battle") return;
-initAudio();
-const ix = st % 16;
-if (ix % 2 === 0) playTone(ix % 4 === 0 ? 110 : 123, 0.14, "triangle", 0.16, 65);
-playTone(mel[ix], 0.15, "square", 0.06);
-st++;
-}, 175);
-}
+    bgmTimer = setInterval(() => {
+      if (!sndOn || bgmMode !== "home") return;
+      initAudio();
+      const b = st % 3;
+      if (b === 0) {
+        playTone(110, 0.28, "sine", 0.28, 48);
+        playTone(165, 0.12, "triangle", 0.12, 70);
+      } else if (b === 1) {
+        playTone(130, 0.24, "sine", 0.24, 55);
+      }
+      st++;
+    }, 460);
+  } else if (m === "battle") {
+    const mel = "330,330,349,330,440,392,349,330,294,294,330,349,392,349,330,247".split(",").map(Number);
+    bgmTimer = setInterval(() => {
+      if (!sndOn || bgmMode !== "battle") return;
+      initAudio();
+      const ix = st % 16;
+      if (ix % 2 === 0) playTone(ix % 4 === 0 ? 110 : 123, 0.14, "triangle", 0.16, 65);
+      playTone(mel[ix], 0.15, "square", 0.06);
+      st++;
+    }, 175);
+  }
 }
 function toggleSound() {
-sndOn = !sndOn;
+  sndOn = !sndOn;
 el("btn-snd1").textContent = el("btn-snd2").textContent = sndOn ? "🔊音ON" : "🔇音OFF";
 if (!sndOn) {
 clearInterval(bgmTimer);
