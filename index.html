@@ -10,18 +10,15 @@
   .s { display: none; height: 350px; flex-direction: column; justify-content: center; align-items: center; position: relative; border-radius: 8px; overflow: hidden; }
   .s.on { display: flex; }
 
-  /* 起動画面：「知らん図書」フェードイン・アウト */
   #s-intro { background: #000; cursor: pointer; }
   .intro-txt { font-size: 38px; font-weight: bold; letter-spacing: 8px; color: #f5f6fa; text-shadow: 0 0 14px rgba(255,255,255,0.5); opacity: 0; animation: fadeIntro 3.6s ease-in-out forwards; }
   @keyframes fadeIntro { 0% { opacity: 0; transform: scale(0.95); } 35% { opacity: 1; transform: scale(1); } 65% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.03); } }
 
-  /* タイトル画面：燃え盛る戦場 */
   #s0 { background: radial-gradient(ellipse at 20% 100%, rgba(255,165,2,.7) 0%, transparent 50%), radial-gradient(ellipse at 80% 100%, rgba(255,71,87,.75) 0%, transparent 55%), radial-gradient(circle at 50% 95%, #ff6348 0%, #c23616 40%, #2f0909 85%, #120303 100%); animation: fg 2.4s infinite alternate ease-in-out; }
   @keyframes fg { 0% { filter: brightness(.95) contrast(1.05); } 100% { filter: brightness(1.15) contrast(1.15); } }
   #fx0 { position: absolute; inset: 0; width: 100%; height: 100%; border: none; pointer-events: none; z-index: 1; }
   #s0 .lg, #s0 .mb { position: relative; z-index: 2; }
 
-  /* ホーム画面：和室風 */
   #s1 { background-color: #f4ecd8; background-image: linear-gradient(to bottom, transparent 268px, #1e4620 268px, #2e6f40 274px, #1e4620 278px, transparent 278px), linear-gradient(to bottom, transparent 278px, #8fa858 278px, #768f42 350px), repeating-linear-gradient(to bottom, #5c3a21 0px, #5c3a21 5px, transparent 5px, transparent 68px), repeating-linear-gradient(to right, #5c3a21 0px, #5c3a21 6px, transparent 6px, transparent 142px); box-shadow: inset 0 0 0 10px #4a2e18, inset 0 0 35px rgba(42,24,10,.45); }
   #s1 .tg { background: #3e2723; color: #f1c40f; padding: 4px 14px; border: 2px solid #8d6e63; border-radius: 4px; top: 14px; left: 16px; }
   #s1 .kb { background: rgba(62,39,35,.9); border: 1px solid #d7ccc8; top: 14px; right: 16px; }
@@ -103,7 +100,7 @@ function setBgm(m) {
   if (bgmMode === m && bgmTimer) return; bgmMode = m; clearInterval(bgmTimer); bgmTimer = null; if (!m || !sndOn) return;
   let st = 0;
   if (m === 'home') bgmTimer = setInterval(() => { if (!sndOn || bgmMode !== 'home') return; initAudio(); const b = st % 3; if (b === 0) { playTone(110, .28, 'sine', .28, 48); playTone(165, .12, 'triangle', .12, 70); } else if (b === 1) playTone(130, .24, 'sine', .24, 55); st++; }, 460);
-else if (m === 'battle') { const mel = '330,330,349,330,440,392,349,330,294,294,330,349,392,349,330,247'.split(',').map(Number); bgmTimer = setInterval(() => { if (!sndOn || bgmMode !== 'battle') return; initAudio(); const ix = st % 16; if (ix % 2 === 0) playTone(ix % 4 === 0 ? 110 : 123, .14, 'triangle', .16, 65); playTone(mel.at(ix), .15, 'square', .06); st++; }, 175); }
+  else if (m === 'battle') { const mel = '330,330,349,330,440,392,349,330,294,294,330,349,392,349,330,247'.split(',').map(Number); bgmTimer = setInterval(() => { if (!sndOn || bgmMode !== 'battle') return; initAudio(); const ix = st % 16; if (ix % 2 === 0) playTone(ix % 4 === 0 ? 110 : 123, .14, 'triangle', .16, 65); playTone(mel[ix], .15, 'square', .06); st++; }, 175); }
 }
 function toggleSound() { sndOn = !sndOn; $('btn-snd1').textContent = $('btn-snd2').textContent = sndOn ? '🔊音ON' : '🔇音OFF'; if (!sndOn) { clearInterval(bgmTimer); bgmTimer = null; } else { const m = bgmMode; bgmMode = ''; setBgm(m); } }
 const sparks = Array.from({ length: 55 }, () => ({ x: Math.random() * 700, y: Math.random() * 350, r: 1.5 + Math.random() * 3.5, vy: .8 + Math.random() * 2.2, vx: (Math.random() - .5) * 1.2, a: .4 + Math.random() * .6, c: Math.random() < .5 ? '#ffdd59' : '#ff5e57' }));
@@ -147,7 +144,7 @@ function pull() {
 initAudio(); if (kb < 100) return; kb -= 100;
 let r = Math.random() * 100, tr = r < 1 ? 'UR' : r < 5 ? 'SSR' : r < 17 ? 'SR' : r < 45 ? 'R' : 'N';
 let pool = A.map((u, idx) => ({ u, idx })).filter(x => x.u.r === tr);
-let pick = pool.at(Math.floor(Math.random() * pool.length)), u = pick.idx, x = pick.u, nw = !ow.includes(u);
+let pick = pool[Math.floor(Math.random() * pool.length)], u = pick.idx, x = pick.u, nw = !ow.includes(u);
 if (nw) ow.push(u); else kb += 30;
 saveData(); playTone(nw ? 880 : 523, .3, 'triangle', .15, nw ? 1318 : 659);
 $('k1').textContent = $('k4').textContent = kb; $('cnt').textContent = ow.length; $('gb').disabled = kb < 100;
@@ -155,9 +152,9 @@ let cl = x.r === 'UR' ? '#ff6b81' : x.r === 'SSR' ? '#ff9ff3' : x.r === 'SR' ? '
 $('grs').innerHTML = <div style="color:${cl};font-size:20px">[${x.r}] ${x.n}</div><div style="font-size:12px;margin-top:6px">${nw ? 'NEW! 仲間になった！' : '所持済（小判+30返還）'}</div>;
 }
 function rnD() {
-$('dk').textContent = '出陣枠:' + dk.map(i => A.at(i).n).join('/');
+$('dk').textContent = '出陣枠:' + dk.map(i => A[i].n).join('/');
 $('pl').innerHTML = ow.map(i => {
-let u = A.at(i), on = dk.includes(i), cl = u.r === 'UR' ? '#ff6b81' : u.r === 'SSR' ? '#ff9ff3' : u.r === 'SR' ? '#00d2d3' : u.r === 'R' ? '#f1c40f' : '#dfe6e9';
+let u = A[i], on = dk.includes(i), cl = u.r === 'UR' ? '#ff6b81' : u.r === 'SSR' ? '#ff9ff3' : u.r === 'SR' ? '#00d2d3' : u.r === 'R' ? '#f1c40f' : '#dfe6e9';
 return <div class="cd ${on ? 'on' : ''}" data-id="${i}"><b style="color:${cl}">[${u.r}]${u.n}</b><br>${u.c}両/HP${u.h}<br>${on ? '★編成中' : '選択'}</div>;
 }).join('');
 document.querySelectorAll('.cd').forEach(el => el.onclick = () => {
@@ -168,10 +165,10 @@ saveData(); rnD();
 }
 function ini() {
 cancelAnimationFrame(aid); playBattleHorn(); setBgm('battle');
-let s = S.at(cr); $('bt').textContent = s.t; $('en').textContent = s.n; $('cv').style.background = s.b;
+let s = S[cr]; $('bt').textContent = s.t; $('en').textContent = s.n; $('cv').style.background = s.b;
 mn = 50; ph = 1000; eh = s.h; ov = 0; al = []; en = []; bl = []; souls = []; tm = te = ts = Date.now(); ec = bt = 0; $('ed').style.display = 'none';
 for (let i = 0; i < 4; i++) {
-let b = $('b' + i), uid = dk.at(i), u = uid !== undefined ? A.at(uid) : null;
+let b = $('b' + i), uid = dk[i], u = uid !== undefined ? A[uid] : null;
 if (u) { b.style.display = 'block'; b.innerHTML = u.n + '
 ' + u.c + '両'; b.style.background = u.bs ? '#4a1c40' : '#273c75'; b.style.borderColor = u.b || '#f1c40f'; } else b.style.display = 'none';
 }
@@ -180,13 +177,13 @@ ae(); aid = requestAnimationFrame(lp);
 function addSoul(x, y, alFlag) { souls.push({ x, y, vy: 1.1 + Math.random() * .6, p: Math.random() * 6.28, a: .95, f: alFlag }); }
 function drawSouls() {
 for (let i = souls.length - 1; i >= 0; i--) {
-let s = souls.at(i); s.y -= s.vy; s.p += .14; s.a -= .014; if (s.a <= 0) { souls.splice(i, 1); continue; }
+let s = souls[i]; s.y -= s.vy; s.p += .14; s.a -= .014; if (s.a <= 0) { souls.splice(i, 1); continue; }
 let sx = s.x + Math.sin(s.p) * 7; ctx.save(); ctx.globalAlpha = s.a; ctx.fillStyle = s.f ? '#dff9fb' : '#ffcccc'; ctx.shadowColor = s.f ? '#7ed6df' : '#ff7979'; ctx.shadowBlur = 8;
 ctx.beginPath(); ctx.arc(sx, s.y, 7, Math.PI, 0); ctx.quadraticCurveTo(sx + 7, s.y + 8, sx, s.y + 18); ctx.quadraticCurveTo(sx - 7, s.y + 8, sx - 7, s.y); ctx.fill(); ctx.restore();
 }
 }
 function aa(i) {
-initAudio(); let uid = dk.at(i); if (uid === undefined) return; let u = A.at(uid);
+initAudio(); let uid = dk[i]; if (uid === undefined) return; let u = A[uid];
 if (u && !ov && mn >= u.c) { mn -= u.c; if (u.bs) { bn('総大将・' + u.n + ' 出陣！', 'rgba(25,42,86,.9)'); playTone(220, .35, 'sawtooth', .15, 440); en.forEach(e => e.k = 220); } else playTone(440, .12, 'triangle', .12, 660); al.push({ ...u, m: u.h, x: 590, o: 0, k: 0 }); }
 }
 function sp() {
@@ -194,7 +191,7 @@ initAudio(); let w = Date.now(); if (ov || w - ts < 60000) return; ts = w; bn('�
 for (let i = 0; i < 3; i++) setTimeout(() => { if (!ov) { playTone(150, .18, 'sawtooth', .18, 45); for (let r = 0; r < 5; r++) bl.push({ x: 620, y: 95 + r * 15, a: 45, f: 1, p: 1 }); } }, i * 280);
 }
 function ae() {
-ec++; let s = S.at(cr), b = ec % 8 === 0, v = !b && ec % 4 === 0, g = !b && !v && ec % 3 === 0;
+ec++; let s = S[cr], b = ec % 8 === 0, v = !b && ec % 4 === 0, g = !b && !v && ec % 3 === 0;
 if (b) { bn('敵将・' + s.eb + ' 出陣！', 'rgba(183,21,64,.85)'); al.forEach(a => a.k = 220); en.push({ n: s.eb, h: s.bh, m: s.bh, a: s.ba, g: 50, s: .9, d: 60, l: '#b71540', b: '#f1c40f', t: '#f1c40f', z: 68, x: 100, o: 0, k: 0 }); }
 else if (g) en.push({ n: s.e2, h: 140, m: 140, a: 32, g: 175, s: 1.1, d: 55, l: '#e67e22', t: '#fff', u: 1, z: 36, x: 90, o: 0, k: 0 });
 else en.push({ n: v ? s.e3 : s.e1, h: v ? 350 : 180, m: v ? 350 : 180, a: v ? 28 : 12, g: 35, s: v ? 2 : 1.1, d: v ? 55 : 48, l: v ? '#8e44ad' : '#c0392b', t: '#fff', z: 36, x: 90, o: 0, k: 0 });
@@ -216,9 +213,9 @@ function lp() {
 if (ov) return;
 let w = Date.now(), rm = Math.ceil((60000 - (w - ts)) / 1000);
 if (w - tm >= 1000) { mn = Math.min(1000, mn + 3); tm += 1000; }
-if (w - te >= S.at(cr).w) { ae(); te = w; }
+if (w - te >= S[cr].w) { ae(); te = w; }
 $('mn').textContent = mn; $('ph').textContent = Math.max(0, ph); $('eh').textContent = Math.max(0, eh);
-dk.forEach((u, i) => $('b' + i).disabled = mn < A.at(u).c);
+dk.forEach((u, i) => $('b' + i).disabled = mn < A[u].c);
 $('bp').disabled = rm > 0; $('bp').innerHTML = rm > 0 ? '三段撃ち
 (' + rm + 's)' : '三段撃ち
 発動！';
@@ -235,7 +232,7 @@ else { if (e.o > 0) e.o--; let x = e.x + e.z / 2, t = al.find(a => (a.x - a.z / 
 dr(e, 0);
 });
 for (let k = bl.length - 1; k >= 0; k--) {
-let b = bl.at(k); b.x += b.f ? (b.p ? -15 : -10) : 10; ctx.fillStyle = b.p ? '#ff3f34' : (b.f ? '#ffd32a' : '#ff9f43'); ctx.beginPath(); ctx.arc(b.x, b.y, b.p ? 5 : 4, 0, 6.283); ctx.fill();
+let b = bl[k]; b.x += b.f ? (b.p ? -15 : -10) : 10; ctx.fillStyle = b.p ? '#ff3f34' : (b.f ? '#ffd32a' : '#ff9f43'); ctx.beginPath(); ctx.arc(b.x, b.y, b.p ? 5 : 4, 0, 6.283); ctx.fill();
 let h = b.f ? en.find(e => e.h > 0 && Math.abs(b.x - e.x) <= e.z / 2) : al.find(a => a.h > 0 && Math.abs(b.x - a.x) <= a.z / 2);
 if (h) { h.h -= b.a; bl.splice(k, 1); } else if (b.f && b.x <= 75) { eh -= b.a; bl.splice(k, 1); } else if (!b.f && b.x >= 625) { ph -= b.a; bl.splice(k, 1); } else if (b.x < 0 || b.x > 700) bl.splice(k, 1);
 }
