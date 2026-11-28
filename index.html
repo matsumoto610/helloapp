@@ -24,14 +24,14 @@
   .kb { position: absolute; top: 10px; right: 12px; font-size: 13px; font-weight: bold; color: #ffd32a; background: rgba(0,0,0,.5); padding: 3px 9px; border-radius: 10px; }
   .mb { padding: 10px 20px; font-size: 15px; font-weight: bold; color: #fff; background: #c23616; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
   .mb:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; }
-  .nd { position: absolute; border-radius: 50px; transform: translate(-50%, -50%); padding: 7px 13px; font-size: 13px; white-space: nowrap; }
+  .nd { position: absolute; border-radius: 50px; transform: translate(-50%, -50%); }
   .bb { position: absolute; bottom: 10px; left: 10px; padding: 5px 12px; font-size: 12px; background: #57606f; color: #fff; border: 1px solid #a4b0be; border-radius: 4px; cursor: pointer; }
   #s1 .bb { bottom: 14px; left: 16px; background: #4a2e18; border-color: #d7ccc8; }
   .sb { position: absolute; bottom: 10px; right: 12px; padding: 4px 10px; font-size: 12px; background: #2f3640; color: #f1c40f; border: 1px solid #f1c40f; border-radius: 4px; cursor: pointer; z-index: 5; }
   .br { width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; background: #1e272e; padding: 6px 12px; border-radius: 6px; font-weight: bold; font-size: 14px; margin-bottom: 6px; }
   canvas#cv { border: 2px solid #fff; border-radius: 6px; display: block; width: 100%; height: 210px; }
   .bs { width: 100%; display: flex; gap: 6px; margin-top: 8px; }
-  .ub { flex: 1; padding: 8px 2px; font-size: 12px; font-weight: bold; color: #fff; background: #273c75; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; }
+  .ub { flex: 1; padding: 8px 2px; font-size: 12px; font-weight: bold; color: #fff; background: #273c75; border: 2px solid #f1c40f; border-radius: 8px; cursor: pointer; line-height: 1.3; }
   .ub:disabled { background: #57606f; border-color: #7f8fa6; color: #a4b0be; }
   #ed { display: none; gap: 10px; margin-top: 8px; }
   .gr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; width: 100%; overflow-y: auto; margin-top: 6px; }
@@ -50,15 +50,10 @@
     <button class="bb" id="btn-title">タイトル</button><button class="sb" id="btn-snd1">🔊音ON</button>
   </div>
   <div id="s2" class="s">
-    <div class="tg">合戦場(全8戦・勝利+150両)</div>
-    <button class="mb nd" id="st0" style="top:24%;left:16%;background:#2980b9">⚔️桶狭間</button>
-    <button class="mb nd" id="st1" style="top:24%;left:39%;background:#16a085">⚔️川中島</button>
-    <button class="mb nd" id="st2" style="top:24%;left:62%;background:#27ae60">⚔️姉川</button>
-    <button class="mb nd" id="st3" style="top:24%;left:85%;background:#d35400">⚔️三方ヶ原</button>
-    <button class="mb nd" id="st4" style="top:64%;left:16%;background:#c0392b">⚔️長篠</button>
-    <button class="mb nd" id="st5" style="top:64%;left:39%;background:#8e44ad">⚔️山崎</button>
-    <button class="mb nd" id="st6" style="top:64%;left:62%;background:#6c3483">⚔️関ヶ原</button>
-    <button class="mb nd" id="st7" style="top:64%;left:85%;background:#192a56">🔥大坂の陣</button>
+    <div class="tg">合戦場(勝利+150両)</div>
+    <button class="mb nd" id="st0" style="top:28%;left:24%;background:#2980b9">⚔️桶狭間</button>
+    <button class="mb nd" id="st1" style="top:52%;left:50%">⚔️長篠</button>
+    <button class="mb nd" id="st2" style="top:74%;left:76%;background:#6c3483">⚔️関ヶ原</button>
     <button class="bb" id="btn-home1">戻る</button>
   </div>
   <div id="s3" class="s">
@@ -70,416 +65,145 @@
   </div>
   <div id="s4" class="s">
     <div class="tg">武将ガチャ(100両)</div><div class="kb">小判:<span id="k4">300</span>両／図鑑:<span id="cnt">4</span>/100</div>
-    <div id="grs" style="margin:auto;font-size:17px;font-weight:bold">ボタンを押して召喚！<div style="font-size:11px;color:#a4b0be;margin-top:6px">UR:1% / SSR:4% / SR:12% / R:28% / N:55%</div></div>
+    <div id="grs" style="margin:auto;font-size:17px;font-weight:bold">ボタンを押して召喚！</div>
     <button class="mb" id="gb" style="background:#8e44ad;margin-bottom:8px">ガチャを引く</button><button class="bb" id="btn-home2">戻る</button>
   </div>
   <div id="s5" class="s"><div class="tg">部隊編成(4体まで)</div><div class="kb" id="dk"></div><div id="pl" class="gr"></div><button class="bb" id="btn-home3">戻る</button></div>
 </div>
 <script>
-const el = id => document.getElementById(id);
-const ctx = el("cv").getContext("2d");
-const fctx = el("fx0").getContext("2d");
-
-let actx = null, sndOn = true, bgmTimer = null, bgmMode = "";
-function initAudio() {
-  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-  if (actx.state === "suspended") actx.resume();
+const $ = i => document.getElementById(i), ctx = $('cv').getContext('2d'), fctx = $('fx0').getContext('2d');
+let actx = null, sndOn = true, bgmTimer = null, bgmMode = '';
+function initAudio() { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); }
+function playTone(f, d, t = 'triangle', v = .15, sl = null, dl = 0) {
+  if (!sndOn || !actx || !f) return;
+  const n = actx.currentTime + dl, o = actx.createOscillator(), g = actx.createGain();
+  o.type = t; o.frequency.setValueAtTime(f, n); if (sl) o.frequency.exponentialRampToValueAtTime(sl, n + d);
+  g.gain.setValueAtTime(v, n); g.gain.exponentialRampToValueAtTime(.001, n + d);
+  o.connect(g); g.connect(actx.destination); o.start(n); o.stop(n + d);
 }
-function playTone(f, d, t = "triangle", v = 0.15, sl = null, dl = 0) {
-  if (!sndOn || !actx) return;
-  const n = actx.currentTime + dl;
-  const o = actx.createOscillator();
-  const g = actx.createGain();
-  o.type = t;
-  o.frequency.setValueAtTime(f, n);
-  if (sl) o.frequency.exponentialRampToValueAtTime(sl, n + d);
-  g.gain.setValueAtTime(v, n);
-  g.gain.exponentialRampToValueAtTime(0.001, n + d);
-  o.connect(g);
-  g.connect(actx.destination);
-  o.start(n);
-  o.stop(n + d);
-}
-function playBattleHorn() {
-  initAudio();
-  playTone(587.3, 0.25, "sine", 0.18, 659.3, 0);
-  playTone(880, 0.75, "sine", 0.22, 932.3, 0.22);
-  playTone(220, 0.85, "sawtooth", 0.08, 196, 0.1);
-}
+function playBattleHorn() { initAudio(); playTone(587.3, .25, 'sine', .18, 659.3, 0); playTone(880, .75, 'sine', .22, 932.3, .22); playTone(220, .85, 'sawtooth', .08, 196, .1); }
 function setBgm(m) {
-  if (bgmMode === m && bgmTimer) return;
-  bgmMode = m;
-  clearInterval(bgmTimer);
-  bgmTimer = null;
-  if (!m || !sndOn) return;
+  if (bgmMode === m && bgmTimer) return; bgmMode = m; clearInterval(bgmTimer); bgmTimer = null; if (!m || !sndOn) return;
   let st = 0;
-  if (m === "home") {
+  if (m === 'home') bgmTimer = setInterval(() => { if (!sndOn || bgmMode !== 'home') return; initAudio(); const b = st % 3; if (b === 0) { playTone(110, .28, 'sine', .28, 48); playTone(165, .12, 'triangle', .12, 70); } else if (b === 1) playTone(130, .24, 'sine', .24, 55); st++; }, 460);
+  else if (m === 'battle') {
+    // 和風・緊迫メロディ（ラ・シ・ド・ミ・ファの陰旋法ベース16拍）
+    const mel = [440, 0, 493.9, 523.3, 659.3, 0, 523.3, 493.9, 440, 523.3, 659.3, 698.5, 880, 698.5, 659.3, 493.9];
     bgmTimer = setInterval(() => {
-      if (!sndOn || bgmMode !== "home") return;
-      initAudio();
-      const b = st % 3;
-      if (b === 0) {
-        playTone(110, 0.28, "sine", 0.28, 48);
-        playTone(165, 0.12, "triangle", 0.12, 70);
-      } else if (b === 1) {
-        playTone(130, 0.24, "sine", 0.24, 55);
-      }
-      st++;
-    }, 460);
-  } else if (m === "battle") {
-    const mel = "330,330,349,330,440,392,349,330,294,294,330,349,392,349,330,247".split(",").map(Number);
-    bgmTimer = setInterval(() => {
-      if (!sndOn || bgmMode !== "battle") return;
+      if (!sndOn || bgmMode !== 'battle') return;
       initAudio();
       const ix = st % 16;
-      if (ix % 2 === 0) playTone(ix % 4 === 0 ? 110 : 123, 0.14, "triangle", 0.16, 65);
-      playTone(mel[ix], 0.15, "square", 0.06);
+      if (ix % 2 === 0) playTone(ix % 4 === 0 ? 110 : 123.5, .14, 'triangle', .16, 65);
+      if (mel[ix] > 0) playTone(mel[ix], .15, 'square', .06);
       st++;
     }, 175);
   }
 }
-function toggleSound() {
-  sndOn = !sndOn;
-el("btn-snd1").textContent = el("btn-snd2").textContent = sndOn ? "🔊音ON" : "🔇音OFF";
-if (!sndOn) {
-clearInterval(bgmTimer);
-bgmTimer = null;
-} else {
-const m = bgmMode;
-bgmMode = "";
-setBgm(m);
-}
-}
-const sparks = Array.from({ length: 55 }, () => ({
-x: Math.random() * 700,
-y: Math.random() * 350,
-r: 1.5 + Math.random() * 3.5,
-vy: 0.8 + Math.random() * 2.2,
-vx: (Math.random() - 0.5) * 1.2,
-a: 0.4 + Math.random() * 0.6,
-c: Math.random() < 0.5 ? "#ffdd59" : "#ff5e57"
-}));
+function toggleSound() { sndOn = !sndOn; $('btn-snd1').textContent = $('btn-snd2').textContent = sndOn ? '🔊音ON' : '🔇音OFF'; if (!sndOn) { clearInterval(bgmTimer); bgmTimer = null; } else { const m = bgmMode; bgmMode = ''; setBgm(m); } }
+
+const sparks = Array.from({ length: 55 }, () => ({ x: Math.random() * 700, y: Math.random() * 350, r: 1.5 + Math.random() * 3.5, vy: .8 + Math.random() * 2.2, vx: (Math.random() - .5) * 1.2, a: .4 + Math.random() * .6, c: Math.random() < .5 ? '#ffdd59' : '#ff5e57' }));
 function drawFire() {
-if (el("s0").classList.contains("on")) {
-fctx.clearRect(0, 0, 700, 350);
-const t = Date.now() * 0.004;
-for (let i = 0; i < 14; i++) {
-const fx = i * 55 + Math.sin(t + i) * 12;
-const fh = 75 + Math.sin(t * 1.5 + i * 1.7) * 28;
-const gr = fctx.createRadialGradient(fx, 350, 5, fx, 350 - fh * 0.4, fh);
-gr.addColorStop(0, "rgba(255,234,167,0.85)");
-gr.addColorStop(0.5, "rgba(255,118,117,0.45)");
-gr.addColorStop(1, "rgba(214,48,49,0)");
-fctx.fillStyle = gr;
-fctx.beginPath();
-fctx.arc(fx, 350, fh, Math.PI, 0);
-fctx.fill();
-}
-sparks.forEach(s => {
-s.y -= s.vy;
-s.x += s.vx + Math.sin(t + s.y * 0.03) * 0.5;
-if (s.y < -10) {
-s.y = 355;
-s.x = Math.random() * 700;
-}
-fctx.globalAlpha = s.a * (s.y / 350);
-fctx.fillStyle = s.c;
-fctx.beginPath();
-fctx.arc(s.x, s.y, s.r, 0, 6.283);
-fctx.fill();
-});
-fctx.globalAlpha = 1;
+  if ($('s0').classList.contains('on')) {
+    fctx.clearRect(0, 0, 700, 350); const t = Date.now() * .004;
+for (let i = 0; i < 14; i++) { const fx = i * 55 + Math.sin(t + i) * 12, fh = 75 + Math.sin(t * 1.5 + i * 1.7) * 28, gr = fctx.createRadialGradient(fx, 350, 5, fx, 350 - fh * .4, fh); gr.addColorStop(0, 'rgba(255,234,167,.85)'); gr.addColorStop(.5, 'rgba(255,118,117,.45)'); gr.addColorStop(1, 'rgba(214,48,49,0)'); fctx.fillStyle = gr; fctx.beginPath(); fctx.arc(fx, 350, fh, Math.PI, 0); fctx.fill(); }
+sparks.forEach(s => { s.y -= s.vy; s.x += s.vx + Math.sin(t + s.y * .03) * .5; if (s.y < -10) { s.y = 355; s.x = Math.random() * 700; } fctx.globalAlpha = s.a * (s.y / 350); fctx.fillStyle = s.c; fctx.beginPath(); fctx.arc(s.x, s.y, s.r, 0, 6.283); fctx.fill(); }); fctx.globalAlpha = 1;
 }
 requestAnimationFrame(drawFire);
 }
 drawFire();
-const RAW = [
-"織田軍|N|50|100|48|185|1.1|50|#8e44ad||#fff|1|36|0",
-"豊臣軍|N|30|160|34|35|2.5|35|#f1c40f||#1e272e|0|36|0",
-"徳川軍|N|15|300|16|30|1.0|40|#27ae60||#fff|0|36|0",
-"信長|R|100|2000|80|55|0.9|55|#192a56|#f1c40f|#f1c40f|0|68|1",
-"秀吉|R|95|1600|75|50|1.7|40|#d4ac0d|#fff|#1e272e|0|64|1",
-"家康|R|90|2600|55|45|0.8|50|#1e8449|#f1c40f|#f1c40f|0|64|1",
-"メタル織田|SR|70|700|65|195|1.2|45|#95a5a6|#00d2d3|#1e272e|1|38|0",
-"メタル豊臣|SR|55|900|50|38|2.8|30|#bdc3c7|#f1c40f|#1e272e|0|38|0",
-"メタル徳川|SR|60|1600|32|35|1.1|38|#7f8c8d|#2ecc71|#fff|0|38|0",
-"メタル信長|SSR|125|3500|95|60|1.0|50|#718093|#00d2d3|#fff|0|68|1",
-"メタル秀吉|SSR|120|2900|90|55|1.9|35|#a4b0be|#f1c40f|#1e272e|0|66|1",
-"メタル家康|SSR|115|4500|70|50|0.9|45|#57606f|#2ecc71|#fff|0|66|1",
-"魔王信長|UR|140|3200|120|180|1.0|45|#2c003e|#ff3f34|#ffdd59|1|72|1",
-"狼信長|UR|135|2800|135|65|2.3|32|#3d3d3d|#ff4757|#fff|0|70|1",
-"猿秀吉|UR|130|2500|105|55|3.1|24|#e67e22|#ffdd59|#fff|0|68|1",
-"狸家康|UR|135|5500|85|50|1.0|42|#6D4C41|#2ecc71|#ffdd59|0|70|1",
-"足軽隊|N|10|220|14|28|1.3|36|#ecf0f1||#1e272e|0|32|0",
-"大盾兵|N|20|650|10|28|0.8|50|#dfe6e9|#636e72|#1e272e|0|40|0",
-"野武士|N|35|280|45|35|1.6|32|#ff7675||#fff|0|36|0",
-"長弓隊|N|40|180|38|175|1.1|48|#ffeaa7||#1e272e|1|36|0",
-"軽騎兵|N|45|320|30|32|3.4|24|#fab1a0||#1e272e|0|38|0",
-"鴉天狗|N|48|210|55|45|2.4|34|#74b9ff||#1e272e|0|36|0",
-"水軍衆|N|38|420|36|32|1.4|38|#0984e3||#fff|0|36|0",
-"焙烙玉隊|N|55|240|62|195|1.0|55|#00b894||#fff|1|38|0",
-"相撲力士|N|75|1100|70|40|0.7|60|#e17055|#fff|#fff|0|52|0",
-"伊賀忍者|N|25|190|32|32|2.7|26|#2d3436||#fff|0|34|0",
-"農民一揆|N|12|180|18|28|1.5|35|#b2bec3||#1e272e|0|32|0",
-"長槍隊|N|18|260|22|42|1.2|38|#55efc4||#1e272e|0|34|0",
-"陣太鼓兵|N|28|300|20|35|1.3|40|#fdcb6e||#1e272e|0|34|0",
-"火縄銃隊|N|52|150|52|190|1.0|52|#6c5ce7||#fff|1|36|0",
-"国崩し大筒|N|68|260|85|210|0.7|75|#2d3436|#f1c40f|#fff|1|40|0",
-"赤備え騎馬|N|46|360|42|35|2.9|30|#d63031||#fff|0|38|0",
-"比叡山僧兵|N|42|480|35|38|1.1|42|#636e72||#fff|0|38|0",
-"修験山伏|N|44|340|46|160|1.2|48|#e84393||#fff|1|36|0",
-"甲賀くノ一|N|32|170|44|32|3.0|22|#fd79a8||#1e272e|0|34|0",
-"陰陽師|N|58|200|58|185|1.1|50|#a29bfe||#1e272e|1|36|0",
-"南蛮宣教師|N|22|350|15|30|1.0|45|#00cec9||#1e272e|0|34|0",
-"堺の豪商|N|26|280|25|30|1.6|35|#f1c40f||#1e272e|0|34|0",
-"伊達政宗|R|88|1500|82|50|2.1|36|#0984e3|#f1c40f|#fff|0|60|1",
-"真田幸村|R|92|1650|95|48|2.4|32|#d63031|#f1c40f|#fff|0|62|1",
-"武田信玄|R|98|2400|78|50|1.1|48|#c0392b|#f1c40f|#f1c40f|0|66|1",
-"上杉謙信|R|96|1900|92|50|1.8|36|#ecf0f1|#0984e3|#1e272e|0|64|1",
-"本多忠勝|R|95|2500|88|52|1.2|42|#2d3436|#f1c40f|#f1c40f|0|64|1",
-"前田慶次|R|90|1800|90|55|2.2|34|#e84393|#f1c40f|#fff|0|62|1",
-"明智光秀|R|85|1300|72|185|1.2|46|#3498db|#fff|#fff|1|58|1",
-"濃姫|R|80|1100|68|195|1.3|42|#9b59b6|#ff7675|#fff|1|56|0",
-"お市|R|75|1400|50|170|1.2|45|#fd79a8|#fff|#1e272e|1|54|0",
-"石田三成|R|84|1350|70|180|1.3|44|#6c5ce7|#fff|#fff|1|58|1",
-"直江兼続|R|86|1750|74|48|1.5|40|#e17055|#fff|#fff|0|58|0",
-"服部半蔵|R|82|1200|86|40|3.0|24|#1e272e|#00d2d3|#fff|0|56|0",
-"宮本武蔵|R|94|1700|105|45|1.9|28|#636e72|#fff|#fff|0|60|1",
-"佐々木小次郎|R|89|1450|96|65|2.0|30|#74b9ff|#fff|#1e272e|0|58|0",
-"黒田官兵衛|R|83|1300|76|190|1.1|46|#2c3e50|#f1c40f|#fff|1|56|0",
-"竹中半兵衛|R|81|1250|74|195|1.2|44|#55efc4|#2d3436|#1e272e|1|56|0",
-"今川義元|R|85|2100|62|48|0.8|52|#8e44ad|#f1c40f|#fff|0|62|1",
-"北条氏康|R|90|2600|65|45|0.9|50|#f39c12|#fff|#1e272e|0|62|1",
-"毛利元就|R|87|1500|78|205|1.1|44|#16a085|#f1c40f|#fff|1|60|1",
-"島津義弘|R|93|1850|94|48|1.7|35|#c23616|#fff|#fff|0|62|1",
-"長宗我部元親|R|86|1650|80|50|1.8|38|#00a8ff|#fff|#fff|0|58|0",
-"雑賀孫市|R|84|1200|88|215|1.3|42|#e67e22|#fff|#fff|1|56|0",
-"風魔小太郎|R|83|1350|84|42|3.1|25|#2f3640|#ff4757|#fff|0|56|0",
-"石川五右衛門|R|88|1600|85|45|2.3|32|#d35400|#f1c40f|#fff|0|58|0",
-"メタル足軽|SR|35|950|24|30|1.4|34|#95a5a6|#fff|#1e272e|0|36|0",
-"メタル大盾兵|SR|50|2200|18|30|0.9|48|#7f8c8d|#00d2d3|#fff|0|44|0",
-"メタル忍者|SR|55|850|52|34|2.9|24|#636e72|#00d2d3|#fff|0|38|0",
-"メタル騎馬|SR|68|1100|55|35|3.5|24|#b2bec3|#f1c40f|#1e272e|0|40|0",
-"メタル大筒|SR|85|950|105|215|0.8|70|#57606f|#ff6b81|#fff|1|44|0",
-"メタル政宗|SR|105|2400|92|52|2.2|34|#74b9ff|#dfe6e9|#1e272e|0|62|1",
-"メタル幸村|SR|108|2600|105|50|2.5|30|#ff7675|#dfe6e9|#1e272e|0|64|1",
-"メタル信玄|SR|112|3600|88|52|1.1|46|#fab1a0|#dfe6e9|#1e272e|0|66|1",
-"メタル謙信|SR|110|2900|102|52|1.9|34|#dfe6e9|#0984e3|#1e272e|0|64|1",
-"メタル忠勝|SR|110|3800|96|52|1.3|40|#636e72|#f1c40f|#fff|0|64|1",
-"メタル慶次|SR|104|2700|98|55|2.3|32|#fd79a8|#dfe6e9|#1e272e|0|62|1",
-"メタル光秀|SR|98|2100|85|190|1.3|44|#81ecec|#0984e3|#1e272e|1|60|1",
-"メタル武蔵|SR|106|2500|115|48|2.0|28|#b2bec3|#00d2d3|#1e272e|0|60|1",
-"メタル半蔵|SR|96|1900|94|42|3.1|24|#2f3640|#00d2d3|#fff|0|58|0",
-"狂戦士・野武士|SR|45|750|68|35|2.6|22|#2d3436|#ff3f34|#ff3f34|0|40|0",
-"鉄壁・仁王像|SR|65|2400|35|35|1.2|40|#2d3436|#ff3f34|#fff|0|46|0",
-"暴走・大入道|SR|100|3000|115|48|1.0|50|#1e272e|#ff3f34|#ffdd59|0|64|1",
-"黄金・南蛮鎧武者|SR|77|1500|77|45|1.7|35|#f1c40f|#fff|#1e272e|0|52|0",
-"独眼竜・政宗|SSR|122|2700|118|55|2.4|30|#0984e3|#00d2d3|#ffdd59|0|66|1",
-"日本一の兵・幸村|SSR|125|2900|130|52|2.7|26|#c23616|#ffdd59|#fff|0|68|1",
-"甲斐の虎・信玄|SSR|128|4200|110|55|1.2|42|#b71540|#f1c40f|#ffdd59|0|70|1",
-"越後の龍・謙信|SSR|126|3300|125|55|2.1|30|#ecf0f1|#00a8ff|#0984e3|0|68|1",
-"戦国最強・忠勝|SSR|128|4400|115|58|1.3|38|#1e272e|#f1c40f|#ffdd59|0|70|1",
-"天下一傾奇・慶次|SSR|120|2800|122|60|2.5|28|#e84393|#ffdd59|#fff|0|66|1",
-"鬼島津・義弘|SSR|124|3200|128|52|2.0|30|#833471|#ff4757|#fff|0|68|1",
-"二天一流・武蔵|SSR|125|2600|145|50|2.2|24|#2f3640|#00d2d3|#fff|0|66|1",
-"三本の矢・元就|SSR|120|2400|112|220|1.2|40|#009432|#f1c40f|#fff|1|64|1",
-"黒き軍師・官兵衛|SSR|118|2200|115|215|1.3|38|#192a56|#9c88ff|#fff|1|64|1",
-"妖狐・お市|SSR|115|2300|108|205|1.5|36|#fd79a8|#ffdd59|#fff|1|62|1",
-"大ふへん者・前田|SSR|122|3100|116|55|2.3|30|#fa983a|#fff|#1e272e|0|66|1",
-"第六天魔王・信長|UR|145|4200|150|195|1.2|38|#1e002b|#ff3f34|#ffdd59|1|74|1",
-"豊国大明神・秀吉|UR|142|3600|135|65|3.3|22|#f1c40f|#ff3f34|#1e272e|0|72|1",
-"東照大権現・家康|UR|145|6800|105|55|1.1|38|#006266|#f1c40f|#ffdd59|0|74|1",
-"蒼龍神・伊達政宗|UR|140|3500|148|60|2.8|24|#0652DD|#00d2d3|#fff|0|72|1",
-"紅蓮獅子・真田幸村|UR|142|3700|160|58|3.0|22|#EA2027|#ffdd59|#fff|0|72|1",
-"風林火山・武田信玄|UR|144|5200|138|60|1.4|36|#6F1E51|#f1c40f|#ffdd59|0|74|1",
-"毘沙門天・上杉謙信|UR|142|4100|155|60|2.5|24|#dff9fb|#00a8ff|#130f40|0|72|1",
-"八岐大蛇・明智光秀|UR|148|4500|152|210|1.6|30|#1B1464|#ff3f34|#00d2d3|1|75|1"
-];
-const A = RAW.map(line => {
-const [n, r, c, h, a, g, s, dp, l, b, t, u, z, bs] = line.split("|");
+const RAW = 織田軍|N|50|100|48|185|1.1|50|#8e44ad||#fff|1|36|0 豊臣軍|N|30|160|34|35|2.5|35|#f1c40f||#1e272e|0|36|0 徳川軍|N|15|300|16|30|1.0|40|#27ae60||#fff|0|36|0 信長|R|100|2000|80|55|0.9|55|#192a56|#f1c40f|#f1c40f|0|68|1 秀吉|R|95|1600|75|50|1.7|40|#d4ac0d|#fff|#1e272e|0|64|1 家康|R|90|2600|55|45|0.8|50|#1e8449|#f1c40f|#f1c40f|0|64|1 メタル織田|SR|70|700|65|195|1.2|45|#95a5a6|#00d2d3|#1e272e|1|38|0 メタル豊臣|SR|55|900|50|38|2.8|30|#bdc3c7|#f1c40f|#1e272e|0|38|0 メタル徳川|SR|60|1600|32|35|1.1|38|#7f8c8d|#2ecc71|#fff|0|38|0 メタル信長|SSR|125|3500|95|60|1.0|50|#718093|#00d2d3|#fff|0|68|1 メタル秀吉|SSR|120|2900|90|55|1.9|35|#a4b0be|#f1c40f|#1e272e|0|66|1 メタル家康|SSR|115|4500|70|50|0.9|45|#57606f|#2ecc71|#fff|0|66|1 魔王信長|UR|140|3200|120|180|1.0|45|#2c003e|#ff3f34|#ffdd59|1|72|1 狼信長|UR|135|2800|135|65|2.3|32|#3d3d3d|#ff4757|#fff|0|70|1 猿秀吉|UR|130|2500|105|55|3.1|24|#e67e22|#ffdd59|#fff|0|68|1 狸家康|UR|135|5500|85|50|1.0|42|#6D4C41|#2ecc71|#ffdd59|0|70|1 足軽隊|N|10|220|14|28|1.3|36|#ecf0f1||#1e272e|0|32|0 大盾兵|N|20|650|10|28|0.8|50|#dfe6e9|#636e72|#1e272e|0|40|0 野武士|N|35|280|45|35|1.6|32|#ff7675||#fff|0|36|0 長弓隊|N|40|180|38|175|1.1|48|#ffeaa7||#1e272e|1|36|0 軽騎兵|N|45|320|30|32|3.4|24|#fab1a0||#1e272e|0|38|0 鴉天狗|N|48|210|55|45|2.4|34|#74b9ff||#1e272e|0|36|0 水軍衆|N|38|420|36|32|1.4|38|#0984e3||#fff|0|36|0 焙烙玉隊|N|55|240|62|195|1.0|55|#00b894||#fff|1|38|0 相撲力士|N|75|1100|70|40|0.7|60|#e17055|#fff|#fff|0|52|0 伊賀忍者|N|25|190|32|32|2.7|26|#2d3436||#fff|0|34|0 農民一揆|N|12|180|18|28|1.5|35|#b2bec3||#1e272e|0|32|0 長槍隊|N|18|260|22|42|1.2|38|#55efc4||#1e272e|0|34|0 陣太鼓兵|N|28|300|20|35|1.3|40|#fdcb6e||#1e272e|0|34|0 火縄銃隊|N|52|150|52|190|1.0|52|#6c5ce7||#fff|1|36|0 国崩し大筒|N|68|260|85|210|0.7|75|#2d3436|#f1c40f|#fff|1|40|0 赤備え騎馬|N|46|360|42|35|2.9|30|#d63031||#fff|0|38|0 比叡山僧兵|N|42|480|35|38|1.1|42|#636e72||#fff|0|38|0 修験山伏|N|44|340|46|160|1.2|48|#e84393||#fff|1|36|0 甲賀くノ一|N|32|170|44|32|3.0|22|#fd79a8||#1e272e|0|34|0 陰陽師|N|58|200|58|185|1.1|50|#a29bfe||#1e272e|1|36|0 南蛮宣教師|N|22|350|15|30|1.0|45|#00cec9||#1e272e|0|34|0 堺の豪商|N|26|280|25|30|1.6|35|#f1c40f||#1e272e|0|34|0 伊達政宗|R|88|1500|82|50|2.1|36|#0984e3|#f1c40f|#fff|0|60|1 真田幸村|R|92|1650|95|48|2.4|32|#d63031|#f1c40f|#fff|0|62|1 武田信玄|R|98|2400|78|50|1.1|48|#c0392b|#f1c40f|#f1c40f|0|66|1 上杉謙信|R|96|1900|92|50|1.8|36|#ecf0f1|#0984e3|#1e272e|0|64|1 本多忠勝|R|95|2500|88|52|1.2|42|#2d3436|#f1c40f|#f1c40f|0|64|1 前田慶次|R|90|1800|90|55|2.2|34|#e84393|#f1c40f|#fff|0|62|1 明智光秀|R|85|1300|72|185|1.2|46|#3498db|#fff|#fff|1|58|1 濃姫|R|80|1100|68|195|1.3|42|#9b59b6|#ff7675|#fff|1|56|0 お市|R|75|1400|50|170|1.2|45|#fd79a8|#fff|#1e272e|1|54|0 石田三成|R|84|1350|70|180|1.3|44|#6c5ce7|#fff|#fff|1|58|1 直江兼続|R|86|1750|74|48|1.5|40|#e17055|#fff|#fff|0|58|0 服部半蔵|R|82|1200|86|40|3.0|24|#1e272e|#00d2d3|#fff|0|56|0 宮本武蔵|R|94|1700|105|45|1.9|28|#636e72|#fff|#fff|0|60|1 佐々木小次郎|R|89|1450|96|65|2.0|30|#74b9ff|#fff|#1e272e|0|58|0 黒田官兵衛|R|83|1300|76|190|1.1|46|#2c3e50|#f1c40f|#fff|1|56|0 竹中半兵衛|R|81|1250|74|195|1.2|44|#55efc4|#2d3436|#1e272e|1|56|0 今川義元|R|85|2100|62|48|0.8|52|#8e44ad|#f1c40f|#fff|0|62|1 北条氏康|R|90|2600|65|45|0.9|50|#f39c12|#fff|#1e272e|0|62|1 毛利元就|R|87|1500|78|205|1.1|44|#16a085|#f1c40f|#fff|1|60|1 島津義弘|R|93|1850|94|48|1.7|35|#c23616|#fff|#fff|0|62|1 長宗我部元親|R|86|1650|80|50|1.8|38|#00a8ff|#fff|#fff|0|58|0 雑賀孫市|R|84|1200|88|215|1.3|42|#e67e22|#fff|#fff|1|56|0 風魔小太郎|R|83|1350|84|42|3.1|25|#2f3640|#ff4757|#fff|0|56|0 石川五右衛門|R|88|1600|85|45|2.3|32|#d35400|#f1c40f|#fff|0|58|0 メタル足軽|SR|35|950|24|30|1.4|34|#95a5a6|#fff|#1e272e|0|36|0 メタル大盾兵|SR|50|2200|18|30|0.9|48|#7f8c8d|#00d2d3|#fff|0|44|0 メタル忍者|SR|55|850|52|34|2.9|24|#636e72|#00d2d3|#fff|0|38|0 メタル騎馬|SR|68|1100|55|35|3.5|24|#b2bec3|#f1c40f|#1e272e|0|40|0 メタル大筒|SR|85|950|105|215|0.8|70|#57606f|#ff6b81|#fff|1|44|0 メタル政宗|SR|105|2400|92|52|2.2|34|#74b9ff|#dfe6e9|#1e272e|0|62|1 メタル幸村|SR|108|2600|105|50|2.5|30|#ff7675|#dfe6e9|#1e272e|0|64|1 メタル信玄|SR|112|3600|88|52|1.1|46|#fab1a0|#dfe6e9|#1e272e|0|66|1 メタル謙信|SR|110|2900|102|52|1.9|34|#dfe6e9|#0984e3|#1e272e|0|64|1 メタル忠勝|SR|110|3800|96|52|1.3|40|#636e72|#f1c40f|#fff|0|64|1 メタル慶次|SR|104|2700|98|55|2.3|32|#fd79a8|#dfe6e9|#1e272e|0|62|1 メタル光秀|SR|98|2100|85|190|1.3|44|#81ecec|#0984e3|#1e272e|1|60|1 メタル武蔵|SR|106|2500|115|48|2.0|28|#b2bec3|#00d2d3|#1e272e|0|60|1 メタル半蔵|SR|96|1900|94|42|3.1|24|#2f3640|#00d2d3|#fff|0|58|0 狂戦士・野武士|SR|45|750|68|35|2.6|22|#2d3436|#ff3f34|#ff3f34|0|40|0 鉄壁・仁王像|SR|65|2400|35|35|1.2|40|#2d3436|#ff3f34|#fff|0|46|0 暴走・大入道|SR|100|3000|115|48|1.0|50|#1e272e|#ff3f34|#ffdd59|0|64|1 黄金・南蛮鎧武者|SR|77|1500|77|45|1.7|35|#f1c40f|#fff|#1e272e|0|52|0 独眼竜・政宗|SSR|122|2700|118|55|2.4|30|#0984e3|#00d2d3|#ffdd59|0|66|1 日本一の兵・幸村|SSR|125|2900|130|52|2.7|26|#c23616|#ffdd59|#fff|0|68|1 甲斐の虎・信玄|SSR|128|4200|110|55|1.2|42|#b71540|#f1c40f|#ffdd59|0|70|1 越後の龍・謙信|SSR|126|3300|125|55|2.1|30|#ecf0f1|#00a8ff|#0984e3|0|68|1 戦国最強・忠勝|SSR|128|4400|115|58|1.3|38|#1e272e|#f1c40f|#ffdd59|0|70|1 天下一傾奇・慶次|SSR|120|2800|122|60|2.5|28|#e84393|#ffdd59|#fff|0|66|1 鬼島津・義弘|SSR|124|3200|128|52|2.0|30|#833471|#ff4757|#fff|0|68|1 二天一流・武蔵|SSR|125|2600|145|50|2.2|24|#2f3640|#00d2d3|#fff|0|66|1 三本の矢・元就|SSR|120|2400|112|220|1.2|40|#009432|#f1c40f|#fff|1|64|1 黒き軍師・官兵衛|SSR|118|2200|115|215|1.3|38|#192a56|#9c88ff|#fff|1|64|1 妖狐・お市|SSR|115|2300|108|205|1.5|36|#fd79a8|#ffdd59|#fff|1|62|1 大ふへん者・前田|SSR|122|3100|116|55|2.3|30|#fa983a|#fff|#1e272e|0|66|1 第六天魔王・信長|UR|145|4200|150|195|1.2|38|#1e002b|#ff3f34|#ffdd59|1|74|1 豊国大明神・秀吉|UR|142|3600|135|65|3.3|22|#f1c40f|#ff3f34|#1e272e|0|72|1 東照大権現・家康|UR|145|6800|105|55|1.1|38|#006266|#f1c40f|#ffdd59|0|74|1 蒼龍神・伊達政宗|UR|140|3500|148|60|2.8|24|#0652DD|#00d2d3|#fff|0|72|1 紅蓮獅子・真田幸村|UR|142|3700|160|58|3.0|22|#EA2027|#ffdd59|#fff|0|72|1 風林火山・武田信玄|UR|144|5200|138|60|1.4|36|#6F1E51|#f1c40f|#ffdd59|0|74|1 毘沙門天・上杉謙信|UR|142|4100|155|60|2.5|24|#dff9fb|#00a8ff|#130f40|0|72|1 八岐大蛇・明智光秀|UR|148|4500|152|210|1.6|30|#1B1464|#ff3f34|#00d2d3|1|75|1.trim().split('\n').map(line => {
+const [n, r, c, h, a, g, s, dp, l, b, t, u, z, bs] = line.split('|');
 return { n, r, c:+c, h:+h, a:+a, g:+g, s:+s, d:+dp, l, b, t, u:+u, z:+z, bs:+bs };
 });
+const A = RAW;
 const S = [
-{ t:"桶狭間の戦い", n:"今川本陣", h:1800, w:5200, b:"#576574", e1:"今川", e2:"弓兵", e3:"侍大将", eb:"義元", bh:1400, ba:55 },
-{ t:"川中島の戦い", n:"越後本陣", h:2400, w:4900, b:"#6a89cc", e1:"越後", e2:"投石", e3:"車懸り", eb:"謙信", bh:1800, ba:65 },
-{ t:"姉川の戦い", n:"浅井朝倉陣", h:2800, w:4700, b:"#60a3bc", e1:"浅井", e2:"鉄砲", e3:"朝倉兵", eb:"長政", bh:2000, ba:70 },
-{ t:"三方ヶ原の戦い", n:"甲斐本陣", h:3400, w:4300, b:"#b33939", e1:"甲斐", e2:"弓騎", e3:"風林隊", eb:"信玄", bh:2600, ba:82 },
-{ t:"長篠の戦い", n:"武田城", h:3800, w:4100, b:"#87ceeb", e1:"武田", e2:"鉄砲", e3:"赤備", eb:"勝頼", bh:2800, ba:85 },
-{ t:"山崎の戦い", n:"明智本陣", h:4400, w:3900, b:"#40407a", e1:"明智", e2:"火縄", e3:"斎藤隊", eb:"光秀", bh:3100, ba:90 },
-{ t:"関ヶ原の戦い", n:"西軍本陣", h:5200, w:3600, b:"#b2bec3", e1:"西軍", e2:"鉄砲", e3:"島津", eb:"三成", bh:3600, ba:100 },
-{ t:"大坂の陣", n:"大坂城", h:7500, w:3100, b:"#2c2c54", e1:"真田隊", e2:"大筒", e3:"十勇士", eb:"幸村", bh:5200, ba:125 }
+{ t:'桶狭間の戦い', n:'今川本陣', h:1800, w:5200, b:'#576574', e1:'今川', e2:'弓兵', e3:'侍大将', eb:'義元', bh:1400, ba:55 },
+{ t:'長篠の戦い', n:'武田城', h:3000, w:4500, b:'#87ceeb', e1:'武田', e2:'鉄砲', e3:'赤備', eb:'勝頼', bh:2200, ba:75 },
+{ t:'関ヶ原の戦い', n:'西軍本陣', h:5000, w:3600, b:'#b2bec3', e1:'西軍', e2:'鉄砲', e3:'島津', eb:'三成', bh:3200, ba:95 }
 ];
-const SAVE_KEY = "sengoku_taisen_save_v1";
-let kb = 300;
-let ow = "0,1,2,3".split(",").map(Number);
-let dk = "0,1,2,3".split(",").map(Number);
-try {
-const raw = localStorage.getItem(SAVE_KEY);
-if (raw) {
-const d = JSON.parse(raw);
-if (typeof d.kb === "number") kb = d.kb;
-if (Array.isArray(d.ow) && d.ow.length) ow = d.ow.filter(i => i >= 0 && i < A.length);
-if (Array.isArray(d.dk) && d.dk.length) dk = d.dk.filter(i => i >= 0 && i < A.length).slice(0, 4);
-}
-} catch (e) {}
-function saveData() {
-try { localStorage.setItem(SAVE_KEY, JSON.stringify({ kb, ow, dk })); } catch (e) {}
-}
-let cr = 0, mn, ph, eh, ov, al, en, bl, souls, tm, te, ts, ec, bt, bx, bc, aid;
+let kb = 300, ow =, dk =;
+let cr = 1, mn, ph, eh, ov, al, en, bl, souls, tm, te, ts, ec, bt, bx, bc, aid;
 function go(n) {
-initAudio();
-document.querySelectorAll(".s").forEach(e => e.classList.remove("on"));
-el("s" + n).classList.add("on");
-el("k1").textContent = el("k4").textContent = kb;
-el("cnt").textContent = ow.length;
-el("gb").disabled = kb < 100;
+initAudio(); document.querySelectorAll('.s').forEach(e => e.classList.remove('on')); $('s' + n).classList.add('on');
+$('k1').textContent = $('k4').textContent = kb; $('cnt').textContent = ow.length; $('gb').disabled = kb < 100;
 if (n === 5) rnD();
-if (n >= 1 && n !== 3) setBgm("home");
-else if (n === 0) setBgm("");
+if (n >= 1 && n !== 3) setBgm('home'); else if (n === 0) setBgm('');
 }
 function pl(n) { cr = n; go(3); ini(); }
 function bn(t, l) { bx = t; bc = l; bt = 120; }
 function pull() {
-initAudio();
-if (kb < 100) return;
-kb -= 100;
-let r = Math.random() * 100;
-let tr = r < 1 ? "UR" : r < 5 ? "SSR" : r < 17 ? "SR" : r < 45 ? "R" : "N";
+initAudio(); if (kb < 100) return; kb -= 100;
+let r = Math.random() * 100, tr = r < 8 ? 'UR' : r < 24 ? 'SSR' : r < 50 ? 'SR' : r < 78 ? 'R' : 'N';
 let pool = A.map((u, idx) => ({ u, idx })).filter(x => x.u.r === tr);
-let pick = pool[Math.floor(Math.random() * pool.length)];
-let u = pick.idx, x = pick.u, nw = !ow.includes(u);
+let pick = pool[Math.floor(Math.random() * pool.length)], u = pick.idx, x = pick.u, nw = !ow.includes(u);
 if (nw) ow.push(u); else kb += 30;
-saveData();
-playTone(nw ? 880 : 523, 0.3, "triangle", 0.15, nw ? 1318 : 659);
-el("k1").textContent = el("k4").textContent = kb;
-el("cnt").textContent = ow.length;
-el("gb").disabled = kb < 100;
-let cl = x.r === "UR" ? "#ff6b81" : x.r === "SSR" ? "#ff9ff3" : x.r === "SR" ? "#00d2d3" : x.r === "R" ? "#f1c40f" : "#dfe6e9";
-el("grs").innerHTML = "<div style="color:" + cl + ";font-size:20px">[" + x.r + "] " + x.n + "<div style="font-size:12px;margin-top:6px">" + (nw ? "NEW! 仲間になった！" : "所持済（小判+30返還）") + "";
+playTone(nw ? 880 : 523, .3, 'triangle', .15, nw ? 1318 : 659);
+$('k1').textContent = $('k4').textContent = kb; $('cnt').textContent = ow.length; $('gb').disabled = kb < 100;
+let cl = x.r === 'UR' ? '#ff6b81' : x.r === 'SSR' ? '#ff9ff3' : x.r === 'SR' ? '#00d2d3' : x.r === 'R' ? '#f1c40f' : '#dfe6e9';
+$('grs').innerHTML = <div style="color:${cl};font-size:20px">[${x.r}] ${x.n}</div><div style="font-size:12px;margin-top:6px">${nw ? 'NEW! 仲間になった！' : '所持済（小判+30返還）'}</div>;
 }
 function rnD() {
-el("dk").textContent = "出陣枠:" + dk.map(i => A[i].n).join("/");
-el("pl").innerHTML = ow.map(i => {
-let u = A[i], on = dk.includes(i);
-let cl = u.r === "UR" ? "#ff6b81" : u.r === "SSR" ? "#ff9ff3" : u.r === "SR" ? "#00d2d3" : u.r === "R" ? "#f1c40f" : "#dfe6e9";
-return "<div class="cd " + (on ? "on" : "") + "" data-id="" + i + ""><b style="color:" + cl + "">[" + u.r + "]" + u.n + "
-" + u.c + "両/HP" + u.h + "
-" + (on ? "★編成中" : "選択") + "";
-}).join("");
-document.querySelectorAll(".cd").forEach(card => card.onclick = () => {
-let i = +card.dataset.id;
-if (dk.includes(i)) { if (dk.length > 1) dk = dk.filter(x => x !== i); }
-else if (dk.length < 4) dk.push(i);
-saveData();
+$('dk').textContent = '出陣枠:' + dk.map(i => A[i].n).join('/');
+$('pl').innerHTML = ow.map(i => {
+let u = A[i], on = dk.includes(i), cl = u.r === 'UR' ? '#ff6b81' : u.r === 'SSR' ? '#ff9ff3' : u.r === 'SR' ? '#00d2d3' : u.r === 'R' ? '#f1c40f' : '#dfe6e9';
+return <div class="cd ${on ? 'on' : ''}" data-id="${i}"><b style="color:${cl}">[${u.r}]${u.n}</b><br>${u.c}両/HP${u.h}<br>${on ? '★編成中' : '選択'}</div>;
+}).join('');
+document.querySelectorAll('.cd').forEach(el => el.onclick = () => {
+let i = +el.dataset.id;
+if (dk.includes(i)) { if (dk.length > 1) dk = dk.filter(x => x !== i); } else if (dk.length < 4) dk.push(i);
 rnD();
 });
 }
 function ini() {
-cancelAnimationFrame(aid);
-playBattleHorn();
-setBgm("battle");
-let s = S[cr];
-el("bt").textContent = s.t;
-el("en").textContent = s.n;
-el("cv").style.background = s.b;
-mn = 50; ph = 1000; eh = s.h; ov = 0; al = []; en = []; bl = []; souls = [];
-tm = te = ts = Date.now(); ec = bt = 0;
-el("ed").style.display = "none";
+cancelAnimationFrame(aid); playBattleHorn(); setBgm('battle');
+let s = S[cr]; $('bt').textContent = s.t; $('en').textContent = s.n; $('cv').style.background = s.b;
+mn = 50; ph = 1000; eh = s.h; ov = 0; al = []; en = []; bl = []; souls = []; tm = te = ts = Date.now(); ec = bt = 0; $('ed').style.display = 'none';
 for (let i = 0; i < 4; i++) {
-let b = el("b" + i), uid = dk[i], u = uid !== undefined ? A[uid] : null;
-if (u) {
-b.style.display = "block";
-b.innerHTML = u.n + "
-" + u.c + "両";
-b.style.background = u.bs ? "#4a1c40" : "#273c75";
-b.style.borderColor = u.b || "#f1c40f";
-} else b.style.display = "none";
+let b = $('b' + i), uid = dk[i], u = uid !== undefined ? A[uid] : null;
+if (u) { b.style.display = 'block'; b.innerHTML = u.n + '
+' + u.c + '両'; b.style.background = u.bs ? '#4a1c40' : '#273c75'; b.style.borderColor = u.b || '#f1c40f'; } else b.style.display = 'none';
 }
-ae();
-aid = requestAnimationFrame(lp);
+ae(); aid = requestAnimationFrame(lp);
 }
-function addSoul(x, y, alFlag) {
-souls.push({ x, y, vy: 1.1 + Math.random() * 0.6, p: Math.random() * 6.28, a: 0.95, f: alFlag });
-}
+function addSoul(x, y, alFlag) { souls.push({ x, y, vy: 1.1 + Math.random() * .6, p: Math.random() * 6.28, a: .95, f: alFlag }); }
 function drawSouls() {
 for (let i = souls.length - 1; i >= 0; i--) {
-let s = souls[i];
-s.y -= s.vy; s.p += 0.14; s.a -= 0.014;
-if (s.a <= 0) { souls.splice(i, 1); continue; }
-let sx = s.x + Math.sin(s.p) * 7;
-ctx.save();
-ctx.globalAlpha = s.a;
-ctx.fillStyle = s.f ? "#dff9fb" : "#ffcccc";
-ctx.shadowColor = s.f ? "#7ed6df" : "#ff7979";
-ctx.shadowBlur = 8;
-ctx.beginPath();
-ctx.arc(sx, s.y, 7, Math.PI, 0);
-ctx.quadraticCurveTo(sx + 7, s.y + 8, sx, s.y + 18);
-ctx.quadraticCurveTo(sx - 7, s.y + 8, sx - 7, s.y);
-ctx.fill();
-ctx.restore();
+let s = souls[i]; s.y -= s.vy; s.p += .14; s.a -= .014; if (s.a <= 0) { souls.splice(i, 1); continue; }
+let sx = s.x + Math.sin(s.p) * 7; ctx.save(); ctx.globalAlpha = s.a; ctx.fillStyle = s.f ? '#dff9fb' : '#ffcccc'; ctx.shadowColor = s.f ? '#7ed6df' : '#ff7979'; ctx.shadowBlur = 8;
+ctx.beginPath(); ctx.arc(sx, s.y, 7, Math.PI, 0); ctx.quadraticCurveTo(sx + 7, s.y + 8, sx, s.y + 18); ctx.quadraticCurveTo(sx - 7, s.y + 8, sx - 7, s.y); ctx.fill(); ctx.restore();
 }
 }
 function aa(i) {
-initAudio();
-let uid = dk[i];
-if (uid === undefined) return;
-let u = A[uid];
-if (u && !ov && mn >= u.c) {
-mn -= u.c;
-if (u.bs) {
-bn("総大将・" + u.n + " 出陣！", "rgba(25,42,86,.9)");
-playTone(220, 0.35, "sawtooth", 0.15, 440);
-en.forEach(e => e.k = 220);
-} else playTone(440, 0.12, "triangle", 0.12, 660);
-al.push({ ...u, m: u.h, x: 590, o: 0, k: 0 });
-}
+initAudio(); let uid = dk[i]; if (uid === undefined) return; let u = A[uid];
+if (u && !ov && mn >= u.c) { mn -= u.c; if (u.bs) { bn('総大将・' + u.n + ' 出陣！', 'rgba(25,42,86,.9)'); playTone(220, .35, 'sawtooth', .15, 440); en.forEach(e => e.k = 220); } else playTone(440, .12, 'triangle', .12, 660); al.push({ ...u, m: u.h, x: 590, o: 0, k: 0 }); }
 }
 function sp() {
-initAudio();
-let w = Date.now();
-if (ov || w - ts < 60000) return;
-ts = w;
-bn("必殺・鉄砲三段撃ち！！", "rgba(194,54,22,.9)");
-for (let i = 0; i < 3; i++) setTimeout(() => {
-if (!ov) {
-playTone(150, 0.18, "sawtooth", 0.18, 45);
-for (let r = 0; r < 5; r++) bl.push({ x: 620, y: 95 + r * 15, a: 45, f: 1, p: 1 });
-}
-}, i * 280);
+initAudio(); let w = Date.now(); if (ov || w - ts < 60000) return; ts = w; bn('必殺・鉄砲三段撃ち！！', 'rgba(194,54,22,.9)');
+for (let i = 0; i < 3; i++) setTimeout(() => { if (!ov) { playTone(150, .18, 'sawtooth', .18, 45); for (let r = 0; r < 5; r++) bl.push({ x: 620, y: 95 + r * 15, a: 45, f: 1, p: 1 }); } }, i * 280);
 }
 function ae() {
-ec++;
-let s = S[cr], b = ec % 8 === 0, v = !b && ec % 4 === 0, g = !b && !v && ec % 3 === 0;
-if (b) { bn("敵将・" + s.eb + " 出陣！", "rgba(183,21,64,.85)"); al.forEach(a => a.k = 220); en.push({ n: s.eb, h: s.bh, m: s.bh, a: s.ba, g: 50, s: 0.9, d: 60, l: "#b71540", b: "#f1c40f", t: "#f1c40f", z: 68, x: 100, o: 0, k: 0 }); }
-else if (g) en.push({ n: s.e2, h: 140, m: 140, a: 32, g: 175, s: 1.1, d: 55, l: "#e67e22", t: "#fff", u: 1, z: 36, x: 90, o: 0, k: 0 });
-else en.push({ n: v ? s.e3 : s.e1, h: v ? 350 : 180, m: v ? 350 : 180, a: v ? 28 : 12, g: 35, s: v ? 2 : 1.1, d: v ? 55 : 48, l: v ? "#8e44ad" : "#c0392b", t: "#fff", z: 36, x: 90, o: 0, k: 0 });
+ec++; let s = S[cr], b = ec % 8 === 0, v = !b && ec % 4 === 0, g = !b && !v && ec % 3 === 0;
+if (b) { bn('敵将・' + s.eb + ' 出陣！', 'rgba(183,21,64,.85)'); al.forEach(a => a.k = 220); en.push({ n: s.eb, h: s.bh, m: s.bh, a: s.ba, g: 50, s: .9, d: 60, l: '#b71540', b: '#f1c40f', t: '#f1c40f', z: 68, x: 100, o: 0, k: 0 }); }
+else if (g) en.push({ n: s.e2, h: 140, m: 140, a: 32, g: 175, s: 1.1, d: 55, l: '#e67e22', t: '#fff', u: 1, z: 36, x: 90, o: 0, k: 0 });
+else en.push({ n: v ? s.e3 : s.e1, h: v ? 350 : 180, m: v ? 350 : 180, a: v ? 28 : 12, g: 35, s: v ? 2 : 1.1, d: v ? 55 : 48, l: v ? '#8e44ad' : '#c0392b', t: '#fff', z: 36, x: 90, o: 0, k: 0 });
 }
 function dr(u, f) {
-let s = u.z, h = s / 2, y = 166 - s;
-ctx.fillStyle = u.l; ctx.fillRect(u.x - h, y, s, s);
-ctx.lineWidth = s > 40 ? 3 : 1; ctx.strokeStyle = u.b || "#fff"; ctx.strokeRect(u.x - h, y, s, s);
-ctx.fillStyle = u.t; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-let fs = s > 40 ? 14 : 10; ctx.font = "bold " + fs + "px sans-serif";
-const maxW = s - 4, tw = ctx.measureText(u.n).width;
-if (tw > maxW) { fs = Math.max(6, Math.floor(fs * (maxW / tw))); ctx.font = "bold " + fs + "px sans-serif"; }
-ctx.fillText(u.n, u.x, y + h, maxW);
-ctx.textBaseline = "alphabetic";
-ctx.fillStyle = "#333"; ctx.fillRect(u.x - h + 2, y - 8, s - 4, 5);
-ctx.fillStyle = f ? "#4cd137" : "#ff4757"; ctx.fillRect(u.x - h + 2, y - 8, (s - 4) * Math.max(0, u.h / u.m), 5);
+let s = u.z, h = s / 2, y = 166 - s; ctx.fillStyle = u.l; ctx.fillRect(u.x - h, y, s, s); ctx.lineWidth = s > 40 ? 3 : 1; ctx.strokeStyle = u.b || '#fff'; ctx.strokeRect(u.x - h, y, s, s);
+ctx.fillStyle = u.t; ctx.font = 'bold ' + (s > 40 ? 14 : 10) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(u.n, u.x, y + h + (s > 40 ? 5 : 4));
+ctx.fillStyle = '#333'; ctx.fillRect(u.x - h + 2, y - 8, s - 4, 5); ctx.fillStyle = f ? '#4cd137' : '#ff4757'; ctx.fillRect(u.x - h + 2, y - 8, (s - 4) * Math.max(0, u.h / u.m), 5);
 }
 function lp() {
 if (ov) return;
 let w = Date.now(), rm = Math.ceil((60000 - (w - ts)) / 1000);
 if (w - tm >= 1000) { mn = Math.min(1000, mn + 3); tm += 1000; }
 if (w - te >= S[cr].w) { ae(); te = w; }
-el("mn").textContent = mn; el("ph").textContent = Math.max(0, ph); el("eh").textContent = Math.max(0, eh);
-dk.forEach((u, i) => el("b" + i).disabled = mn < A[u].c);
-el("bp").disabled = rm > 0; el("bp").innerHTML = rm > 0 ? "三段撃ち
-(" + rm + "s)" : "三段撃ち
-発動！";
-ctx.clearRect(0, 0, 700, 220); ctx.fillStyle = "#558b2f"; ctx.fillRect(0, 168, 700, 52); ctx.fillStyle = "#c23616"; ctx.fillRect(20, 88, 55, 80); ctx.fillStyle = "#273c75"; ctx.fillRect(625, 88, 55, 80);
-if (bt > 0) { bt--; ctx.fillStyle = bc; ctx.fillRect(180, 14, 340, 32); ctx.strokeStyle = "#f1c40f"; ctx.strokeRect(180, 14, 340, 32); ctx.fillStyle = "#f1c40f"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.fillText(bx, 350, 36); }
+$('mn').textContent = mn; $('ph').textContent = Math.max(0, ph); $('eh').textContent = Math.max(0, eh);
+dk.forEach((u, i) => $('b' + i).disabled = mn < A[u].c);
+$('bp').disabled = rm > 0; $('bp').innerHTML = rm > 0 ? '三段撃ち
+(' + rm + 's)' : '三段撃ち
+発動！';
+ctx.clearRect(0, 0, 700, 220); ctx.fillStyle = '#558b2f'; ctx.fillRect(0, 168, 700, 52); ctx.fillStyle = '#c23616'; ctx.fillRect(20, 88, 55, 80); ctx.fillStyle = '#273c75'; ctx.fillRect(625, 88, 55, 80);
+if (bt > 0) { bt--; ctx.fillStyle = bc; ctx.fillRect(180, 14, 340, 32); ctx.strokeStyle = '#f1c40f'; ctx.strokeRect(180, 14, 340, 32); ctx.fillStyle = '#f1c40f'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(bx, 350, 36); }
 al.forEach(a => {
 if (a.k > 0) { let s = Math.min(18, a.k); a.x = Math.min(600, a.x + s); a.k -= s; }
 else { if (a.o > 0) a.o--; let t = en.find(e => a.x >= e.x - 45 && a.x - (e.x + e.z / 2) <= a.g); if (t) { if (!a.o) { a.u ? bl.push({ x: a.x - 15, y: 148, a: a.a, f: 1 }) : t.h -= a.a; a.o = a.d; } } else if (a.x - 75 <= a.g) { if (!a.o) { a.u ? bl.push({ x: a.x - 15, y: 148, a: a.a, f: 1 }) : eh -= a.a; a.o = a.d; } } else a.x -= a.s; }
@@ -491,38 +215,27 @@ else { if (e.o > 0) e.o--; let x = e.x + e.z / 2, t = al.find(a => (a.x - a.z / 
 dr(e, 0);
 });
 for (let k = bl.length - 1; k >= 0; k--) {
-let b = bl[k]; b.x += b.f ? (b.p ? -15 : -10) : 10; ctx.fillStyle = b.p ? "#ff3f34" : (b.f ? "#ffd32a" : "#ff9f43"); ctx.beginPath(); ctx.arc(b.x, b.y, b.p ? 5 : 4, 0, 6.283); ctx.fill();
+let b = bl[k]; b.x += b.f ? (b.p ? -15 : -10) : 10; ctx.fillStyle = b.p ? '#ff3f34' : (b.f ? '#ffd32a' : '#ff9f43'); ctx.beginPath(); ctx.arc(b.x, b.y, b.p ? 5 : 4, 0, 6.283); ctx.fill();
 let h = b.f ? en.find(e => e.h > 0 && Math.abs(b.x - e.x) <= e.z / 2) : al.find(a => a.h > 0 && Math.abs(b.x - a.x) <= a.z / 2);
 if (h) { h.h -= b.a; bl.splice(k, 1); } else if (b.f && b.x <= 75) { eh -= b.a; bl.splice(k, 1); } else if (!b.f && b.x >= 625) { ph -= b.a; bl.splice(k, 1); } else if (b.x < 0 || b.x > 700) bl.splice(k, 1);
 }
 al.filter(a => a.h <= 0).forEach(a => addSoul(a.x, 160 - a.z / 2, true));
 en.filter(e => e.h <= 0).forEach(e => addSoul(e.x, 160 - e.z / 2, false));
 al = al.filter(a => a.h > 0);
-let dead = en.filter(e => e.h <= 0).length; if (dead > 0) { mn = Math.min(1000, mn + dead * 5); playTone(300, 0.1, "sine", 0.08, 120); }
+let dead = en.filter(e => e.h <= 0).length; if (dead > 0) { mn = Math.min(1000, mn + dead * 5); playTone(300, .1, 'sine', .08, 120); }
 en = en.filter(e => e.h > 0);
 drawSouls();
 if (eh <= 0 || ph <= 0) {
-ov = 1; setBgm(""); el("eh").textContent = Math.max(0, eh); el("ph").textContent = Math.max(0, ph);
-if (eh <= 0) { kb += 150; saveData(); playTone(523, 0.15, "triangle", 0.18, null, 0); playTone(659, 0.15, "triangle", 0.18, null, 0.15); playTone(784, 0.4, "triangle", 0.2, null, 0.3); } else playTone(220, 0.5, "sawtooth", 0.15, 110);
-ctx.fillStyle = "rgba(0,0,0,.7)"; ctx.fillRect(0, 0, 700, 220); ctx.fillStyle = eh <= 0 ? "#f1c40f" : "#ff6b81"; ctx.font = "bold 28px sans-serif"; ctx.textAlign = "center"; ctx.fillText(eh <= 0 ? "勝利！小判150両獲得！" : "連合軍の敗北…", 350, 120);
-el("ed").style.display = "flex"; return;
+ov = 1; setBgm(''); $('eh').textContent = Math.max(0, eh); $('ph').textContent = Math.max(0, ph);
+if (eh <= 0) { kb += 150; playTone(523, .15, 'triangle', .18, null, 0); playTone(659, .15, 'triangle', .18, null, .15); playTone(784, .4, 'triangle', .2, null, .3); } else playTone(220, .5, 'sawtooth', .15, 110);
+ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(0, 0, 700, 220); ctx.fillStyle = eh <= 0 ? '#f1c40f' : '#ff6b81'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(eh <= 0 ? '勝利！小判150両獲得！' : '連合軍の敗北…', 350, 120);
+$('ed').style.display = 'flex'; return;
 }
 aid = requestAnimationFrame(lp);
 }
-el("btn-start").onclick = () => go(1);
-el("btn-map").onclick = () => go(2);
-el("btn-gacha").onclick = () => go(4);
-el("btn-deck").onclick = () => go(5);
-el("btn-title").onclick = () => go(0);
-el("btn-home1").onclick = el("btn-home2").onclick = el("btn-home3").onclick = () => go(1);
-for (let i = 0; i < 8; i++) el("st" + i).onclick = () => pl(i);
-el("btn-quit").onclick = () => { ov = 1; go(2); };
-el("btn-retry").onclick = () => ini();
-el("btn-tomap").onclick = () => go(2);
-el("gb").onclick = () => pull();
-el("b0").onclick = () => aa(0);
-el("b1").onclick = () => aa(1);
-el("b2").onclick = () => aa(2);
-el("b3").onclick = () => aa(3);
-el("bp").onclick = () => sp();
-el("btn-snd1").onclick = el("btn-snd2").onclick = () => toggleSound();
+$('btn-start').onclick = () => go(1); $('btn-map').onclick = () => go(2); $('btn-gacha').onclick = () => go(4); $('btn-deck').onclick = () => go(5); $('btn-title').onclick = () => go(0);
+$('btn-home1').onclick = $('btn-home2').onclick = $('btn-home3').onclick = () => go(1);
+$('st0').onclick = () => pl(0); $('st1').onclick = () => pl(1); $('st2').onclick = () => pl(2);
+$('btn-quit').onclick = () => { ov = 1; go(2); }; $('btn-retry').onclick = () => ini(); $('btn-tomap').onclick = () => go(2);
+$('gb').onclick = () => pull(); $('b0').onclick = () => aa(0); $('b1').onclick = () => aa(1); $('b2').onclick = () => aa(2); $('b3').onclick = () => aa(3); $('bp').onclick = () => sp();
+$('btn-snd1').onclick = $('btn-snd2').onclick = () => toggleSound();
