@@ -18,7 +18,7 @@ body{margin:0;background:#1e272e;color:#fff;font-family:sans-serif;display:flex;
 #s1 .kb{background:rgba(62,39,35,.9);border:1px solid #d7ccc8;top:14px;right:16px}
 #s2{background:#3d5a3c;border:2px solid #78e08f}
 #s3{height:auto}
-#s4,#s5{background:#1e272e;border:1px solid #f1c40f;justify-content:flex-start;padding:40px 10px 42px;box-sizing:border-box}
+#s4,#s5{background:#1e272e;border:1px solid #f1c40f;justify-content:flex-start;padding:38px 10px 42px;box-sizing:border-box}
 .lg{font-size:40px;font-weight:700;color:#f1c40f;text-shadow:3px 3px 0 #c23616,0 0 18px rgba(255,107,129,.8);margin:-40px 0 30px}
 .tg{position:absolute;top:10px;left:12px;font-size:15px;font-weight:700;color:#f1c40f}
 .kb{position:absolute;top:10px;right:12px;font-size:13px;font-weight:700;color:#ffd32a;background:rgba(0,0,0,.5);padding:3px 9px;border-radius:10px}
@@ -36,13 +36,15 @@ canvas#cv{border:2px solid #fff;border-radius:6px;display:block;width:100%;heigh
 .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%;overflow-y:auto;margin-top:6px}
 .cd{background:#2f3640;border:2px solid #7f8fa6;border-radius:6px;padding:4px 2px;font-size:11px;cursor:pointer}
 .cd.on{border-color:#f1c40f;background:#3d3d29}
+.g10{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;width:100%;margin-top:8px}
+.gc{background:#2f3640;border:1px solid #7f8fa6;border-radius:6px;padding:5px 2px;font-size:11px}
 </style>
 </head>
 <body>
 <div id="g">
   <div id="s0" class="s on"><canvas id="fx0" width="700" height="350"></canvas><div class="lg">戦国大戦争</div><button class="mb" style="font-size:16px;padding:10px 24px" onclick="go(1)">出陣</button></div>
   <div id="s1" class="s">
-    <div class="tg">本陣 <span style="font-size:11px;color:#a3cb38">●自動保存</span></div><div class="kb">小判:<span id="k1">300</span>両</div>
+    <div class="tg">本陣 <span id="clr-badge" style="font-size:11px;color:#a3cb38">●制覇 0/8</span></div><div class="kb">小判:<span id="k1">300</span>両</div>
     <button class="mb" id="btn-go" onclick="go(2)" style="position:absolute;top:30%;left:32%;transform:translate(-50%,-50%);font-size:15px">⚔️出陣</button>
     <div id="dk-warn" style="display:none;position:absolute;top:43%;left:32%;transform:translate(-50%,-50%);background:rgba(194,54,22,.9);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">※編成を4体にしてください</div>
     <button class="mb" onclick="go(4)" style="position:absolute;top:62%;left:32%;transform:translate(-50%,-50%);background:#8e44ad;font-size:15px">🔮ガチャ</button>
@@ -52,15 +54,15 @@ canvas#cv{border:2px solid #fff;border-radius:6px;display:block;width:100%;heigh
     <button class="sb snd" onclick="toggleSound()">🔊音ON</button>
   </div>
   <div id="s2" class="s">
-    <div class="tg">合戦場（全8戦・出陣枠4体必須）</div>
-    <button class="mb nd" onclick="pl(0)" style="top:24%;left:15%;background:#2980b9">⚔️桶狭間<br><span style="font-size:10px">150両</span></button>
-    <button class="mb nd" onclick="pl(1)" style="top:48%;left:17%;background:#16a085">⚔️川中島<br><span style="font-size:10px">170両</span></button>
-    <button class="mb nd" onclick="pl(2)" style="top:72%;left:19%">⚔️長篠<br><span style="font-size:10px">190両</span></button>
-    <button class="mb nd" onclick="pl(3)" style="top:26%;left:48%;background:#8e44ad">⚔️山崎<br><span style="font-size:10px">210両</span></button>
-    <button class="mb nd" onclick="pl(4)" style="top:50%;left:50%;background:#e67e22">⚔️小田原<br><span style="font-size:10px">230両</span></button>
-    <button class="mb nd" onclick="pl(5)" style="top:74%;left:52%;background:#6c3483">⚔️関ヶ原<br><span style="font-size:10px">260両</span></button>
-    <button class="mb nd" onclick="pl(6)" style="top:34%;left:82%;background:#d35400">🔥大坂の陣<br><span style="font-size:10px">300両</span></button>
-    <button class="mb nd" onclick="pl(7)" style="top:68%;left:82%;background:#1e002b">👹第六天魔城<br><span style="font-size:10px">400両</span></button>
+    <div class="tg">合戦場（👑クリア記録保存）</div>
+    <button class="mb nd" id="st0" onclick="pl(0)" style="top:24%;left:15%;background:#2980b9"></button>
+    <button class="mb nd" id="st1" onclick="pl(1)" style="top:48%;left:17%;background:#16a085"></button>
+    <button class="mb nd" id="st2" onclick="pl(2)" style="top:72%;left:19%"></button>
+    <button class="mb nd" id="st3" onclick="pl(3)" style="top:26%;left:48%;background:#8e44ad"></button>
+    <button class="mb nd" id="st4" onclick="pl(4)" style="top:50%;left:50%;background:#e67e22"></button>
+    <button class="mb nd" id="st5" onclick="pl(5)" style="top:74%;left:52%;background:#6c3483"></button>
+    <button class="mb nd" id="st6" onclick="pl(6)" style="top:34%;left:82%;background:#d35400"></button>
+    <button class="mb nd" id="st7" onclick="pl(7)" style="top:68%;left:82%;background:#1e002b"></button>
     <button class="bb" onclick="go(1)">戻る</button>
   </div>
   <div id="s3" class="s">
@@ -71,9 +73,16 @@ canvas#cv{border:2px solid #fff;border-radius:6px;display:block;width:100%;heigh
     <div id="ed"><button class="mb" onclick="ini()">再戦</button><button class="mb" onclick="go(2)" style="background:#273c75">マップへ</button></div>
   </div>
   <div id="s4" class="s">
-    <div class="tg">武将ガチャ(100両)</div><div class="kb">小判:<span id="k4">300</span>両／図鑑:<span id="cnt">4</span>/100</div>
-    <div id="grs" style="margin:auto;font-size:17px;font-weight:700">ボタンを押して召喚！</div>
-    <button class="mb" id="gb" onclick="pull()" style="background:#8e44ad;margin-bottom:8px;font-size:15px">ガチャを引く</button><button class="bb" onclick="go(1)">戻る</button>
+    <div class="tg">武将ガチャ</div><div class="kb">小判:<span id="k4">300</span>両／図鑑:<span id="cnt">4</span>/100</div>
+    <div style="font-size:11px;color:#dfe6e9;background:rgba(0,0,0,.4);padding:3px 10px;border-radius:10px;margin-top:2px">
+      排出率: <b style="color:#ff6b81">UR 8%</b> / <b style="color:#ff9ff3">SSR 16%</b> / <b style="color:#00d2d3">SR 26%</b> / <b style="color:#f1c40f">R 28%</b> / N 22%（重複+30両）
+    </div>
+    <div id="grs" style="margin:auto;width:100%;font-size:16px;font-weight:700">ボタンを押して召喚！</div>
+    <div style="display:flex;gap:12px;margin-bottom:4px">
+      <button class="mb" id="gb1" onclick="pull(1)" style="background:#8e44ad;font-size:14px">1回召喚 (100両)</button>
+      <button class="mb" id="gb10" onclick="pull(10)" style="background:#d35400;font-size:14px">10連召喚 (1000両)</button>
+    </div>
+    <button class="bb" onclick="go(1)">戻る</button>
   </div>
   <div id="s5" class="s"><div class="tg">部隊編成(必ず4体選択)</div><div class="kb" id="dk"></div><div id="pl" class="gr"></div><button class="bb" onclick="go(1)">戻る</button></div>
 </div>
@@ -220,43 +229,51 @@ const A = RAW_DATA.map(l => {
 });
 
 const S = new Array(
-  {t:'桶狭間の戦い',n:'今川本陣',h:1800,w:5200,rw:150,b:'#576574',e1:'今川',e2:'弓兵',e3:'侍大将',eb:'義元',bh:1400,ba:55},
-  {t:'川中島の戦い',n:'上杉本陣',h:2400,w:4800,rw:170,b:'#4a69bd',e1:'越後',e2:'投石',e3:'車懸',eb:'謙信',bh:1800,ba:65},
-  {t:'長篠の戦い',n:'武田城',h:3000,w:4500,rw:190,b:'#87ceeb',e1:'武田',e2:'鉄砲',e3:'赤備',eb:'勝頼',bh:2200,ba:75},
-  {t:'山崎の戦い',n:'明智本陣',h:3600,w:4200,rw:210,b:'#60a3bc',e1:'明智',e2:'鉄砲',e3:'斎藤',eb:'光秀',bh:2600,ba:82},
-  {t:'小田原征伐',n:'北条本城',h:4300,w:3900,rw:230,b:'#78e08f',e1:'北条',e2:'大筒',e3:'風魔',eb:'氏康',bh:3000,ba:88},
-  {t:'関ヶ原の戦い',n:'西軍本陣',h:5000,w:3600,rw:260,b:'#b2bec3',e1:'西軍',e2:'鉄砲',e3:'島津',eb:'三成',bh:3400,ba:95},
-  {t:'大坂の陣',n:'真田丸',h:6200,w:3300,rw:300,b:'#e55039',e1:'豊臣',e2:'焙烙',e3:'赤備',eb:'幸村',bh:4200,ba:115},
-  {t:'第六天魔城',n:'安土魔城',h:8000,w:3000,rw:400,b:'#2c003e',e1:'魔兵',e2:'魔砲',e3:'鬼武',eb:'魔王信長',bh:5500,ba:140}
+  {sn:'桶狭間',t:'桶狭間の戦い',n:'今川本陣',h:1800,w:5200,rw:150,b:'#576574',e1:'今川',e2:'弓兵',e3:'侍大将',eb:'義元',bh:1400,ba:55},
+  {sn:'川中島',t:'川中島の戦い',n:'上杉本陣',h:2400,w:4800,rw:170,b:'#4a69bd',e1:'越後',e2:'投石',e3:'車懸',eb:'謙信',bh:1800,ba:65},
+  {sn:'長篠',t:'長篠の戦い',n:'武田城',h:3000,w:4500,rw:190,b:'#87ceeb',e1:'武田',e2:'鉄砲',e3:'赤備',eb:'勝頼',bh:2200,ba:75},
+  {sn:'山崎',t:'山崎の戦い',n:'明智本陣',h:3600,w:4200,rw:210,b:'#60a3bc',e1:'明智',e2:'鉄砲',e3:'斎藤',eb:'光秀',bh:2600,ba:82},
+  {sn:'小田原',t:'小田原征伐',n:'北条本城',h:4300,w:3900,rw:230,b:'#78e08f',e1:'北条',e2:'大筒',e3:'風魔',eb:'氏康',bh:3000,ba:88},
+  {sn:'関ヶ原',t:'関ヶ原の戦い',n:'西軍本陣',h:5000,w:3600,rw:260,b:'#b2bec3',e1:'西軍',e2:'鉄砲',e3:'島津',eb:'三成',bh:3400,ba:95},
+  {sn:'大坂の陣',t:'大坂の陣',n:'真田丸',h:6200,w:3300,rw:300,b:'#e55039',e1:'豊臣',e2:'焙烙',e3:'赤備',eb:'幸村',bh:4200,ba:115},
+  {sn:'第六天魔城',t:'第六天魔城',n:'安土魔城',h:8000,w:3000,rw:400,b:'#2c003e',e1:'魔兵',e2:'魔砲',e3:'鬼武',eb:'魔王信長',bh:5500,ba:140}
 );
-const SAVE_KEY = 'sengoku_save_v1';
-let kb=300,ow='0,1,2,3'.split(',').map(Number),dk='0,1,2,3'.split(',').map(Number);
+const SAVE_KEY = 'sengoku_save_v2';
+let kb=300,ow='0,1,2,3'.split(',').map(Number),dk='0,1,2,3'.split(',').map(Number),cl=new Array();
 let cr=1,mn,ph,eh,ov,al,en,bl,souls,tm,te,ts,ec,bt,bx,bc,aid;
 
 function saveGame(){
-  try{localStorage.setItem(SAVE_KEY,JSON.stringify({kb,ow,dk}))}catch(e){}
+  try{localStorage.setItem(SAVE_KEY,JSON.stringify({kb,ow,dk,cl}))}catch(e){}
 }
 function loadGame(){
   try{
     const d=JSON.parse(localStorage.getItem(SAVE_KEY));
-    if(d&&typeof d.kb==='number'&&Array.isArray(d.ow)&&Array.isArray(d.dk)){kb=d.kb;ow=d.ow;dk=d.dk}
+    if(d&&typeof d.kb==='number'&&Array.isArray(d.ow)&&Array.isArray(d.dk)){
+      kb=d.kb;ow=d.ow;dk=d.dk;cl=Array.isArray(d.cl)?d.cl:new Array();
+    }
   }catch(e){}
 }
 function resetSave(){
   if(!confirm('セーブデータを初期化しますか？'))return;
   localStorage.removeItem(SAVE_KEY);
-  kb=300;ow='0,1,2,3'.split(',').map(Number);dk='0,1,2,3'.split(',').map(Number);
+  kb=300;ow='0,1,2,3'.split(',').map(Number);dk='0,1,2,3'.split(',').map(Number);cl=new Array();
   syncUI();alert('初期化しました！');
 }
 
 function syncUI(){
   $('k1').textContent=$('k4').textContent=kb;
   $('cnt').textContent=ow.length;
-  $('gb').disabled=kb<100;
+  $('gb1').disabled=kb<100;
+  $('gb10').disabled=kb<1000;
   $('dkc').textContent=dk.length;
   const ok=dk.length===4;
   $('btn-go').disabled=!ok;
   $('dk-warn').style.display=ok?'none':'block';
+  $('clr-badge').textContent=cl.length>=8?'👑天下統一 (8/8)':'●制覇 '+cl.length+'/8';
+  S.forEach((s,i)=>{
+    const b=$('st'+i),done=cl.includes(i);
+    if(b)b.innerHTML=(done?'👑':'⚔️')+s.sn+'<br><span style="font-size:10px">'+(done?'クリア済/':'')+s.rw+'両</span>';
+  });
 }
 function go(n){
   if(n===2&&dk.length!==4)return;
@@ -266,14 +283,24 @@ function go(n){
 function pl(n){if(dk.length!==4)return;cr=n;go(3);ini()}
 function bn(t,l){bx=t;bc=l;bt=120}
 
-function pull(){
-  initAudio();if(kb<100)return;kb-=100;
+function drawOne(){
   let r=Math.random()*100,tr=r<8?'UR':r<24?'SSR':r<50?'SR':r<78?'R':'N';
   let pool=A.map((u,i)=>({u,i})).filter(x=>x.u.r===tr),p=pool.at(Math.random()*pool.length|0),nw=!ow.includes(p.i);
-  nw?ow.push(p.i):kb+=30;tone(nw?880:523,.3,'triangle',.15,nw?1318:659);
+  nw?ow.push(p.i):kb+=30;
+  return {u:p.u,nw};
+}
+function pull(cnt){
+  initAudio();const cost=cnt*100;if(kb<cost)return;kb-=cost;
+  const res=Array.from({length:cnt},()=>drawOne()),hasNew=res.some(x=>x.nw);
+  tone(hasNew?880:523,.3,'triangle',.15,hasNew?1318:659);
   saveGame();syncUI();
-  $('grs').innerHTML='<div style="font-size:20px">['+p.u.r+'] '+p.u.n+'</div><div style="font-size:12px;margin-top:6px">'+(nw?'NEW! 仲間になった！':'所持済（小判+30返還）')+'</div>';
-  $('grs').firstChild.style.color=RC[p.u.r];
+  if(cnt===1){
+    const x=res.at(0);
+    $('grs').innerHTML='<div style="font-size:20px;color:'+RC[x.u.r]+'">['+x.u.r+'] '+x.u.n+'</div><div style="font-size:12px;margin-top:6px">'+(x.nw?'NEW! 仲間になった！':'所持済（小判+30返還）')+'</div>';
+  }else{
+    const rf=res.filter(x=>!x.nw).length*30;
+    $('grs').innerHTML='<div class="g10">'+res.map(x=>'<div class="gc" style="border-color:'+RC[x.u.r]+'"><b style="color:'+RC[x.u.r]+'">['+x.u.r+']</b><br>'+x.u.n+'<br><span style="color:'+(x.nw?'#f1c40f':'#a4b0be')+'">'+(x.nw?'NEW!':'+30両')+'</span></div>').join('')+'</div><div style="font-size:11px;margin-top:4px;color:#ffd32a">重複返還合計: +'+rf+'両</div>';
+  }
 }
 
 function rnD(){
@@ -357,7 +384,10 @@ function lp(){
   if(eh<=0||ph<=0){
     ov=1;setBgm('');$('eh').textContent=Math.max(0,eh);$('ph').textContent=Math.max(0,ph);
     let rw=S.at(cr).rw;
-    if(eh<=0){kb+=rw;saveGame();'523,659,784'.split(',').forEach((f,i)=>tone(+f,i===2?.4:.15,'triangle',.2,0,i*.15))}else tone(220,.5,'sawtooth',.15,110);
+    if(eh<=0){
+      kb+=rw;if(!cl.includes(cr))cl.push(cr);saveGame();syncUI();
+      '523,659,784'.split(',').forEach((f,i)=>tone(+f,i===2?.4:.15,'triangle',.2,0,i*.15));
+    }else tone(220,.5,'sawtooth',.15,110);
     ctx.fillStyle='rgba(0,0,0,.7)';ctx.fillRect(0,0,700,220);ctx.fillStyle=eh<=0?'#f1c40f':'#ff6b81';ctx.font='bold 28px sans-serif';ctx.textAlign='center';ctx.fillText(eh<=0?'勝利！小判'+rw+'両獲得！':'連合軍の敗北…',350,120);
     $('ed').style.display='flex';return;
   }
