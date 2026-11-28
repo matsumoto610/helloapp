@@ -18,7 +18,7 @@ body{margin:0;background:#1e272e;color:#fff;font-family:sans-serif;display:flex;
 #s1 .kb{background:rgba(62,39,35,.9);border:1px solid #d7ccc8;top:14px;right:16px}
 #s2{background:#3d5a3c;border:2px solid #78e08f}
 #s3{height:auto}
-#s4,#s5{background:#1e272e;border:1px solid #f1c40f;justify-content:flex-start;padding:38px 10px 42px;box-sizing:border-box}
+#s4,#s5,#s6{background:#1e272e;border:1px solid #f1c40f;justify-content:flex-start;padding:38px 10px 42px;box-sizing:border-box}
 .lg{font-size:40px;font-weight:700;color:#f1c40f;text-shadow:3px 3px 0 #c23616,0 0 18px rgba(255,107,129,.8);margin:-40px 0 30px}
 .tg{position:absolute;top:10px;left:12px;font-size:15px;font-weight:700;color:#f1c40f}
 .kb{position:absolute;top:10px;right:12px;font-size:13px;font-weight:700;color:#ffd32a;background:rgba(0,0,0,.5);padding:3px 9px;border-radius:10px}
@@ -36,8 +36,12 @@ canvas#cv{border:2px solid #fff;border-radius:6px;display:block;width:100%;heigh
 .gr{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;width:100%;overflow-y:auto;margin-top:6px}
 .cd{background:#2f3640;border:2px solid #7f8fa6;border-radius:6px;padding:4px 2px;font-size:11px;cursor:pointer}
 .cd.on{border-color:#f1c40f;background:#3d3d29}
+.cd.lk{opacity:.45;cursor:default;background:#191e24}
 .g10{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;width:100%;margin-top:8px}
 .gc{background:#2f3640;border:1px solid #7f8fa6;border-radius:6px;padding:5px 2px;font-size:11px}
+.ft{display:flex;gap:4px;margin-bottom:4px}
+.fb{padding:3px 9px;font-size:11px;font-weight:700;background:#2f3640;color:#fff;border:1px solid #7f8fa6;border-radius:4px;cursor:pointer}
+.fb.on{background:#f1c40f;color:#1e272e;border-color:#f1c40f}
 </style>
 </head>
 <body>
@@ -47,6 +51,7 @@ canvas#cv{border:2px solid #fff;border-radius:6px;display:block;width:100%;heigh
     <div class="tg">本陣 <span id="clr-badge" style="font-size:11px;color:#a3cb38">●制覇 0/8</span></div><div class="kb">小判:<span id="k1">300</span>両</div>
     <button class="mb" id="btn-go" onclick="go(2)" style="position:absolute;top:30%;left:32%;transform:translate(-50%,-50%);font-size:15px">⚔️出陣</button>
     <div id="dk-warn" style="display:none;position:absolute;top:43%;left:32%;transform:translate(-50%,-50%);background:rgba(194,54,22,.9);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700">※編成を4体にしてください</div>
+    <button class="mb" onclick="go(6)" style="position:absolute;top:30%;left:68%;transform:translate(-50%,-50%);background:#16a085;font-size:15px">📖図鑑(<span id="zcnt">4</span>/100)</button>
     <button class="mb" onclick="go(4)" style="position:absolute;top:62%;left:32%;transform:translate(-50%,-50%);background:#8e44ad;font-size:15px">🔮ガチャ</button>
     <button class="mb" onclick="go(5)" style="position:absolute;top:62%;left:68%;transform:translate(-50%,-50%);background:#273c75;font-size:15px">🛡️編成(<span id="dkc">4</span>/4)</button>
     <button class="bb" onclick="go(0)">タイトル</button>
@@ -85,6 +90,12 @@ canvas#cv{border:2px solid #fff;border-radius:6px;display:block;width:100%;heigh
     <button class="bb" onclick="go(1)">戻る</button>
   </div>
   <div id="s5" class="s"><div class="tg">部隊編成(必ず4体選択)</div><div class="kb" id="dk"></div><div id="pl" class="gr"></div><button class="bb" onclick="go(1)">戻る</button></div>
+  <div id="s6" class="s">
+    <div class="tg">戦国武将図鑑</div><div class="kb">収集率:<span id="zcnt2">4</span>/100</div>
+    <div class="ft" id="zft"></div>
+    <div id="zl" class="gr"></div>
+    <button class="bb" onclick="go(1)">戻る</button>
+  </div>
 </div>
 <script>
 const $=i=>document.getElementById(i),ctx=$('cv').getContext('2d'),fctx=$('fx0').getContext('2d');
@@ -240,7 +251,7 @@ const S = new Array(
 );
 const SAVE_KEY = 'sengoku_save_v2';
 let kb=300,ow='0,1,2,3'.split(',').map(Number),dk='0,1,2,3'.split(',').map(Number),cl=new Array();
-let cr=1,mn,ph,eh,ov,al,en,bl,souls,tm,te,ts,ec,bt,bx,bc,aid;
+let cr=1,mn,ph,eh,ov,al,en,bl,souls,tm,te,ts,ec,bt,bx,bc,aid,zFil='ALL';
 
 function saveGame(){
   try{localStorage.setItem(SAVE_KEY,JSON.stringify({kb,ow,dk,cl}))}catch(e){}
@@ -262,7 +273,7 @@ function resetSave(){
 
 function syncUI(){
   $('k1').textContent=$('k4').textContent=kb;
-  $('cnt').textContent=ow.length;
+  $('cnt').textContent=$('zcnt').textContent=$('zcnt2').textContent=ow.length;
   $('gb1').disabled=kb<100;
   $('gb10').disabled=kb<1000;
   $('dkc').textContent=dk.length;
@@ -278,7 +289,7 @@ function syncUI(){
 function go(n){
   if(n===2&&dk.length!==4)return;
   initAudio();document.querySelectorAll('.s').forEach(e=>e.classList.remove('on'));$('s'+n).classList.add('on');
-  syncUI();if(n===5)rnD();setBgm(n===0?'':n===3?'battle':'home');
+  syncUI();if(n===5)rnD();if(n===6)rnZ();setBgm(n===0?'':n===3?'battle':'home');
 }
 function pl(n){if(dk.length!==4)return;cr=n;go(3);ini()}
 function bn(t,l){bx=t;bc=l;bt=120}
@@ -311,6 +322,17 @@ function tgD(i){
   if(dk.includes(i))dk=dk.filter(x=>x!==i);
   else if(dk.length<4)dk.push(i);
   saveGame();syncUI();rnD();
+}
+
+function setZFil(r){zFil=r;rnZ()}
+function rnZ(){
+  const tabs='ALL,UR,SSR,SR,R,N'.split(',');
+  $('zft').innerHTML=tabs.map(t=>'<button class="fb '+(zFil===t?'on':'')+'" onclick="setZFil(\''+t+'\')">'+(t==='ALL'?'全100体':t)+'</button>').join('');
+  $('zl').innerHTML=A.map((u,i)=>({u,i})).filter(x=>zFil==='ALL'||x.u.r===zFil).map(x=>{
+    const has=ow.includes(x.i),u=x.u,no=('00'+(x.i+1)).slice(-3);
+    if(!has)return'<div class="cd lk">No.'+no+' ['+u.r+']<br><b>？？？？</b><br>未獲得</div>';
+    return'<div class="cd" style="border-color:'+RC[u.r]+'"><span style="color:#a4b0be">No.'+no+'</span> <b style="color:'+RC[u.r]+'">['+u.r+']'+u.n+(u.bs?'👑':'')+'</b><br>費:'+u.c+'両 / HP:'+u.h+'<br>攻:'+u.a+' / 射:'+u.g+' / 速:'+u.s+'</div>';
+  }).join('');
 }
 
 function ini(){
